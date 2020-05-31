@@ -93,7 +93,7 @@ class MasterCellType
 {
 public:
     //Constructor(no copy constructor)
-    MasterCellType(const std::string& MCName, unsigned id, int layer): _MCName(MCName), _Id(id)
+    MasterCellType(const std::string& MCName, unsigned id, int layer): _MCName(MCName), _Id(id), _layer(layer)
     {
         _LayerDemand.reserve(layer); for (int i = 0;i < layer; ++i) _LayerDemand.push_back(0);
     }
@@ -123,6 +123,7 @@ public:
     //acceser
     std::string getMCName() const                                   { return _MCName; }
     unsigned getId() const                                          { return _Id; }
+    unsigned getNumLayers() const                                   { return _layer; }
     int getLayerDemand(int i) const                                 { assert(i < _LayerDemand.size()); return _LayerDemand[i]; }
     size_t getNumPins() const                                       { return _Pins.size(); }
     size_t getNumBlkgs() const                                      { return _Blkgs.size(); }
@@ -161,6 +162,7 @@ public:
 private:
     const std::string                           _MCName;
     const unsigned                              _Id;
+    const int                                   _layer;
     std::vector<int>                            _LayerDemand;
     std::vector<PinType>                        _Pins;
     std::vector<BlockageType>                   _Blkgs;

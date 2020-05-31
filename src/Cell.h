@@ -84,9 +84,20 @@ public:
     Cell(const std::string& CellName, MasterCellType& MCT, bool movable, unsigned id):
     _CellName(CellName), _MCT(MCT), _movable(movable), _Id(id)
     {
-        int n = _MCT.getNumPins();
-        _pins.reserve(n);
-        for(int i = 0; i < n; ++i) _pins.push_back(Pin(_MCT.getPinType(i),*this));
+        int p = _MCT.getNumPins();
+        _pins.reserve(p);
+        _Layer2pin.reserve(l);
+        int l = _MCT.getNumLayers();
+        for(int i = 0; i < l; ++i)
+        {
+            std::vector<Pin*>* v = new std::vector<Pin*>();
+            _Layer2pin.push_back(v);
+        }
+        for(int i = 0; i < p; ++i)
+        {
+            _pins.push_back(Pin(_MCT.getPinType(i),*this));
+            _Layer2pin[_pins[i].getLayer()]->push_back(&_pins[i]);
+        }
     }
 
     //modifier
@@ -105,6 +116,7 @@ public:
     int getadjHGridDemand(Cell& a) const                { return _MCT.getDemand(a._MCT); }
     size_t getNumPins() const                           { return _pins.size(); }
     int getLayerDemand(int i) const                     { return _MCT.getLayerDemand(i); }
+    std::vector<Pin*>& getPinLayer(int i) const         { return *_Layer2pin[i];}
 
     //friend
     friend std::ostream& operator<<(std::ostream& os, const Cell& cell);
@@ -117,6 +129,7 @@ private:
     unsigned                            _x;
     unsigned                            _y;
     std::vector<Pin>                    _pins;
+    std::vector<std::vector<Pin*>*>     _Layer2pin;
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& cell);
