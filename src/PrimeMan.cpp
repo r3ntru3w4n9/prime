@@ -99,6 +99,7 @@ void PrimeMan::readFile(std::fstream& input)
         input >> str; // MasterCell
         assert(str == "MasterCell");
         input >> str; // <masterCellName>
+        _MasterCell2Idx[str] = i;
         MasterCellType* mct = new MasterCellType(str,i,_layer);
         _MasterCells.push_back(mct);
         int pin, blockage;
@@ -122,19 +123,27 @@ void PrimeMan::readFile(std::fstream& input)
     /*NumNeighborCellExtraDemand <count>
       sameGGrid <masterCellName1> <masterCellName2> <layerName> <demand>
       adjHGGrid <masterCellName1> <masterCellName2> <layerName> <demand>*/
+    int mc1, mc2;
     input >> str; //NumNeighborCellExtraDemand
     assert(str == "NumNeighborCellExtraDemand");
     input >> count; //<count>
     for(int i = 0; i < count; ++i)
     {
         input >> str; //sameGGrid || adjHGGrid
-        if(str == "sameGGrid")
-        {
-
-        }
-        else if(str == "adjHGGrid") 
+        input >> buf; // <masterCellName1>
+        mc1 = _MasterCell2Idx[buf];
+        input >> buf; // <masterCellName2>
+        mc2 = _MasterCell2Id[buf];
+        input >> layer >> demand;
+        if(str == "sameGGrid") { _MasterCells[mc1]->AddExtraSame(mc2,demand,layer); _masterCells[mc2]-> AddExtraSame(mc1,demand,layer);}
+        else if(str == "adjHGGrid") { _MasterCells[mc1]->AddExtraadjH(mc2,demand,layer); _masterCells[mc2]-> AddExtraadjH(mc1,demand,layer);}
         else assert(str == "sameGGrid" || str == "adjHGGrid");
     }
+
+    /*NumCellInst <cellInstCount>
+      CellInst <instName> <masterCellName> <gGridRowIdx> <gGridColIdx> <movableCstr>*/
+    
+    /*NumNets <netCount>Net <netName> <numPins> <minRoutingLayConstraint>Pin <instName>/<masterPinName>*/
 }
 
 void PrimeMan::constructCoordinate()

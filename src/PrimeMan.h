@@ -46,6 +46,7 @@ private:
     int                                     _area;
     int                                     _layer;
     std::unordered_map<std::string,int>     _Layer2Idx;
+    std::unordered_map<unsigned,int>        _MasterCell2Idx;
     std::vector<Layer*>                     _layers;
     std::vector<Coordinate*>                _coordinates;
     std::vector<MasterCellType*>            _MasterCells;
