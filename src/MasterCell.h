@@ -95,7 +95,31 @@ public:
     //Constructor(no copy constructor)
     MasterCellType(const std::string MCName, unsigned id, int layer): _MCName(MCName), _Id(id), _layer(layer)
     {
-        _LayerDemand.reserve(layer); for (int i = 0;i < layer; ++i) _LayerDemand.push_back(0);
+        _LayerDemand.reserve(layer);
+        _SameGridMC.reserve(layer);
+        _adjHGridMC.reserve(layer);
+        _SameGridDemand.reserve(layer);
+        _adjHGridDemand.reserve(layer);
+        for(int i = 0;i < layer; ++i)
+        {
+            _LayerDemand.push_back(0);
+            std::vector<unsigned>* v1 = new std::vector<unsigned>(); _SameGridMC.push_back(v1);
+            std::vector<unsigned>* v2 = new std::vector<unsigned>(); _adjHGridMC.push_back(v2);
+            std::vector<int>* v3 = new std::vector<int>(); _SameGridDemand.push_back(v3);
+            std::vector<int>* v4 = new std::vector<int>(); _adjHGridDemand.push_back(v4);
+        }
+    }
+
+    //destructor
+    ~MasterCellType()
+    {
+        for(int i = 0; i < _layer; ++i)
+        {
+            delete _adjHGridDemand[i];
+            delete _adjHGridMC[i];
+            delete _SameGridDemand[i];
+            delete _SameGridMC[i];
+        }
     }
 
     //Modifier
@@ -111,15 +135,13 @@ public:
     }
     void AddExtraSame(unsigned MC, int demand, int layer)
     {
-        _ExtraSameGrid[MC] = _SameGridDemand.size();
-        _SameGridDemand.push_back(demand);
-        _SameGridLayer.push_back(layer);
+        _SameGridMC[layer]->push_back(MC);
+        _SameGridDemand[layer]->push_back(demand);
     }
     void AddExtraadjH(unsigned MC, int demand, int layer)
     {
-        _ExtraadjHGrid[MC] = _adjHGridDemand.size();
-        _adjHGridDemand.push_back(demand);
-        _adjHGridLayer.push_back(layer);
+        _adjHGridMC[layer]->push_back(MC);
+        _SameGridDemand[layer]->push_back(demand);
     }
 
     //acceser
@@ -133,50 +155,10 @@ public:
     PinType& getPinType(std::string& str)                           { auto idx = _PinName2Idx.find(str); assert(idx != _PinName2Idx.end()); return _Pins[idx->second]; }
     size_t getPin(std::string& str) const                           { auto idx = _PinName2Idx.find(str); assert(idx != _PinName2Idx.end()); return idx->second; }
     BlockageType& getBlkg(size_t i)                                 { assert(i < _Blkgs.size()); return _Blkgs[i]; }
-    int getDemandSame(unsigned a, int& layer) const                             
-    {
-        auto idx = _ExtraSameGrid.find(a);
-        if(idx != _ExtraSameGrid.end())
-        {
-            layer = _SameGridLayer[idx->second];
-            return _SameGridDemand[idx->second];
-        }
-        layer = -1;
-        return 0;
-    }
-    int getDemandSame(const MasterCellType& a, int& layer) const
-    {
-        auto idx = _ExtraSameGrid.find(a._Id);
-        if(idx != _ExtraSameGrid.end())
-        {
-            layer = _SameGridLayer[idx->second];
-            return _SameGridDemand[idx->second];
-        }
-        layer = -1;
-        return 0;
-    }
-    int getDemandadjH(unsigned a, int& layer) const                             
-    {
-        auto idx = _ExtraadjHGrid.find(a);
-        if(idx != _ExtraadjHGrid.end())
-        {
-            layer = _adjHGridLayer[idx->second];
-            return _adjHGridDemand[idx->second];
-        }
-        layer = -1;
-        return 0;
-    }
-    int getDemandadjH(const MasterCellType& a, int& layer) const
-    {
-        auto idx = _ExtraadjHGrid.find(a._Id);
-        if(idx != _ExtraadjHGrid.end())
-        {
-            layer = _adjHGridLayer[idx->second];
-            return _adjHGridDemand[idx->second];
-        }
-        layer = -1;
-        return 0;
-    }
+    std::vector<unsigned>& getSameGridMC(unsigned layer)            { return *_SameGridMC[layer]; }
+    std::vector<unsigned>& getadjHGridMC(unsigned layer)            { return *_adjHGridMC[layer]; }
+    std::vector<int>& getSameGridDemand(unsigned layer)             { return *_SameGridDemand[layer]; }
+    std::vector<int>& getadjHGridDemand(unsigned layer)             { return *_adjHGridDemand[layer]; }
 
     //friend
     friend std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT);
@@ -188,12 +170,10 @@ private:
     std::vector<int>                            _LayerDemand;
     std::vector<PinType>                        _Pins;
     std::vector<BlockageType>                   _Blkgs;
-    std::unordered_map<unsigned,unsigned>       _ExtraSameGrid;
-    std::vector<int>                            _SameGridDemand;
-    std::vector<int>                            _SameGridLayer;
-    std::unordered_map<unsigned,unsigned>       _ExtraadjHGrid;
-    std::vector<int>                            _adjHGridDemand;
-    std::vector<int>                            _adjHGridLayer;
+    std::vector<std::vector<unsigned>*>         _SameGridMC;
+    std::vector<std::vector<int>*>              _SameGridDemand;
+    std::vector<std::vector<unsigned>*>         _adjHGridMC;
+    std::vector<std::vector<int>*>              _adjHGridDemand;
     std::unordered_map<std::string,unsigned>    _PinName2Idx;
 };
 
@@ -204,10 +184,6 @@ std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT)
     for(size_t i = 0, n = MCT._Pins.size(); i < n; ++i) os << MCT._Pins[i];
     os << "Blockages : \n";
     for(size_t i = 0, n = MCT._Blkgs.size(); i < n; ++i) os << MCT._Blkgs[i];
-    os << "Same Grid Extra Demand : \n";
-    for(size_t i = 0, n = MCT._SameGridDemand.size(); i < n; ++i) os << i << " : " << MCT._SameGridDemand[i] << '\n';
-    os << "Same Grid Extra Demand : \n";
-    for(size_t i = 0, n = MCT._adjHGridDemand.size(); i < n; ++i) os << i << " : " << MCT._adjHGridDemand[i] << '\n';
     os << "---------------------------------------------" << '\n';
     return os;
 }

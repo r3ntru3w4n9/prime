@@ -99,6 +99,7 @@ void PrimeMan::readFile(std::fstream& input)
         input >> str; // MasterCell
         assert(str == "MasterCell");
         input >> str; // <masterCellName>
+        assert(_MasterCell2Idx.count(str) == 0);
         _MasterCell2Idx[str] = i;
         MasterCellType* mct = new MasterCellType(str,i,_layer);
         _MasterCells.push_back(mct);
@@ -133,17 +134,48 @@ void PrimeMan::readFile(std::fstream& input)
         input >> buf; // <masterCellName1>
         mc1 = _MasterCell2Idx[buf];
         input >> buf; // <masterCellName2>
-        mc2 = _MasterCell2Id[buf];
-        input >> layer >> demand;
-        if(str == "sameGGrid") { _MasterCells[mc1]->AddExtraSame(mc2,demand,layer); _masterCells[mc2]-> AddExtraSame(mc1,demand,layer);}
-        else if(str == "adjHGGrid") { _MasterCells[mc1]->AddExtraadjH(mc2,demand,layer); _masterCells[mc2]-> AddExtraadjH(mc1,demand,layer);}
+        mc2 = _MasterCell2Idx[buf];
+        input >> buf >> demand; // <layerName> <demand>
+        layer = _Layer2Idx[buf];
+        if(str == "sameGGrid") { _MasterCells[mc1]->AddExtraSame(mc2,demand,layer); _MasterCells[mc2]-> AddExtraSame(mc1,demand,layer);}
+        else if(str == "adjHGGrid") { _MasterCells[mc1]->AddExtraadjH(mc2,demand,layer); _MasterCells[mc2]-> AddExtraadjH(mc1,demand,layer);}
         else assert(str == "sameGGrid" || str == "adjHGGrid");
     }
 
     /*NumCellInst <cellInstCount>
       CellInst <instName> <masterCellName> <gGridRowIdx> <gGridColIdx> <movableCstr>*/
+    input >> str; // NumCellInst
+    assert(str == "NumCellInst");
+    input >> count; //<cellInstCount>
+    _cells.reserve(count);
+    for(int i = 0; i < count; ++i)
+    {
+        input >> str; // CellInst
+        assert(str == "CellInst");
+        input >> str; // <instName>
+        assert(_Cell2Idx.count(str) == 0);
+        _Cell2Idx[str] = i;
+        input >> buf; // <masterCellName>
+        assert(_MasterCell2Idx[buf] > 0);
+        MasterCellType MCT = *_MasterCells[_MasterCell2Idx[buf]];
+        input >> row >> column >> buf; // <gGridRowIdx> <gGridColIdx> <movableCstr>
+        bool movable;
+        if(buf == "Movable") movable = true;
+        else if(buf == "Fixed") movable = false;
+        else assert(buf == "Fixed" || buf == "Movable");
+        Cell* cell = new Cell(str,MCT,movable,i);
+        cell->setCoordinate(row,column);
+    }
     
     /*NumNets <netCount>Net <netName> <numPins> <minRoutingLayConstraint>Pin <instName>/<masterPinName>*/
+}
+
+PrimeMan::~PrimeMan()
+{
+    for(int i = 0, n = _layers.size(); i < n; ++i) delete _layers[i];
+    for(int i = 0, n = _coordinates.size(); i < n; ++i) delete _coordinates[i];
+    for(int i = 0, n = _MasterCells.size(); i < n; ++i) delete _MasterCells[i];
+    for(int i = 0, n = _cells.size(); i < n; ++i) delete _cells[i];
 }
 
 void PrimeMan::constructCoordinate()
