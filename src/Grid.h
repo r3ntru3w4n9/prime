@@ -133,6 +133,18 @@ class Grid {
         if (getDemand(mc, demand))
             _supply -= demand;
     }
+    void addNet(Net& net) {
+        if(_nets.count(net.getId()) == 0) {
+            _nets[net.getId()] = net;
+            _supply -= 1;
+        }
+    }
+    bool getNet(Net& net) { return _nets.count(net->getId()) == 1;}
+    Net* getNet(unsigned i) {
+        if(_nets.count(i) == 0)
+            return 0;
+        return _nets[i];
+    }
 
     // accesser
     int getRow() const { return _coordinate->getRow(); }
@@ -152,6 +164,7 @@ class Grid {
     Layer& _layer;
     Coordinate* _coordinate;
     std::unordered_map<unsigned, int> _Cell2Demand;
+    std::unordered_map<unsigned, Net*> _nets;
 };
 
 #endif

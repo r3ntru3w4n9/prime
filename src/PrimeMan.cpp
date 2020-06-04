@@ -229,9 +229,10 @@ void PrimeMan::readFile(std::fstream& input) {
     assert(str == "NumRoutes");
     input >> count;  // <routeSegmentCount>
     for (int i = 0; i < count; ++i) {
-        input >> srow >> scol >> slay >> erow >> ecol >> elay >>
-            str;  // <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx>
-                  // <netName>
+        input >> srow >> scol >> slay >> erow >> ecol >> elay >> str;  // <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx> <netName>
+        assert(_Net2Idx.count(str) == 1);
+        Net* net = _Net2Idx[str];
+        assignRoute(srow - _rowBase, scol - _columnBase, slay - 1, erow - _rowBase, ecol - _columnBase, elay - 1, net);
     }
 }
 
@@ -267,4 +268,17 @@ void PrimeMan::connectCoordinateGrid() {
             c->addGrid(&g);
         }
     }
+}
+
+void PrimeMan::assignRoute(int srow, int scol, int slay, int erow, int ecol, int elay, Net* net) {
+    for(int i = slay; i <= elay; ++i) {
+        Layer* l = _layers[i];
+        for(int j = scol; j <= ecol; ++j) {
+            for(int k = srow; k <= erow; ++k) {
+                Grid g = l->getGrid(getIdx(k,j));
+                g.addNet(*net);
+            }
+        }
+    }
+
 }

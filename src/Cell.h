@@ -67,6 +67,8 @@ class Net {
     const std::string& getName() const { return _NetName; }
     unsigned getId() const { return _Id; }
     unsigned getMinlayer() const { return _layer; }
+    size_t getNumPin() const { return _pins.size(); }
+    Pin& getPin(unsigned i) { return *_pins[i]; }
 
    private:
     const std::string _NetName;

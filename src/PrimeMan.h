@@ -62,6 +62,12 @@ class PrimeMan {
         return getIdx(row + 1, column);
     }
 
+    Layer& getLayer(int layer) { return *_layers[layer]; }
+    Coordinate& getCoordinate(int i) { return _coordinates[i]; }
+    Cell& getCell(unsigned i) { return _cells[i]; }
+    Net& getNet(unsigned i) { return _net[i]; }
+
+
    private:
     unsigned _maxMove;
     int _rowBase;
@@ -85,6 +91,7 @@ class PrimeMan {
     void constructCoordinate();
     void constructGrid(int layer);
     void connectCoordinateGrid();
+    void assignRoute(int srow, int scol, int slay, int erow, int ecol, int elay, Net* net);
 };
 
 #endif
