@@ -44,6 +44,6 @@ int main(int argc, char* argv[]) {
     }
 
     // call solver
-    PrimeMan Mgr = PrimeMan(inputfile);
+    PrimeMan Mgr(inputfile);
     return 0;
 }

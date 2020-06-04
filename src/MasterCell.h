@@ -56,7 +56,7 @@ class PinType {
    private:
     const std::string _PinName;
     const int _layer;
-    const MasterCellType _MCT;
+    const MasterCellType& _MCT;
 };
 
 std::ostream& operator<<(std::ostream& os, const PinType& PT) {

@@ -1,6 +1,6 @@
 
 CXX = g++
-CXXFLAGS = -O3 -std=c++11 -Wall
+CXXFLAGS = -O3 -std=c++14 -Wall
 TARGETS = main.o
 BINARY = cell_move_router
 FLAGS =
