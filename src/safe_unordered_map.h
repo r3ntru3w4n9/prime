@@ -31,11 +31,14 @@ class unordered_map {
     void rehash(size_t new_size) { field.rehash(new_size); }
     size_t size() const { return field.size(); }
 
-    const V& operator[](const K& key) const {
+    const V& operator[](const K& key) const { return field[key]; }
+    V& operator[](const K& key) { return field[key]; }
+
+    const V& at(const K& key) const {
         assert(contains(key));
         return field[key];
     }
-    V& operator[](const K& key) {
+    V& at(const K& key) {
         assert(contains(key));
         return field[key];
     }

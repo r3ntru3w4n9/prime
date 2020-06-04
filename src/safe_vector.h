@@ -48,6 +48,9 @@ class vector {
         return field[index];
     }
 
+    const T& at(size_t index) const { return (*this)[index]; }
+    T& at(size_t index) { return (*this)[index]; }
+
     typename std::vector<T>::iterator begin() { return field.begin(); }
     typename std::vector<T>::const_iterator begin() const {
         return field.begin();

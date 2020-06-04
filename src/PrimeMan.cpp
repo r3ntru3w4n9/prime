@@ -49,7 +49,7 @@ void PrimeMan::readFile(std::fstream& input) {
     /*NumLayers <LayerCount>
       Lay <LayerName> <Idx> <RoutingDirection> <defaultSupplyOfOneGGrid>*/
     input >> str;  // NumLayers
-    assert(str == "NumLayers");
+    assert(str == "NumLayer");
     input >> _layer;  //<LayerCount>
     _layers.reserve(_layer);
     for (int i = 0; i < _layer; ++i) {
