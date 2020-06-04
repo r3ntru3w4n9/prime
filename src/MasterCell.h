@@ -41,8 +41,8 @@ class PinType {
     PinType(PinType& a);
 
     // acceser
-    const std::string& getPinName() const { return _PinName; }
-    int getLayer() const { return _layer; }
+    const std::string& getPinName() const;
+    int getLayer() const;
 
     // friend
     friend std::ostream& operator<<(std::ostream& os, const PinType& PT);

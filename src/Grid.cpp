@@ -9,8 +9,6 @@
 
 ***********************************************************************/
 
-#pragma once
-
 ////////////////////////////////////////////////////////////////////////
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
@@ -27,7 +25,7 @@
 
 //Layer
 Layer::Layer(const std::string name, int i, bool d, int supply, int area)
-    : _direction(d), _LayerName(name), _idx(i) {
+    : _LayerName(name), _idx(i), _direction(d) {
     _grids.reserve(area);
     for (int i = 0; i < area; ++i) {
         Grid* g = new Grid(supply, *this);
@@ -102,12 +100,12 @@ int Coordinate::getColumn() const {
 }
 
 //Grid
-Grid::Grid(int supply, Layer& layer) : _layer(layer), _supply(supply) {
+Grid::Grid(int supply, Layer& layer) : _supply(supply), _layer(layer) {
     
 }
 
 Grid::Grid(Grid& a)
-        : _layer(a._layer), _supply(a._supply), _coordinate(a._coordinate) {
+        : _supply(a._supply), _layer(a._layer), _coordinate(a._coordinate) {
 
 }
 

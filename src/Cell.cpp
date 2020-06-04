@@ -8,8 +8,6 @@
 
 ***********************************************************************/
 
-#pragma once
-
 ////////////////////////////////////////////////////////////////////////
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
@@ -103,9 +101,9 @@ Cell::Cell(const std::string CellName,
         unsigned id)
     : _CellName(CellName),
         _MCT(MCT),
+        _Id(id),
         _movable(movable),
-        _moved(false),
-        _Id(id) {
+        _moved(false) {
     size_t p = _MCT.getNumPins();
     _pins.reserve(p);
     size_t l = _MCT.getNumLayers();
@@ -204,4 +202,5 @@ safe::vector<Pin*>& Cell::getPinLayer(int i) const {
 std::ostream& operator<<(std::ostream& os, const Cell& cell) {
     os << "CellName : " << cell.getCellName()
        << " MasterCellType : " << cell._MCT.getMCName() << '\n';
+    return os;
 }
