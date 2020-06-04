@@ -210,7 +210,7 @@ void PrimeMan::readFile(std::fstream& input) {
         input >> str;      // <netName>
         input >> numPins;  // <numPins>
         // assert(_Net2Idx.count(str) == 0);
-        assert(_Net2Idx.contains(str));
+        assert(!_Net2Idx.contains(str));
         _Net2Idx[str] = i;
         Net* net = new Net(str, i, numPins, _layer);
         _nets.push_back(net);
