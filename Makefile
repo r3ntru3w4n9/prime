@@ -1,7 +1,7 @@
 
 CXX = g++
 CXXFLAGS = -O3 -std=c++14 -Wall
-TARGETS = main.o
+TARGETS = main.o Cell.o Grid.o MasterCell.o PrimeMan.o
 BINARY = cell_move_router
 FLAGS =
 
