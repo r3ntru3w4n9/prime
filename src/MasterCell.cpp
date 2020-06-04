@@ -23,14 +23,35 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-//PinType
+// PinType
 PinType::PinType(const std::string PinName, int layer, MasterCellType& MCT)
     : _PinName(PinName), _layer(layer), _MCT(MCT) {
     assert(layer >= 0);
 }
 
-PinType::PinType(PinType& a) : _PinName(a._PinName), _layer(a._layer), _MCT(a._MCT) {
+PinType::PinType(const PinType& a)
+    : _PinName(a._PinName), _layer(a._layer), _MCT(a._MCT) {
     assert(a._layer >= 0);
+}
+
+// ! this is tricky as there is no way to invalidate an l-value reference
+PinType::PinType(PinType&& a)
+    : _PinName(std::move(a._PinName)), _layer(a._layer), _MCT(a._MCT) {
+    assert(_layer >= 0);
+}
+
+PinType& PinType::operator=(const PinType& a) {
+    _PinName = a._PinName;
+    _layer = a._layer;
+    _MCT = a._MCT;
+    return *this;
+}
+
+PinType& PinType::operator=(PinType&& a) {
+    _PinName = std::move(a._PinName);
+    _layer = a._layer;
+    _MCT = a._MCT;
+    return *this;
 }
 
 const std::string& PinType::getPinName() const {
@@ -46,19 +67,38 @@ std::ostream& operator<<(std::ostream& os, const PinType& PT) {
     return os;
 }
 
-//BlockageType
+// BlockageType
 
 BlockageType::BlockageType(const std::string BlkgName, int layer, int demand)
     : _BlkgName(BlkgName), _layer(layer), _demand(demand) {
     assert(layer >= 0 && demand >= 0);
 }
 
-BlockageType::BlockageType(BlockageType& a)
+BlockageType::BlockageType(const BlockageType& a)
     : _BlkgName(a._BlkgName), _layer(a._layer), _demand(a._demand) {
     assert(a._layer >= 0 && a._demand >= 0);
 }
 
-std::string BlockageType::getBlkgName() const {
+BlockageType::BlockageType(BlockageType&& a)
+    : _BlkgName(std::move(a._BlkgName)), _layer(a._layer), _demand(a._demand) {
+    assert(_layer >= 0 && _demand >= 0);
+}
+
+BlockageType& BlockageType::operator=(const BlockageType& a) {
+    _BlkgName = a._BlkgName;
+    _layer = a._layer;
+    _demand = a._demand;
+    return *this;
+}
+
+BlockageType& BlockageType::operator=(BlockageType&& a) {
+    _BlkgName = std::move(a._BlkgName);
+    _layer = a._layer;
+    _demand = a._demand;
+    return *this;
+}
+
+const std::string& BlockageType::getBlkgName() const {
     return _BlkgName;
 }
 
@@ -76,7 +116,7 @@ std::ostream& operator<<(std::ostream& os, const BlockageType& BT) {
     return os;
 }
 
-//MasterCellType
+// MasterCellType
 MasterCellType::MasterCellType(const std::string MCName, unsigned id, int layer)
     : _MCName(MCName), _Id(id), _layer(layer) {
     _LayerDemand.reserve(layer);
@@ -106,14 +146,16 @@ MasterCellType::~MasterCellType() {
     }
 }
 
-void MasterCellType::AddBlkg(const std::string BlkgName, int layer, int demand) {
-    _Blkgs.push_back(BlockageType(BlkgName, layer, demand));
+void MasterCellType::AddBlkg(const std::string BlkgName,
+                             int layer,
+                             int demand) {
+    _Blkgs.push_back(std::move(BlockageType(BlkgName, layer, demand)));
     _LayerDemand[layer] += demand;
 }
 
 void MasterCellType::AddPin(const std::string PinName, int layer) {
     _PinName2Idx[PinName] = _Pins.size();
-    _Pins.push_back(PinType(PinName, layer, *this));
+    _Pins.push_back(std::move(PinType(PinName, layer, *this)));
 }
 
 void MasterCellType::AddExtraSame(unsigned MC, int demand, int layer) {

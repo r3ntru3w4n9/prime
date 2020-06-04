@@ -22,14 +22,10 @@
 ///                          FUNCTIONS                               ///
 ////////////////////////////////////////////////////////////////////////
 
-//Pin
-Pin::Pin(PinType& PT, Cell* cell) : _PT(PT), _cell(cell) {
+// Pin
+Pin::Pin(PinType& PT, Cell* cell) : _PT(PT), _cell(cell) {}
 
-}
-
-Pin::Pin(Pin& a) : _PT(a._PT), _cell(a._cell) {
-
-}
+Pin::Pin(const Pin& a) : _PT(a._PT), _cell(a._cell) {}
 
 void Pin::setNet(Net* net) {
     _net = net;
@@ -40,8 +36,7 @@ PinType& Pin::getPinType() const {
 }
 
 Net& Pin::get_net() const {
-    return *_net; 
-
+    return *_net;
 }
 
 Cell& Pin::get_cell() const {
@@ -60,8 +55,11 @@ int Pin::getLayer() const {
     return _PT.getLayer();
 }
 
-//Net
-Net::Net(const std::string NetName, unsigned id, unsigned PinNum, unsigned layer)
+// Net
+Net::Net(const std::string NetName,
+         unsigned id,
+         unsigned PinNum,
+         unsigned layer)
     : _NetName(NetName), _Id(id), _layer(layer) {
     _pins.reserve(PinNum);
 }
@@ -94,16 +92,16 @@ Pin& Net::getPin(unsigned i) {
     return *_pins[i];
 }
 
-//Cell
+// Cell
 Cell::Cell(const std::string CellName,
-        MasterCellType& MCT,
-        bool movable,
-        unsigned id)
+           MasterCellType& MCT,
+           bool movable,
+           unsigned id)
     : _CellName(CellName),
-        _MCT(MCT),
-        _Id(id),
-        _movable(movable),
-        _moved(false) {
+      _MCT(MCT),
+      _Id(id),
+      _movable(movable),
+      _moved(false) {
     size_t p = _MCT.getNumPins();
     _pins.reserve(p);
     size_t l = _MCT.getNumLayers();
@@ -113,7 +111,7 @@ Cell::Cell(const std::string CellName,
         _Layer2pin.push_back(v);
     }
     for (size_t i = 0; i < p; ++i) {
-        _pins.push_back(Pin(_MCT.getPinType(i), this));
+        _pins.push_back(std::move(Pin(_MCT.getPinType(i), this)));
         _Layer2pin[_pins[i].getLayer()]->push_back(&_pins[i]);
     }
 }

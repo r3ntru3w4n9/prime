@@ -23,7 +23,7 @@
 ///                          FUNCTIONS                               ///
 ////////////////////////////////////////////////////////////////////////
 
-//Layer
+// Layer
 Layer::Layer(const std::string name, int i, bool d, int supply, int area)
     : _LayerName(name), _idx(i), _direction(d) {
     _grids.reserve(area);
@@ -43,7 +43,7 @@ const std::string& Layer::getLayerName() const {
     return _LayerName;
 }
 
-int Layer::getLayerIdx() const {\
+int Layer::getLayerIdx() const {
     return _idx;
 }
 
@@ -51,7 +51,7 @@ Grid& Layer::getGrid(int i) {
     return *_grids[i];
 }
 
-//Coordinate
+// Coordinate
 Coordinate::Coordinate(int x, int y, int layer) : _row(x), _column(y) {
     _grids.reserve(layer);
 }
@@ -79,8 +79,8 @@ void Coordinate::addCell(Cell* cell, Coordinate* c1, Coordinate* c2) {
 }
 
 void Coordinate::addConstraint(int layer,
-                    safe::vector<unsigned>& mc,
-                    safe::vector<int>& demand) {
+                               safe::vector<unsigned>& mc,
+                               safe::vector<int>& demand) {
     assert(mc.size() == demand.size());
     for (int i = 0, n = mc.size(); i < n; ++i) {
         _grids[layer]->addConstraint(mc[i], demand[i]);
@@ -99,15 +99,11 @@ int Coordinate::getColumn() const {
     return _column;
 }
 
-//Grid
-Grid::Grid(int supply, Layer& layer) : _supply(supply), _layer(layer) {
-    
-}
+// Grid
+Grid::Grid(int supply, Layer& layer) : _supply(supply), _layer(layer) {}
 
 Grid::Grid(Grid& a)
-        : _supply(a._supply), _layer(a._layer), _coordinate(a._coordinate) {
-
-}
+    : _supply(a._supply), _layer(a._layer), _coordinate(a._coordinate) {}
 
 void Grid::assignCoordinate(Coordinate* c) {
     _coordinate = c;
@@ -123,7 +119,7 @@ void Grid::decSupply(int d) {
 
 void Grid::addConstraint(unsigned mc, int demand) {
     // if (_Cell2Demand.find(mc) == _Cell2Demand.end()) {
-    if (contains(_Cell2Demand, mc)) {
+    if (!_Cell2Demand.contains(mc)) {
         _Cell2Demand[mc] = demand;
     } else {
         _Cell2Demand[mc] += demand;
@@ -132,7 +128,7 @@ void Grid::addConstraint(unsigned mc, int demand) {
 
 void Grid::moveConstraint(unsigned mc, int demand) {
     // assert(_Cell2Demand.count(mc) > 0);
-    assert(contains(_Cell2Demand, mc));
+    assert(_Cell2Demand.contains(mc));
     demand = _Cell2Demand[mc] - demand;
     if (demand > 0) {
         _Cell2Demand[mc] = demand;
@@ -150,7 +146,7 @@ void Grid::addCell(unsigned mc) {
 
 void Grid::addNet(Net& net) {
     // if (_nets.find(net.getId()) == _nets.end()) {
-    if (!contains(_nets, net.getId())) {
+    if (!_nets.contains(net.getId())) {
         _nets[net.getId()] = &net;
         _supply -= 1;
     }
@@ -158,12 +154,12 @@ void Grid::addNet(Net& net) {
 
 bool Grid::getNet(Net& net) {
     // return _nets.find(net.getId()) != _nets.end();
-    return contains(_nets, net.getId());
+    return _nets.contains(net.getId());
 }
 
 Net* Grid::getNet(unsigned i) {
     // if (_nets.find(i) == _nets.end()) {
-    if (!contains(_nets, i)) {
+    if (!_nets.contains(i)) {
         return nullptr;
     }
     return _nets[i];
@@ -187,7 +183,7 @@ int Grid::getLayer() const {
 
 bool Grid::getDemand(unsigned mc, int& demand) {
     // if (_Cell2Demand.find(mc) == _Cell2Demand.end()) {
-    if (contains(_Cell2Demand, mc)) {
+    if (!_Cell2Demand.contains(mc)) {
         return false;
     } else {
         demand = _Cell2Demand[mc];

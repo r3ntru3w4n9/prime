@@ -55,10 +55,10 @@ class PrimeMan {
     int _columnRange;
     int _area;
     int _layer;
-    std::unordered_map<std::string, int> _Layer2Idx;
-    std::unordered_map<std::string, int> _MasterCell2Idx;
-    std::unordered_map<std::string, unsigned> _Cell2Idx;
-    std::unordered_map<std::string, unsigned> _Net2Idx;
+    safe::unordered_map<std::string, int> _Layer2Idx;
+    safe::unordered_map<std::string, int> _MasterCell2Idx;
+    safe::unordered_map<std::string, unsigned> _Cell2Idx;
+    safe::unordered_map<std::string, unsigned> _Net2Idx;
     safe::vector<Layer*> _layers;
     safe::vector<Coordinate*> _coordinates;
     safe::vector<MasterCellType*> _MasterCells;

@@ -6,52 +6,64 @@
 
 #pragma once
 
+#include <algorithm>
 #include <memory>
-#include <utility>
 #include <vector>
 
 namespace safe {
 
-template <class T>
+template <typename T>
 class vector {
    public:
     vector() : field(std::vector<T>()) {}
-    vector(vector& vec) : field(vec.field) {}
+    vector(const vector& vec) : field(vec.field) {}
     vector(vector&& vec) : field(std::move(vec.field)) {}
 
-    vector<T>& operator=(const vector<T>& other) {
-        this->field = other->field;
+    vector& operator=(const vector& vec) {
+        field = vec.field;
         return *this;
     }
-    vector<T>& operator=(vector<T>&& other) {
-        this->field = std::move(other->field);
+    vector& operator=(vector&& vec) {
+        field = std::move(vec.field);
         return *this;
     }
 
-    void reserve(unsigned long capacity) { this->field.reserve(capacity); }
+    // * wrapper functions
+    void reserve(size_t capacity) { field.reserve(capacity); }
 
-    void resize(unsigned long new_size) { this->field.resize(new_size); }
-    size_t size() const { return this->field.size(); }
+    void resize(size_t new_size) { field.resize(new_size); }
+    size_t size() const { return field.size(); }
 
-    void push_back(T& value) { this->field.push_back(value); }
-    void push_back(T&& value) { this->field.push_back(std::move(value)); }
+    void push_back(T& value) { field.push_back(value); }
+    void push_back(T&& value) { field.push_back(std::move(value)); }
 
-    void pop_back() { return this->field.pop_back(); }
-
-    auto begin() { return this->field.begin(); }
-    auto begin() const { return this->field.begin(); }
-
-    auto end() { return this->field.end(); }
-    auto end() const { return this->field.end(); }
+    void pop_back() { return field.pop_back(); }
 
     const T& operator[](size_t index) const {
-        assert(index < this->field.size());
-        return this->field[index];
+        assert(index < field.size());
+        return field[index];
     }
     T& operator[](size_t index) {
-        assert(index < this->field.size());
-        return this->field[index];
+        assert(index < field.size());
+        return field[index];
     }
+
+    typename std::vector<T>::iterator begin() { return field.begin(); }
+    typename std::vector<T>::const_iterator begin() const {
+        return field.begin();
+    }
+
+    typename std::vector<T>::iterator end() { return field.end(); }
+    typename std::vector<T>::const_iterator end() const { return field.end(); }
+
+    typename std::vector<T>::iterator find(const T& element) {
+        return std::find(field.begin(), field.end(), element);
+    }
+    typename std::vector<T>::const_iterator find(const T& element) const {
+        return std::find(field.begin(), field.end(), element);
+    }
+
+    bool contains(const T& element) const { return find(element) != end(); }
 
    private:
     std::vector<T> field;

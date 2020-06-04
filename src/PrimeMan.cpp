@@ -63,7 +63,7 @@ void PrimeMan::readFile(std::fstream& input) {
         int idx;
         input >> idx;  //<Idx>
         _Layer2Idx[str] = idx;
-        bool direction;
+        bool direction = false;
         input >> buf;  //<RoutingDirection>
         if (buf == "H") {
             direction = false;
@@ -105,7 +105,7 @@ void PrimeMan::readFile(std::fstream& input) {
         assert(str == "MasterCell");
         input >> str;  // <masterCellName>
         // assert(_MasterCell2Idx.count(str) == 0);
-        assert(!contains(_MasterCell2Idx, str));
+        assert(!_MasterCell2Idx.contains(str));
         _MasterCell2Idx[str] = i;
         MasterCellType* mct = new MasterCellType(str, i, _layer);
         _MasterCells.push_back(mct);
@@ -162,14 +162,15 @@ void PrimeMan::readFile(std::fstream& input) {
         input >> str;  // CellInst
         assert(str == "CellInst");
         input >> str;  // <instName>
-        assert(_Cell2Idx.count(str) == 0);
+        // assert(_Cell2Idx.count(str) == 0);
+        assert(!_Cell2Idx.contains(str));
         _Cell2Idx[str] = i;
         input >> buf;  // <masterCellName>
         assert(_MasterCell2Idx[buf] == 1);
         MasterCellType MCT = *_MasterCells[_MasterCell2Idx[buf]];
         input >> row >> column >>
             buf;  // <gGridRowIdx> <gGridColIdx> <movableCstr>
-        bool movable;
+        bool movable = false;
         if (buf == "Movable") {
             movable = true;
         } else if (buf == "Fixed") {
@@ -209,7 +210,7 @@ void PrimeMan::readFile(std::fstream& input) {
         input >> str;      // <netName>
         input >> numPins;  // <numPins>
         // assert(_Net2Idx.count(str) == 0);
-        assert(!contains(_Net2Idx, str));
+        assert(_Net2Idx.contains(str));
         _Net2Idx[str] = i;
         Net* net = new Net(str, i, numPins, _layer);
         _nets.push_back(net);
@@ -222,7 +223,7 @@ void PrimeMan::readFile(std::fstream& input) {
             pos++;
             masterPin = str.substr(pos, str.size() - pos);
             // assert(_Cell2Idx.count(inst) == 1);
-            assert(contains(_Cell2Idx, inst));
+            assert(_Cell2Idx.contains(inst));
             Cell* cell = _cells[_Cell2Idx[inst]];
             Pin pin = cell->getPin(inst);
             net->addPin(&pin);
@@ -240,7 +241,7 @@ void PrimeMan::readFile(std::fstream& input) {
             str;  // <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx>
                   // <netName>
         // assert(_Net2Idx.count(str) == 1);
-        assert(contains(_Net2Idx, str));
+        assert(_Net2Idx.contains(str));
         // FIXME in case it is wrong
         Net* net = _nets[_Net2Idx[str]];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
@@ -264,8 +265,7 @@ PrimeMan::~PrimeMan() {
 }
 
 int PrimeMan::getIdx(int row, int column) const {
-    assert(column >= 0 && column < _columnRange && row >= 0 &&
-            row < _rowRange);
+    assert(column >= 0 && column < _columnRange && row >= 0 && row < _rowRange);
     return column * _rowRange + row;
 }
 

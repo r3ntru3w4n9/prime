@@ -38,7 +38,11 @@ class PinType {
    public:
     // Constructors
     PinType(const std::string PinName, int layer, MasterCellType& MCT);
-    PinType(PinType& a);
+    PinType(const PinType& a);
+    PinType(PinType&& a);
+
+    PinType& operator=(const PinType& a);
+    PinType& operator=(PinType&& a);
 
     // acceser
     const std::string& getPinName() const;
@@ -48,9 +52,9 @@ class PinType {
     friend std::ostream& operator<<(std::ostream& os, const PinType& PT);
 
    private:
-    const std::string _PinName;
-    const int _layer;
-    const MasterCellType& _MCT;
+    std::string _PinName;
+    int _layer;
+    MasterCellType& _MCT;
 };
 
 std::ostream& operator<<(std::ostream& os, const PinType& PT);
@@ -59,10 +63,14 @@ class BlockageType {
    public:
     // Constructors
     BlockageType(const std::string BlkgName, int layer, int demand);
-    BlockageType(BlockageType& a);
+    BlockageType(const BlockageType& a);
+    BlockageType(BlockageType&& a);
 
-    // acceser
-    std::string getBlkgName() const;
+    BlockageType& operator=(const BlockageType& a);
+    BlockageType& operator=(BlockageType&& a);
+
+    // accesor
+    const std::string& getBlkgName() const;
     int getLayer() const;
     int getDemand() const;
 
@@ -70,9 +78,9 @@ class BlockageType {
     friend std::ostream& operator<<(std::ostream& os, const BlockageType& BT);
 
    private:
-    const std::string _BlkgName;
-    const int _layer;
-    const int _demand;
+    std::string _BlkgName;
+    int _layer;
+    int _demand;
 };
 
 std::ostream& operator<<(std::ostream& os, const BlockageType& BT);
@@ -112,9 +120,9 @@ class MasterCellType {
                                     const MasterCellType& MCT);
 
    private:
-    const std::string _MCName;
-    const unsigned _Id;
-    const int _layer;
+    std::string _MCName;
+    unsigned _Id;
+    int _layer;
     safe::vector<int> _LayerDemand;
     safe::vector<PinType> _Pins;
     safe::vector<BlockageType> _Blkgs;
@@ -122,7 +130,7 @@ class MasterCellType {
     safe::vector<safe::vector<int>*> _SameGridDemand;
     safe::vector<safe::vector<unsigned>*> _adjHGridMC;
     safe::vector<safe::vector<int>*> _adjHGridDemand;
-    std::unordered_map<std::string, unsigned> _PinName2Idx;
+    safe::unordered_map<std::string, unsigned> _PinName2Idx;
 };
 
 std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT);

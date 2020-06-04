@@ -6,9 +6,5 @@
 
 #pragma once
 
+#include "safe_unordered_map.h"
 #include "safe_vector.h"
-
-template <class C, class T>
-bool contains(const C& container, const T& element) {
-    return container.find(element) != container.end();
-}

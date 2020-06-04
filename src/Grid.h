@@ -100,6 +100,6 @@ class Grid {
     int _supply;
     Layer& _layer;
     Coordinate* _coordinate;
-    std::unordered_map<unsigned, int> _Cell2Demand;
-    std::unordered_map<unsigned, Net*> _nets;
+    safe::unordered_map<unsigned, int> _Cell2Demand;
+    safe::unordered_map<unsigned, Net*> _nets;
 };

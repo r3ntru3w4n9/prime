@@ -32,7 +32,7 @@ class Pin {
    public:
     // Constructors
     Pin(PinType& PT, Cell* cell);
-    Pin(Pin& a);
+    Pin(const Pin& a);
 
     // modifier
     void setNet(Net* net);
@@ -54,7 +54,10 @@ class Pin {
 class Net {
    public:
     // Constructors(no copy constructor)
-    Net(const std::string NetName, unsigned id, unsigned PinNum, unsigned layer);
+    Net(const std::string NetName,
+        unsigned id,
+        unsigned PinNum,
+        unsigned layer);
 
     // modifier
     void addPin(Pin* pin);
