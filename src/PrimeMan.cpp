@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "PrimeMan.h"
+#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -333,7 +334,7 @@ void PrimeMan::connectCoordinateGrid() {
         Coordinate* c = _coordinates[i];
         for (int j = 0; j < _layer; ++j) {
             Layer* l = _layers[j];
-            Grid g = l->getGrid(i);
+            Grid& g = l->getGrid(i);
             g.assignCoordinate(c);
             c->addGrid(&g);
         }
