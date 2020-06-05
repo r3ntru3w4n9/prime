@@ -6,10 +6,13 @@
 
 #pragma once
 
+#include <assert.h>
+
 #include <memory>
 #include <unordered_map>
 
 namespace safe {
+
 template <typename K, typename V>
 class unordered_map {
    public:

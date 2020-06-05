@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <assert.h>
+
 #include <algorithm>
 #include <memory>
 #include <vector>

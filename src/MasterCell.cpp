@@ -126,23 +126,14 @@ MasterCellType::MasterCellType(const std::string MCName, unsigned id, int layer)
     _adjHGridDemand.reserve(layer);
     for (int i = 0; i < layer; ++i) {
         _LayerDemand.push_back(0);
-        safe::vector<unsigned>* v1 = new safe::vector<unsigned>();
-        _SameGridMC.push_back(v1);
-        safe::vector<unsigned>* v2 = new safe::vector<unsigned>();
-        _adjHGridMC.push_back(v2);
-        safe::vector<int>* v3 = new safe::vector<int>();
-        _SameGridDemand.push_back(v3);
-        safe::vector<int>* v4 = new safe::vector<int>();
-        _adjHGridDemand.push_back(v4);
-    }
-}
-
-MasterCellType::~MasterCellType() {
-    for (int i = 0; i < _layer; ++i) {
-        delete _adjHGridDemand[i];
-        delete _adjHGridMC[i];
-        delete _SameGridDemand[i];
-        delete _SameGridMC[i];
+        safe::vector<unsigned> v1 = safe::vector<unsigned>();
+        _SameGridMC.push_back(std::move(v1));
+        safe::vector<unsigned> v2 = safe::vector<unsigned>();
+        _adjHGridMC.push_back(std::move(v2));
+        safe::vector<int> v3 = safe::vector<int>();
+        _SameGridDemand.push_back(std::move(v3));
+        safe::vector<int> v4 = safe::vector<int>();
+        _adjHGridDemand.push_back(std::move(v4));
     }
 }
 
@@ -159,13 +150,13 @@ void MasterCellType::AddPin(const std::string PinName, int layer) {
 }
 
 void MasterCellType::AddExtraSame(unsigned MC, int demand, int layer) {
-    _SameGridMC[layer]->push_back(MC);
-    _SameGridDemand[layer]->push_back(demand);
+    _SameGridMC[layer].push_back(MC);
+    _SameGridDemand[layer].push_back(demand);
 }
 
 void MasterCellType::AddExtraadjH(unsigned MC, int demand, int layer) {
-    _adjHGridMC[layer]->push_back(MC);
-    _SameGridDemand[layer]->push_back(demand);
+    _adjHGridMC[layer].push_back(MC);
+    _SameGridDemand[layer].push_back(demand);
 }
 
 const std::string& MasterCellType::getMCName() const {
@@ -211,28 +202,23 @@ size_t MasterCellType::getPin(std::string& str) const {
 }
 
 BlockageType& MasterCellType::getBlkg(size_t i) {
-    assert(i < _Blkgs.size());
     return _Blkgs[i];
 }
 
 safe::vector<unsigned>& MasterCellType::getSameGridMC(unsigned layer) {
-    assert(layer < _SameGridMC.size());
-    return *_SameGridMC[layer];
+    return _SameGridMC[layer];
 }
 
 safe::vector<unsigned>& MasterCellType::getadjHGridMC(unsigned layer) {
-    assert(layer < _adjHGridMC.size());
-    return *_adjHGridMC[layer];
+    return _adjHGridMC[layer];
 }
 
 safe::vector<int>& MasterCellType::getSameGridDemand(unsigned layer) {
-    assert(layer < _SameGridDemand.size());
-    return *_SameGridDemand[layer];
+    return _SameGridDemand[layer];
 }
 
 safe::vector<int>& MasterCellType::getadjHGridDemand(unsigned layer) {
-    assert(layer < _adjHGridDemand.size());
-    return *_adjHGridDemand[layer];
+    return _adjHGridDemand[layer];
 }
 
 std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT) {

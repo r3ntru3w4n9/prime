@@ -1,6 +1,6 @@
 
 CXX = g++
-CXXFLAGS = -O3 -std=c++11 -Wall -Werror
+CXXFLAGS = -O3 -std=c++11 -Wall -Wextra -Werror
 TARGETS = main.o Cell.o Grid.o MasterCell.o PrimeMan.o
 BINARY = cell_move_router
 FLAGS =

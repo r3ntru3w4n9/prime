@@ -106,7 +106,8 @@ class Cell {
     safe::vector<int>& getSameGridDemand(unsigned layer);
     safe::vector<int>& getadjHGridDemand(unsigned layer);
     size_t getNumPins() const;
-    safe::vector<Pin*>& getPinLayer(int i) const;
+    const safe::vector<Pin*>& getPinLayer(int i) const;
+    safe::vector<Pin*>& getPinLayer(int i);
 
     // friend
     friend std::ostream& operator<<(std::ostream& os, const Cell& cell);
@@ -120,7 +121,7 @@ class Cell {
     unsigned _row;
     unsigned _column;
     safe::vector<Pin> _pins;
-    safe::vector<safe::vector<Pin*>*> _Layer2pin;
+    safe::vector<safe::vector<Pin*>> _Layer2pin;
 };
 
 std::ostream& operator<<(std::ostream& os, const Cell& cell);

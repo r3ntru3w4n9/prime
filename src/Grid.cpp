@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "Grid.h"
+
 #include <iostream>
 
 ////////////////////////////////////////////////////////////////////////
@@ -65,10 +66,10 @@ void Coordinate::addCell(Cell* cell, Coordinate* c1, Coordinate* c2) {
     // for every layer
     for (int i = 0, n = _grids.size(); i < n; ++i) {
         _grids[i]->addCell(cell->getMasterCellId());
-        safe::vector<unsigned> adjHMC = cell->getadjHGridMC(i);
-        safe::vector<unsigned> SameMC = cell->getSameGridMC(i);
-        safe::vector<int> adjHDemand = cell->getadjHGridDemand(i);
-        safe::vector<int> SameDemand = cell->getSameGridDemand(i);
+        safe::vector<unsigned>& adjHMC = cell->getadjHGridMC(i);
+        safe::vector<unsigned>& SameMC = cell->getSameGridMC(i);
+        safe::vector<int>& adjHDemand = cell->getadjHGridDemand(i);
+        safe::vector<int>& SameDemand = cell->getSameGridDemand(i);
         addConstraint(i, SameMC, SameDemand);
         if (c1) {
             c1->addConstraint(i, adjHMC, adjHDemand);
@@ -129,8 +130,8 @@ void Grid::addConstraint(unsigned mc, int demand) {
 
 void Grid::moveConstraint(unsigned mc, int demand) {
     // assert(_Cell2Demand.count(mc) > 0);
-    assert(_Cell2Demand.contains(mc));
-    demand = _Cell2Demand[mc] - demand;
+    // assert(_Cell2Demand.contains(mc));
+    demand = _Cell2Demand.at(mc) - demand;
     if (demand > 0) {
         _Cell2Demand[mc] = demand;
     } else {

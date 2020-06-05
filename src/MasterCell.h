@@ -19,8 +19,6 @@
 
 #include <iostream>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 #include "safe.h"
 
@@ -90,8 +88,8 @@ class MasterCellType {
     // Constructor(no copy constructor)
     MasterCellType(const std::string MCName, unsigned id, int layer);
 
-    // destructor
-    ~MasterCellType();
+    // ! no need for destructor
+    // ~MasterCellType();
 
     // Modifier
     void AddBlkg(const std::string BlkgName, int layer, int demand);
@@ -126,10 +124,10 @@ class MasterCellType {
     safe::vector<int> _LayerDemand;
     safe::vector<PinType> _Pins;
     safe::vector<BlockageType> _Blkgs;
-    safe::vector<safe::vector<unsigned>*> _SameGridMC;
-    safe::vector<safe::vector<int>*> _SameGridDemand;
-    safe::vector<safe::vector<unsigned>*> _adjHGridMC;
-    safe::vector<safe::vector<int>*> _adjHGridDemand;
+    safe::vector<safe::vector<unsigned>> _SameGridMC;
+    safe::vector<safe::vector<int>> _SameGridDemand;
+    safe::vector<safe::vector<unsigned>> _adjHGridMC;
+    safe::vector<safe::vector<int>> _adjHGridDemand;
     safe::unordered_map<std::string, unsigned> _PinName2Idx;
 };
 

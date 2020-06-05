@@ -107,12 +107,12 @@ Cell::Cell(const std::string CellName,
     size_t l = _MCT.getNumLayers();
     _Layer2pin.reserve(l);
     for (size_t i = 0; i < l; ++i) {
-        safe::vector<Pin*>* v = new safe::vector<Pin*>();
-        _Layer2pin.push_back(v);
+        safe::vector<Pin*> v = safe::vector<Pin*>();
+        _Layer2pin.push_back(std::move(v));
     }
     for (size_t i = 0; i < p; ++i) {
         _pins.push_back(std::move(Pin(_MCT.getPinType(i), this)));
-        _Layer2pin[_pins[i].getLayer()]->push_back(&_pins[i]);
+        _Layer2pin[_pins[i].getLayer()].push_back(&_pins[i]);
     }
 }
 
@@ -161,7 +161,6 @@ unsigned Cell::getColumn() const {
 }
 
 Pin& Cell::getPin(size_t i) {
-    assert(i < _pins.size());
     return _pins[i];
 }
 
@@ -193,8 +192,12 @@ size_t Cell::getNumPins() const {
     return _pins.size();
 }
 
-safe::vector<Pin*>& Cell::getPinLayer(int i) const {
-    return *_Layer2pin[i];
+const safe::vector<Pin*>& Cell::getPinLayer(int i) const {
+    return _Layer2pin[i];
+}
+
+safe::vector<Pin*>& Cell::getPinLayer(int i) {
+    return _Layer2pin[i];
 }
 
 std::ostream& operator<<(std::ostream& os, const Cell& cell) {

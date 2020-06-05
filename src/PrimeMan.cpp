@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "PrimeMan.h"
+
 #include <iostream>
 
 ////////////////////////////////////////////////////////////////////////
@@ -40,7 +41,8 @@ void PrimeMan::readFile(std::fstream& input) {
     input >> str;  // GGridBoundaryIdx
     assert(str == "GGridBoundaryIdx");
     int rb, cb, re, ce;
-    input >> rb >> cb >> re >> ce;  //<rowBeginIdx> <colBeginIdx> <rowEndIdx> <colEndIdx>
+    input >> rb >> cb >> re >>
+        ce;  //<rowBeginIdx> <colBeginIdx> <rowEndIdx> <colEndIdx>
     _rowBase = cb;
     _columnBase = rb;
     _rowRange = ce - cb + 1;
@@ -68,11 +70,15 @@ void PrimeMan::readFile(std::fstream& input) {
         input >> buf;  //<RoutingDirection>
         if (buf == "H") {
             direction = false;
-        } else if (buf == "V") {
-            direction = true;
         } else {
-            assert(buf == "H" || buf == "V");
+            assert(buf == "V");
+            direction = true;
         }
+        // } else if (buf == "V") {
+        //     direction = true;
+        // } else {
+        //     assert(buf == "H" || buf == "V");
+        // }
         int supply;
         input >> supply;  //<defaultSupplyOfOneGGrid>
         Layer* l = new Layer(str, idx - 1, direction, supply, _area);
@@ -88,7 +94,9 @@ void PrimeMan::readFile(std::fstream& input) {
     input >> count;
     for (int i = 0; i < count; ++i) {
         input >> row >> column >> layer >> val;
-        _layers[row - 1]->getGrid(getIdx(row - _rowBase, column - _columnBase)).incSupply(val);
+        _layers[row - 1]
+            ->getGrid(getIdx(row - _rowBase, column - _columnBase))
+            .incSupply(val);
     }
 
     /*NumMasterCell <masterCellCount>
@@ -111,7 +119,7 @@ void PrimeMan::readFile(std::fstream& input) {
         MasterCellType* mct = new MasterCellType(str, i, _layer);
         _MasterCells.push_back(mct);
         int pin, blockage;
-        input >> pin >> blockage; // <pinCount> <blockageCount>
+        input >> pin >> blockage;  // <pinCount> <blockageCount>
         for (int j = 0; j < pin; ++j) {
             input >> str;  // Pin
             assert(str == "Pin");
@@ -122,7 +130,8 @@ void PrimeMan::readFile(std::fstream& input) {
         for (int j = 0; j < blockage; ++j) {
             input >> str;  // Blkg
             assert(str == "Blkg");
-            input >> str >> buf >> demand;  // <blockageName> <blockageLayer> <demand>
+            input >> str >> buf >>
+                demand;  // <blockageName> <blockageLayer> <demand>
             assert(_Layer2Idx.contains(buf));
             mct->AddBlkg(str, _Layer2Idx[buf], demand);
         }
@@ -146,11 +155,17 @@ void PrimeMan::readFile(std::fstream& input) {
         if (str == "sameGGrid") {
             _MasterCells[mc1]->AddExtraSame(mc2, demand, layer);
             _MasterCells[mc2]->AddExtraSame(mc1, demand, layer);
-        } else if (str == "adjHGGrid") {
+        } else {
+            assert(str == "adjHGGrid");
             _MasterCells[mc1]->AddExtraadjH(mc2, demand, layer);
             _MasterCells[mc2]->AddExtraadjH(mc1, demand, layer);
-        } else
-            assert(str == "sameGGrid" || str == "adjHGGrid");
+        }
+        // } else if (str == "adjHGGrid") {
+        //     _MasterCells[mc1]->AddExtraadjH(mc2, demand, layer);
+        //     _MasterCells[mc2]->AddExtraadjH(mc1, demand, layer);
+        // } else {
+        //     assert(str == "sameGGrid" || str == "adjHGGrid");
+        // }
     }
 
     /*NumCellInst <cellInstCount>
@@ -174,11 +189,15 @@ void PrimeMan::readFile(std::fstream& input) {
         bool movable = false;
         if (buf == "Movable") {
             movable = true;
-        } else if (buf == "Fixed") {
-            movable = false;
         } else {
-            assert(buf == "Fixed" || buf == "Movable");
+            assert(buf == "Fixed");
+            movable = false;
         }
+        // } else if (buf == "Fixed") {
+        //     movable = false;
+        // } else {
+        //     assert(buf == "Fixed" || buf == "Movable");
+        // }
         Cell* cell = new Cell(str, MCT, movable, i);
         _cells.push_back(cell);
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
@@ -299,22 +318,18 @@ int PrimeMan::getUp(int row, int column) const {
 }
 
 Layer& PrimeMan::getLayer(int layer) {
-    assert(layer < int(_layers.size()));
     return *_layers[layer];
 }
 
 Coordinate& PrimeMan::getCoordinate(unsigned i) {
-    assert(i >= 0 && i < _coordinates.size());
     return *_coordinates[i];
 }
 
 Cell& PrimeMan::getCell(unsigned i) {
-    assert(i < _cells.size());
     return *_cells[i];
 }
 
 Net& PrimeMan::getNet(unsigned i) {
-    assert(i < _nets.size());
     return *_nets[i];
 }
 
