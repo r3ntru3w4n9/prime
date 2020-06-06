@@ -261,9 +261,8 @@ void PrimeMan::readFile(std::fstream& input) {
             str;  // <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx>
                   // <netName>
         // assert(_Net2Idx.count(str) == 1);
-        assert(_Net2Idx.contains(str));
-        // FIXME in case it is wrong
-        Net* net = _nets[_Net2Idx[str]];
+        // assert(_Net2Idx.contains(str));
+        Net* net = _nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
     }
@@ -290,31 +289,19 @@ int PrimeMan::getIdx(int row, int column) const {
 }
 
 int PrimeMan::getLeft(int row, int column) const {
-    if (column == 0) {
-        return -1;
-    }
-    return getIdx(row, column - 1);
+    return (column == 0) ? -1 : getIdx(row, column - 1);
 }
 
 int PrimeMan::getRight(int row, int column) const {
-    if (column == _columnRange - 1) {
-        return -1;
-    }
-    return getIdx(row, column + 1);
+    return (column == _columnRange - 1) ? -1 : getIdx(row, column + 1);
 }
 
 int PrimeMan::getDown(int row, int column) const {
-    if (row == 0) {
-        return -1;
-    }
-    return getIdx(row - 1, column);
+    return (row == 0) ? -1 : getIdx(row - 1, column);
 }
 
 int PrimeMan::getUp(int row, int column) const {
-    if (row == _rowRange - 1) {
-        return -1;
-    }
-    return getIdx(row + 1, column);
+    return (row == _rowRange - 1) ? -1 : getIdx(row + 1, column);
 }
 
 Layer& PrimeMan::getLayer(int layer) {
@@ -367,7 +354,7 @@ void PrimeMan::assignRoute(int srow,
         Layer* l = _layers[i];
         for (int j = scol; j <= ecol; ++j) {
             for (int k = srow; k <= erow; ++k) {
-                Grid g = l->getGrid(getIdx(k, j));
+                Grid& g = l->getGrid(getIdx(k, j));
                 g.addNet(*net);
             }
         }

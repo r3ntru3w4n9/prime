@@ -172,7 +172,6 @@ unsigned MasterCellType::getNumLayers() const {
 }
 
 int MasterCellType::getLayerDemand(int i) const {
-    assert(i < int(_LayerDemand.size()));
     return _LayerDemand[i];
 }
 

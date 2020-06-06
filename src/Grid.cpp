@@ -187,8 +187,7 @@ bool Grid::getDemand(unsigned mc, int& demand) {
     // if (_Cell2Demand.find(mc) == _Cell2Demand.end()) {
     if (!_Cell2Demand.contains(mc)) {
         return false;
-    } else {
-        demand = _Cell2Demand[mc];
     }
+    demand = _Cell2Demand[mc];
     return true;
 }
