@@ -45,8 +45,8 @@ void PrimeMan::readFile(std::fstream& input) {
         ce;  //<rowBeginIdx> <colBeginIdx> <rowEndIdx> <colEndIdx>
     _rowBase = cb;
     _columnBase = rb;
-    _rowRange = ce - cb + 1;
-    _columnRange = re - rb + 1;
+    _rowRange = re - rb + 1;
+    _columnRange = ce - cb + 1;
 
     /*NumLayers <LayerCount>
       Lay <LayerName> <Idx> <RoutingDirection> <defaultSupplyOfOneGGrid>*/
@@ -94,7 +94,7 @@ void PrimeMan::readFile(std::fstream& input) {
     input >> count;
     for (int i = 0; i < count; ++i) {
         input >> row >> column >> layer >> val;
-        _layers[row - 1]
+        _layers[layer - 1]
             ->getGrid(getIdx(row - _rowBase, column - _columnBase))
             .incSupply(val);
     }
@@ -183,7 +183,7 @@ void PrimeMan::readFile(std::fstream& input) {
         assert(!_Cell2Idx.contains(str));
         _Cell2Idx[str] = i;
         input >> buf;  // <masterCellName>
-        MasterCellType MCT = *_MasterCells[_MasterCell2Idx[buf]];
+        MasterCellType& MCT = *_MasterCells[_MasterCell2Idx[buf]];
         input >> row >> column >>
             buf;  // <gGridRowIdx> <gGridColIdx> <movableCstr>
         bool movable = false;
@@ -232,11 +232,21 @@ void PrimeMan::readFile(std::fstream& input) {
         // assert(_Net2Idx.count(str) == 0);
         assert(!_Net2Idx.contains(str));
         _Net2Idx[str] = i;
-        Net* net = new Net(str, i, numPins, _layer);
+        int minLay;
+        input >> str; // <minRoutingLayConstraint>
+        if(str == "NoCstr") {
+            minLay = 0;
+        } else {
+            assert(_Layer2Idx.contains(str));
+            minLay = _Layer2Idx[str];
+        }
+        Net* net = new Net(str, i, numPins, minLay);
         _nets.push_back(net);
         std::string inst, masterPin;
         std::string delimiter = "/";
         for (int j = 0; j < numPins; ++j) {
+            input >> str;  // Pin
+            assert(str == "Pin");
             input >> str;  // <instName>/<masterPinName>
             size_t pos = str.find(delimiter);
             inst = str.substr(0, pos);
@@ -245,7 +255,7 @@ void PrimeMan::readFile(std::fstream& input) {
             // assert(_Cell2Idx.count(inst) == 1);
             assert(_Cell2Idx.contains(inst));
             Cell* cell = _cells[_Cell2Idx[inst]];
-            Pin pin = cell->getPin(inst);
+            Pin& pin = cell->getPin(masterPin);
             net->addPin(&pin);
         }
     }

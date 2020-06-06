@@ -156,7 +156,7 @@ void MasterCellType::AddExtraSame(unsigned MC, int demand, int layer) {
 
 void MasterCellType::AddExtraadjH(unsigned MC, int demand, int layer) {
     _adjHGridMC[layer].push_back(MC);
-    _SameGridDemand[layer].push_back(demand);
+    _adjHGridDemand[layer].push_back(demand);
 }
 
 const std::string& MasterCellType::getMCName() const {
