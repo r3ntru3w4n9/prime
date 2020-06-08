@@ -31,7 +31,7 @@ class Cell;
 class Pin {
    public:
     // Constructors
-    Pin(PinType& PT, Cell* cell);
+    Pin(PinType& PT, Cell& cell);
     Pin(const Pin& a);
 
     // modifier
@@ -47,7 +47,7 @@ class Pin {
 
    private:
     PinType& _PT;
-    Cell* _cell;
+    Cell& _cell;
     Net* _net;
 };
 

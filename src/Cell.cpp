@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 // Pin
-Pin::Pin(PinType& PT, Cell* cell) : _PT(PT), _cell(cell) {}
+Pin::Pin(PinType& PT, Cell& cell) : _PT(PT), _cell(cell) {}
 
 Pin::Pin(const Pin& a) : _PT(a._PT), _cell(a._cell) {}
 
@@ -40,15 +40,15 @@ Net& Pin::get_net() const {
 }
 
 Cell& Pin::get_cell() const {
-    return *_cell;
+    return _cell;
 }
 
 unsigned Pin::getRow() const {
-    return _cell->getRow();
+    return _cell.getRow();
 }
 
 unsigned Pin::getColumn() const {
-    return _cell->getColumn();
+    return _cell.getColumn();
 }
 
 int Pin::getLayer() const {
@@ -111,7 +111,7 @@ Cell::Cell(const std::string CellName,
         _Layer2pin.push_back(std::move(v));
     }
     for (size_t i = 0; i < p; ++i) {
-        _pins.push_back(std::move(Pin(_MCT.getPinType(i), this)));
+        _pins.push_back(std::move(Pin(_MCT.getPinType(i), *this)));
         _Layer2pin[_pins[i].getLayer()].push_back(&_pins[i]);
     }
 }
