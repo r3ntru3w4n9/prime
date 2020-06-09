@@ -67,7 +67,7 @@ void Coordinate::addGrid(Grid* g) {
     _grids.push_back(g);
 }
 
-bool Coordinate::CanAddCell(Cell& cell) { 
+bool Coordinate::CanAddCell(Cell& cell) {
     for (int i = 0, n = _grids.size(); i < n; ++i) {
         if (!_grids[i]->CanAddCell(cell.getMasterCellId())) {
             return false;
@@ -103,7 +103,7 @@ void Coordinate::addConstraint(int layer,
     }
 }
 
-void Coordinate::moveCell(Cell& cell){
+void Coordinate::moveCell(Cell& cell) {
     for (int i = 0, n = _grids.size(); i < n; ++i) {
         _grids[i]->moveCell(cell.getMasterCellId());
         safe::vector<unsigned>& adjHMC = cell.getadjHGridMC(i);
@@ -121,8 +121,8 @@ void Coordinate::moveCell(Cell& cell){
 }
 
 void Coordinate::moveConstraint(int layer,
-                       safe::vector<unsigned>& mc,
-                       safe::vector<int>& demand) {
+                                safe::vector<unsigned>& mc,
+                                safe::vector<int>& demand) {
     assert(mc.size() == demand.size());
     for (int i = 0, n = mc.size(); i < n; ++i) {
         _grids[layer]->moveConstraint(mc[i], demand[i]);
@@ -172,7 +172,7 @@ void Grid::moveConstraint(unsigned mc, int demand) {
     // assert(_Cell2Demand.count(mc) > 0);
     assert(_Cell2Demand.contains(mc));
     demand = _Cell2Demand.at(mc) - demand;
-    assert(demand >=  0);
+    assert(demand >= 0);
     if (demand > 0) {
         _Cell2Demand[mc] = demand;
     } else {
@@ -180,7 +180,7 @@ void Grid::moveConstraint(unsigned mc, int demand) {
     }
 }
 
-bool Grid::CanAddCell(unsigned mc) { 
+bool Grid::CanAddCell(unsigned mc) {
     int demand;
     if (getDemand(mc, demand)) {
         if (demand > _supply) {

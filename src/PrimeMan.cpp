@@ -24,7 +24,7 @@
 ///                          FUNCTIONS                               ///
 ////////////////////////////////////////////////////////////////////////
 
-PrimeMan::PrimeMan(std::fstream& input): _numMoved(0) {
+PrimeMan::PrimeMan(std::fstream& input) : _numMoved(0) {
     readFile(input);
 }
 
@@ -222,8 +222,8 @@ void PrimeMan::readFile(std::fstream& input) {
         assert(!_Net2Idx.contains(str));
         _Net2Idx[str] = i;
         int minLay;
-        input >> str; // <minRoutingLayConstraint>
-        if(str == "NoCstr") {
+        input >> str;  // <minRoutingLayConstraint>
+        if (str == "NoCstr") {
             minLay = 0;
         } else {
             assert(_Layer2Idx.contains(str));
@@ -337,10 +337,10 @@ void PrimeMan::constructCoordinate() {
     }
     for (int i = 0; i < _columnRange; ++i) {
         for (int j = 0; j < _rowRange; ++j) {
-            int left = getLeft(j,i), right = getRight(j,i);
+            int left = getLeft(j, i), right = getRight(j, i);
             Coordinate* c1 = (left == -1) ? 0 : _coordinates[left];
             Coordinate* c2 = (right == -1) ? 0 : _coordinates[right];
-            _coordinates[getIdx(j,i)]->addAdjH(c1,c2);
+            _coordinates[getIdx(j, i)]->addAdjH(c1, c2);
         }
     }
 }

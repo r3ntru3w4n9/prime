@@ -55,10 +55,10 @@ class Coordinate {
     Coordinate(int x, int y, int layer);
 
     // modifier
-    void addAdjH(Coordinate* c1, Coordinate* c2);// you don't need this'
-    void addGrid(Grid* g);// you don't need this
-    bool CanAddCell(Cell& cell);// to see if you can add this cell
-    void addCell(Cell& cell); 
+    void addAdjH(Coordinate* c1, Coordinate* c2);  // you don't need this'
+    void addGrid(Grid* g);                         // you don't need this
+    bool CanAddCell(Cell& cell);  // to see if you can add this cell
+    void addCell(Cell& cell);
     void moveCell(Cell& cell);
 
     // accesser
@@ -77,8 +77,8 @@ class Coordinate {
                        safe::vector<unsigned>& mc,
                        safe::vector<int>& demand);
     void moveConstraint(int layer,
-                       safe::vector<unsigned>& mc,
-                       safe::vector<int>& demand);
+                        safe::vector<unsigned>& mc,
+                        safe::vector<int>& demand);
 };
 
 class Grid {

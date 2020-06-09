@@ -31,15 +31,15 @@
  *    Grid : getGrid()
  *    Pin : getCell() first and then getPin() from the Cell
  *          getNet first and then getPin() from the Net.
- * 
+ *
  * 2. How to get the route of a Net :
  *    Get a Pin from the Net then traverse through the Grids by
- *    searching if the Net is in the adjacent Grids from the pin and 
+ *    searching if the Net is in the adjacent Grids from the pin and
  *    recursively search for the Grids of the Net. Note that there are
- *    2 constraints when searching for the Grids: 1) Routing direction 
+ *    2 constraints when searching for the Grids: 1) Routing direction
  *    constraint and 2) Min Routing layer constraint
  *
- * Q&A : (If you have any question, please directly add the question in 
+ * Q&A : (If you have any question, please directly add the question in
  *        this Q&A and make a sign in the commit message. Then I'll
  *        answer it ASAP.)
  * Q: What is Coordinate?
@@ -68,15 +68,16 @@ class PrimeMan {
     int getUp(int row, int column) const;
 
     // modifier
-    void incNumMoved(); // trigger it if you move a cell
-    void decNumMoved(); // trigger it if you move a cell back to its original position
+    void incNumMoved();  // trigger it if you move a cell
+    void decNumMoved();  // trigger it if you move a cell back to its original
+                         // position
 
     // accesser(use getIdx() to get the idx of Grid and Coordinate)
     Layer& getLayer(int layer);
     Coordinate& getCoordinate(unsigned idx);
     Cell& getCell(unsigned idx);
     Net& getNet(unsigned idx);
-    Grid& getGrid(int layer,unsigned idx);
+    Grid& getGrid(int layer, unsigned idx);
 
    private:
     unsigned _maxMove;

@@ -66,7 +66,7 @@ class Net {
     // accesser
     const std::string& getName() const;
     unsigned getId() const;
-    unsigned getMinlayer() const; //min routing layer constraint
+    unsigned getMinlayer() const;  // min routing layer constraint
     size_t getNumPin() const;
     Pin& getPin(unsigned i);
 
@@ -89,13 +89,14 @@ class Cell {
     void setRow(unsigned x);
     void setColumn(unsigned y);
     void setCoordinate(unsigned row, unsigned column);
-    void move(); // use this to specify that this cell is moved
+    void move();  // use this to specify that this cell is moved
 
     // accesser
     const std::string& getCellName() const;
     MasterCellType& getMasterCell();
     int getMasterCellId() const;
-    bool movable(bool constraint) const; //constraint means the limit of movable number
+    bool movable(
+        bool constraint) const;  // constraint means the limit of movable number
     unsigned getRow() const;
     unsigned getColumn() const;
     Pin& getPin(size_t i);
