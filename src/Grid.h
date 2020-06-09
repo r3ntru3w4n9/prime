@@ -55,8 +55,9 @@ class Coordinate {
     Coordinate(int x, int y, int layer);
 
     // modifier
+    void addAdjH(Coordinate* c1, Coordinate* c2);
     void addGrid(Grid* g);// you don't need this
-    void addCell(Cell* cell, Coordinate* c1, Coordinate* c2);// c1 is the left coordinate, c2 is the right coordinate
+    void addCell(Cell* cell);// c1 is the left coordinate, c2 is the right coordinate
     void addConstraint(int layer,
                        safe::vector<unsigned>& mc,
                        safe::vector<int>& demand);// you don't need this
@@ -67,9 +68,10 @@ class Coordinate {
     int getColumn() const;
 
    private:
-    //TODO : save c1, c2
     int _row;
     int _column;
+    Coordinate* _c1;
+    Coordinate* _c2;
     safe::vector<Grid*> _grids;
 };
 

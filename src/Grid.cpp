@@ -58,11 +58,16 @@ Coordinate::Coordinate(int x, int y, int layer) : _row(x), _column(y) {
     _grids.reserve(layer);
 }
 
+void Coordinate::addAdjH(Coordinate* c1, Coordinate* c2) {
+    _c1 = c1;
+    _c2 = c2;
+}
+
 void Coordinate::addGrid(Grid* g) {
     _grids.push_back(g);
 }
 
-void Coordinate::addCell(Cell* cell, Coordinate* c1, Coordinate* c2) {
+void Coordinate::addCell(Cell* cell) {
     // for every layer
     for (int i = 0, n = _grids.size(); i < n; ++i) {
         _grids[i]->addCell(cell->getMasterCellId());
@@ -71,11 +76,11 @@ void Coordinate::addCell(Cell* cell, Coordinate* c1, Coordinate* c2) {
         safe::vector<int>& adjHDemand = cell->getadjHGridDemand(i);
         safe::vector<int>& SameDemand = cell->getSameGridDemand(i);
         addConstraint(i, SameMC, SameDemand);
-        if (c1) {
-            c1->addConstraint(i, adjHMC, adjHDemand);
+        if (_c1) {
+            _c1->addConstraint(i, adjHMC, adjHDemand);
         }
-        if (c2) {
-            c2->addConstraint(i, adjHMC, adjHDemand);
+        if (_c2) {
+            _c2->addConstraint(i, adjHMC, adjHDemand);
         }
     }
 }

@@ -203,18 +203,7 @@ void PrimeMan::readFile(std::fstream& input) {
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
         cell->setCoordinate(rIdx, cIdx);
         Coordinate* c = _coordinates[getIdx(rIdx, cIdx)];
-        int left, right;
-        left = getLeft(rIdx, cIdx);
-        right = getRight(rIdx, cIdx);
-        Coordinate* c1 = 0;
-        Coordinate* c2 = 0;
-        if (left > -1) {
-            c1 = _coordinates[left];
-        }
-        if (right > -1) {
-            c2 = _coordinates[right];
-        }
-        c->addCell(cell, c1, c2);
+        c->addCell(cell);
     }
 
     /*NumNets <netCount>
@@ -344,6 +333,14 @@ void PrimeMan::constructCoordinate() {
         for (int j = 0; j < _rowRange; ++j) {
             Coordinate* c = new Coordinate(j, i, _layer);
             _coordinates.push_back(c);
+        }
+    }
+    for (int i = 0; i < _columnRange; ++i) {
+        for (int j = 0; j < _rowRange; ++j) {
+            int left = getLeft(j,i), right = getRight(j,i);
+            Coordinate* c1 = (left == -1) ? 0 : _coordinates[left];
+            Coordinate* c2 = (right == -1) ? 0 : _coordinates[right];
+            _coordinates[getIdx(j,i)]->addAdjH(c1,c2);
         }
     }
 }
