@@ -203,7 +203,7 @@ void PrimeMan::readFile(std::fstream& input) {
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
         cell->setCoordinate(rIdx, cIdx);
         Coordinate* c = _coordinates[getIdx(rIdx, cIdx)];
-        c->addCell(cell);
+        c->addCell(*cell);
     }
 
     /*NumNets <netCount>

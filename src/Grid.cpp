@@ -67,14 +67,23 @@ void Coordinate::addGrid(Grid* g) {
     _grids.push_back(g);
 }
 
-void Coordinate::addCell(Cell* cell) {
+bool Coordinate::CanAddCell(Cell& cell) { 
+    for (int i = 0, n = _grids.size(); i < n; ++i) {
+        if (!_grids[i]->CanAddCell(cell.getMasterCellId())) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void Coordinate::addCell(Cell& cell) {
     // for every layer
     for (int i = 0, n = _grids.size(); i < n; ++i) {
-        _grids[i]->addCell(cell->getMasterCellId());
-        safe::vector<unsigned>& adjHMC = cell->getadjHGridMC(i);
-        safe::vector<unsigned>& SameMC = cell->getSameGridMC(i);
-        safe::vector<int>& adjHDemand = cell->getadjHGridDemand(i);
-        safe::vector<int>& SameDemand = cell->getSameGridDemand(i);
+        _grids[i]->addCell(cell.getMasterCellId());
+        safe::vector<unsigned>& adjHMC = cell.getadjHGridMC(i);
+        safe::vector<unsigned>& SameMC = cell.getSameGridMC(i);
+        safe::vector<int>& adjHDemand = cell.getadjHGridDemand(i);
+        safe::vector<int>& SameDemand = cell.getSameGridDemand(i);
         addConstraint(i, SameMC, SameDemand);
         if (_c1) {
             _c1->addConstraint(i, adjHMC, adjHDemand);
@@ -142,6 +151,16 @@ void Grid::moveConstraint(unsigned mc, int demand) {
     } else {
         _Cell2Demand.erase(mc);
     }
+}
+
+bool Grid::CanAddCell(unsigned mc) { 
+    int demand;
+    if (getDemand(mc, demand)) {
+        if (demand > _supply) {
+            return false;
+        }
+    }
+    return true;
 }
 
 void Grid::addCell(unsigned mc) {

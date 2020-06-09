@@ -55,12 +55,13 @@ class Coordinate {
     Coordinate(int x, int y, int layer);
 
     // modifier
-    void addAdjH(Coordinate* c1, Coordinate* c2);
+    void addAdjH(Coordinate* c1, Coordinate* c2);// you don't need this'
     void addGrid(Grid* g);// you don't need this
-    void addCell(Cell* cell);// c1 is the left coordinate, c2 is the right coordinate
     void addConstraint(int layer,
                        safe::vector<unsigned>& mc,
                        safe::vector<int>& demand);// you don't need this
+    bool CanAddCell(Cell& cell);// to see if you can add this cell
+    void addCell(Cell& cell); 
 
     // accesser
     Grid& getGrid(size_t i);
@@ -87,6 +88,7 @@ class Grid {
     void decSupply(int d);
     void addConstraint(unsigned mc, int demand);
     void moveConstraint(unsigned mc, int demand);
+    bool CanAddCell(unsigned mc);
     void addCell(unsigned mc);
     void addNet(Net& net);
     bool getNet(Net& net);
