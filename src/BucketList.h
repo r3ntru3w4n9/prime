@@ -60,8 +60,9 @@ class BucketList {
 
     void clean() {
         _list.clear();
-        for (size_t i = 0; i < 2 * _Pmax + 1; ++i)
+        for (int i = 0, n = 2 * _Pmax + 1; i < n; ++i) {
             _list.push_back(0);
+        }
     }
 
     // access function
@@ -86,38 +87,44 @@ class BucketList {
         Node* node = _list[_maxGain + _Pmax];
         Node* next = node->getNext();
         _list[_maxGain + _Pmax] = next;
-        if (next == 0)  // the last in the bucket
-            do
+        // the last in the bucket
+        if (next == 0) {
+            do {
                 --_maxGain;
-            while (_list[_maxGain + _Pmax] == 0 &&
-                   _maxGain > -_Pmax);  // find the new max gain
-        else
+            } while (_list[_maxGain + _Pmax] == 0 &&
+                     _maxGain > -_Pmax);  // find the new max gain
+        } else {
             next->setPrev(0);
+        }
         return node;
     }
 
     void insert(Node* node, int gain) {
-        if (gain > _maxGain)
+        if (gain > _maxGain) {
             _maxGain = gain;
+        }
         Node* origin = _list[gain + _Pmax];  // original node
         _list[gain + _Pmax] = node;
         node->setPrev(0);
         node->setNext(origin);  // connect
-        if (origin)
+        if (origin) {
             origin->setPrev(node);  // connect
+        }
     }
 
     void dec(Node* node, int gain) {
         Node* prev = node->getPrev();
         Node* next = node->getNext();
-        if (prev)
+        if (prev) {
             prev->setNext(next);
-        else
+        } else {
             _list[gain + _Pmax] = next;  // first in the bucket
-        if (next)
+        }
+        if (next) {
             next->setPrev(prev);
-        if (prev == 0 && next == 0)  // the last in the bucket
-        {
+        }
+        // the last in the bucket
+        if (prev == 0 && next == 0) {
             _list[gain + _Pmax] = 0;
             if (gain == _maxGain)
                 --_maxGain;
@@ -126,18 +133,23 @@ class BucketList {
     }
 
     void inc(Node* node, int gain) {
-        if (gain == _maxGain)
+        if (gain == _maxGain) {
             ++_maxGain;
+        }
         Node* prev = node->getPrev();
         Node* next = node->getNext();
-        if (prev)
+        if (prev) {
             prev->setNext(next);
-        else
+        } else {
             _list[gain + _Pmax] = next;  // first in the bucket
-        if (next)
+        }
+        if (next) {
             next->setPrev(prev);
-        if (prev == 0 && next == 0)  // the last in the bucket
+        }
+        // the last in the bucket
+        if (prev == 0 && next == 0) {
             _list[gain + _Pmax] = 0;
+        }
         insert(node, gain + 1);
     }
 

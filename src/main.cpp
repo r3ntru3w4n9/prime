@@ -47,5 +47,6 @@ int main(int argc, char* argv[]) {
     // call solver
     PrimeMan Mgr(inputfile);
     Force fr(Mgr);
+    Mgr.output(outputfile);
     return 0;
 }

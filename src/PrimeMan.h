@@ -38,7 +38,18 @@
  *    recursively search for the Grids of the Net. Note that there are
  *    2 constraints when searching for the Grids: 1) Routing direction
  *    constraint and 2) Min Routing layer constraint
- *
+ * 
+ * 3. Do the following steps when you move a cell :
+ *    a. Use Cell::movable(PrimeMan::limited()) to check if you can move
+ *       the cell.
+ *    b. Get the Coordinate of the position into which you want to move
+ *       the cell and use Coordinate::CanAddCell() to check if it's
+ *       legal.
+ *    c. Get the Coordinate of the original position and use
+ *       Coordinate::moveCell().
+ *    d. Get the new Coordinate and use Coordinate::addCell().
+ *    e. Call PrimeMan::MoveCell().
+ * 
  * Q&A : (If you have any question, please directly add the question in
  *        this Q&A and make a sign in the commit message. Then I'll
  *        answer it ASAP.)
@@ -68,21 +79,30 @@ class PrimeMan {
     int getUp(int row, int column) const;
 
     // modifier
-    bool incNumMoved();  // trigger it if you want to move a cell
+    void moveCell(Cell& cell);
     void decNumMoved();  // trigger it if you want to move a cell back to its original
                          // position
 
     // accesser(use getIdx() to get the idx of Grid and Coordinate)
+    int getNumLayers() const;
+    size_t getNumColumns() const;
+    size_t getNumRows() const;
+    size_t getNumNets() const;
+    size_t getNumCells() const;
+    size_t getNumMasterCells() const;
     Layer& getLayer(int layer);
     Coordinate& getCoordinate(unsigned idx);
     Cell& getCell(unsigned idx);
     Net& getNet(unsigned idx);
     Grid& getGrid(int layer, unsigned idx);
+    MasterCellType& getMasterCell(unsigned idx);
     bool limited() const;
+
+    // output
+    void output(std::fstream& output);
 
    private:
     unsigned _maxMove;
-    unsigned _numMoved;
     int _rowBase;
     int _columnBase;
     int _rowRange;
@@ -98,6 +118,7 @@ class PrimeMan {
     safe::vector<MasterCellType*> _MasterCells;
     safe::vector<Cell*> _cells;
     safe::vector<Net*> _nets;
+    safe::vector<unsigned> _movedCells;
 
     // private function
     void readFile(std::fstream& input);
@@ -111,4 +132,5 @@ class PrimeMan {
                      int ecol,
                      int elay,
                      Net* net);
+    void outputRoute(std::fstream& output);
 };

@@ -68,8 +68,18 @@ void Net::addPin(Pin* pin) {
     _pins.push_back(pin);
 }
 
-void Net::addSegment() {
-    // TODO
+void Net::addSegment(int srow,
+                     int scol,
+                     int slay,
+                     int erow,
+                     int ecol,
+                     int elay) {
+    _segments.push_back(srow);
+    _segments.push_back(scol);
+    _segments.push_back(slay);
+    _segments.push_back(erow);
+    _segments.push_back(ecol);
+    _segments.push_back(elay);
 }
 
 const std::string& Net::getName() const {
@@ -90,6 +100,14 @@ size_t Net::getNumPin() const {
 
 Pin& Net::getPin(unsigned i) {
     return *_pins[i];
+}
+
+size_t Net::getNumSegments() const {
+    return _segments.size();
+}
+
+safe::vector<unsigned>& Net::getSegments() {
+    return _segments;
 }
 
 // Cell
@@ -137,12 +155,20 @@ const std::string& Cell::getCellName() const {
     return _CellName;
 }
 
+unsigned Cell::getId() const {
+    return _Id;
+}
+
 MasterCellType& Cell::getMasterCell() {
     return _MCT;
 }
 
 int Cell::getMasterCellId() const {
     return _MCT.getId();
+}
+
+bool Cell::moved() const {
+    return _moved;
 }
 
 bool Cell::movable(bool constraint) const {

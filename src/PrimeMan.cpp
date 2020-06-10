@@ -24,7 +24,7 @@
 ///                          FUNCTIONS                               ///
 ////////////////////////////////////////////////////////////////////////
 
-PrimeMan::PrimeMan(std::fstream& input) : _numMoved(0) {
+PrimeMan::PrimeMan(std::fstream& input) {
     readFile(input);
 }
 
@@ -222,12 +222,12 @@ void PrimeMan::readFile(std::fstream& input) {
         assert(!_Net2Idx.contains(str));
         _Net2Idx[str] = i;
         int minLay;
-        input >> str;  // <minRoutingLayConstraint>
-        if (str == "NoCstr") {
+        input >> buf;  // <minRoutingLayConstraint>
+        if (buf == "NoCstr") {
             minLay = 0;
         } else {
-            assert(_Layer2Idx.contains(str));
-            minLay = _Layer2Idx[str];
+            assert(_Layer2Idx.contains(buf));
+            minLay = _Layer2Idx[buf];
         }
         Net* net = new Net(str, i, numPins, minLay);
         _nets.push_back(net);
@@ -306,18 +306,40 @@ int PrimeMan::getUp(int row, int column) const {
     return (row == _rowRange - 1) ? -1 : getIdx(row + 1, column);
 }
 
-bool PrimeMan::incNumMoved() {
-    assert(_numMoved <= _maxMove);
-    if(_numMoved == _maxMove) {
-        return false;
+void PrimeMan::moveCell(Cell& cell) {
+    assert(cell.movable(limited()));
+    if (cell.moved()) {
+        return;
     }
-    ++_numMoved;
-    return true;
+    _movedCells.push_back(cell.getId());
 }
 
 void PrimeMan::decNumMoved() {
-    assert(_numMoved > 0);
-    --_numMoved;
+    assert(_movedCells.size() > 0);
+}
+
+int PrimeMan::getNumLayers() const {
+    return _layers.size();
+}
+
+size_t PrimeMan::getNumColumns() const {
+    return _columnRange;
+}
+
+size_t PrimeMan::getNumRows() const {
+    return _rowRange;
+}
+
+size_t PrimeMan::getNumNets() const {
+    return _nets.size();
+}
+
+size_t PrimeMan::getNumCells() const {
+    return _cells.size();
+}
+
+size_t PrimeMan::getNumMasterCells() const {
+    return _MasterCells.size();
 }
 
 Layer& PrimeMan::getLayer(int layer) {
@@ -340,8 +362,24 @@ Grid& PrimeMan::getGrid(int layer, unsigned idx) {
     return _layers[layer]->getGrid(idx);
 }
 
+MasterCellType& PrimeMan::getMasterCell(unsigned idx) {
+    return *_MasterCells[idx];
+}
+
 bool PrimeMan::limited() const {
-    return _numMoved == _maxMove;
+    return _movedCells.size() == _maxMove;
+}
+
+void PrimeMan::output(std::fstream& output) {
+    int n = _movedCells.size();
+    output << "NumMovedCellInst " << n << '\n';
+    for (int i = 0; i < n; ++i) {
+        Cell* cell = _cells[i];
+        output << "CellInst " << cell->getCellName() << " "
+               << cell->getRow() + _rowBase << " "
+               << cell->getColumn() + _columnBase << '\n';
+    }
+    outputRoute(output);
 }
 
 void PrimeMan::constructCoordinate() {
@@ -382,6 +420,7 @@ void PrimeMan::assignRoute(int srow,
                            int ecol,
                            int elay,
                            Net* net) {
+    net->addSegment(srow, scol, slay, erow, ecol, elay);
     for (int i = slay; i <= elay; ++i) {
         Layer* l = _layers[i];
         for (int j = scol; j <= ecol; ++j) {
@@ -390,5 +429,28 @@ void PrimeMan::assignRoute(int srow,
                 g.addNet(*net);
             }
         }
+    }
+}
+
+void PrimeMan::outputRoute(std::fstream& output) {
+    output << "NumRoutes ";
+    int numRoutes = 0;
+    for (int i = 0, n = _nets.size(); i < n; ++i) {
+        numRoutes += _nets[i]->getNumSegments();
+    }
+    assert((numRoutes % 6) == 0);
+    numRoutes /= 6;
+    output << numRoutes << '\n';
+    for (int i = 0, n = _nets.size(); i < n; ++i) {
+        Net* net = _nets[i];
+        safe::vector<unsigned>& segments = net->getSegments();
+        assert((segments.size() % 6) == 0);
+        for (int j = 0, m = segments.size() / 6; j < m; ++j)
+            output << segments[6 * j] + _rowBase << " "
+                   << segments[6 * j + 1] + _columnBase << " "
+                   << segments[6 * j + 2] + 1 << " "
+                   << segments[6 * j + 3] + _rowBase << " "
+                   << segments[6 * j + 4] + _columnBase << " "
+                   << segments[6 * j + 5] + 1 << " " << net->getName() << '\n';
     }
 }

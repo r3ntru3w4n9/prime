@@ -27,10 +27,14 @@
 
 class Force {
    public:
+    // Constructor
     Force(PrimeMan& pm);
+
+    //solver
+    void solve();
 
    private:
     PrimeMan&                   _pm;
-    BucketList                  _bkList;
+    BucketList*                 _bkList;
     std::vector<Node*>          _nodes;
 };

@@ -61,7 +61,12 @@ class Net {
 
     // modifier
     void addPin(Pin* pin);
-    void addSegment();
+    void addSegment(int srow,
+                    int scol,
+                    int slay,
+                    int erow,
+                    int ecol,
+                    int elay);
 
     // accesser
     const std::string& getName() const;
@@ -69,12 +74,15 @@ class Net {
     unsigned getMinlayer() const;  // min routing layer constraint
     size_t getNumPin() const;
     Pin& getPin(unsigned i);
+    size_t getNumSegments() const;
+    safe::vector<unsigned>& getSegments();
 
    private:
     const std::string _NetName;
     const unsigned _Id;
     const unsigned _layer;
     safe::vector<Pin*> _pins;
+    safe::vector<unsigned> _segments; // srow, scol, slay, erow, ecol, elay
 };
 
 class Cell {
@@ -93,8 +101,10 @@ class Cell {
 
     // accesser
     const std::string& getCellName() const;
+    unsigned getId() const;
     MasterCellType& getMasterCell();
     int getMasterCellId() const;
+    bool moved() const;
     bool movable(
         bool constraint) const;  // constraint means the limit of movable number
     unsigned getRow() const;
