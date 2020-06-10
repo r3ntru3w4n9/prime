@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "PrimeMan.h"
+#include "BucketList.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -30,4 +31,6 @@ class Force {
 
    private:
     PrimeMan&                   _pm;
+    BucketList                  _bkList;
+    std::vector<Node*>          _nodes;
 };
