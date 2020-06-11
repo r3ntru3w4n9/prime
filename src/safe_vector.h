@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 namespace safe {
@@ -69,6 +70,20 @@ class vector {
     }
 
     bool contains(const T& element) const { return find(element) != end(); }
+
+    friend std::ostream& operator<<(std::ostream& out, const vector& vec) {
+        std::stringstream ss;
+        ss << "[";
+        if (vec.size() != 0) {
+            ss << vec[0];
+        }
+        for (size_t i = 1; i < vec.size(); ++i) {
+            ss << ", " << vec[i];
+        }
+        ss << "]";
+        out << ss.str();
+        return out;
+    }
 
    private:
     std::vector<T> field;

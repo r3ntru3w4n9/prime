@@ -9,6 +9,7 @@
 #include <assert.h>
 
 #include <memory>
+#include <sstream>
 #include <unordered_map>
 
 namespace safe {
@@ -71,6 +72,23 @@ class unordered_map {
     }
 
     bool contains(const K& key) const { return find(key) != end(); }
+
+    friend std::ostream& operator<<(std::ostream& out,
+                                    const unordered_map& um) {
+        std::stringstream ss;
+        ss << "{";
+
+        auto iter = um.begin();
+        if (um.size() != 0) {
+            ss << iter->first << ":" << iter->second;
+        }
+        for (++iter; iter != um.end(); ++iter) {
+            ss << ", " << iter->first << ":" << iter->second;
+        }
+        ss << "}";
+        out << ss.str();
+        return out;
+    }
 
    private:
     std::unordered_map<K, V> field;
