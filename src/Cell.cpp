@@ -27,7 +27,7 @@ Pin::Pin(PinType& PT, Cell& cell) : _PT(PT), _cell(cell) {}
 
 Pin::Pin(const Pin& a) : _PT(a._PT), _cell(a._cell) {}
 
-void Pin::setNet(Net* net) {
+void Pin::setNet(GridNet* net) {
     _net = net;
 }
 
@@ -35,7 +35,7 @@ PinType& Pin::getPinType() const {
     return _PT;
 }
 
-Net& Pin::get_net() const {
+GridNet& Pin::get_net() const {
     return *_net;
 }
 
@@ -56,24 +56,24 @@ int Pin::getLayer() const {
 }
 
 // Net
-Net::Net(const std::string NetName,
-         unsigned id,
-         unsigned PinNum,
-         unsigned layer)
+GridNet::GridNet(const std::string NetName,
+                 unsigned id,
+                 unsigned PinNum,
+                 unsigned layer)
     : _NetName(NetName), _Id(id), _layer(layer) {
     _pins.reserve(PinNum);
 }
 
-void Net::addPin(Pin* pin) {
+void GridNet::addPin(Pin* pin) {
     _pins.push_back(pin);
 }
 
-void Net::addSegment(int srow,
-                     int scol,
-                     int slay,
-                     int erow,
-                     int ecol,
-                     int elay) {
+void GridNet::addSegment(int srow,
+                         int scol,
+                         int slay,
+                         int erow,
+                         int ecol,
+                         int elay) {
     _segments.push_back(srow);
     _segments.push_back(scol);
     _segments.push_back(slay);
@@ -82,31 +82,31 @@ void Net::addSegment(int srow,
     _segments.push_back(elay);
 }
 
-const std::string& Net::getName() const {
+const std::string& GridNet::getName() const {
     return _NetName;
 }
 
-unsigned Net::getId() const {
+unsigned GridNet::getId() const {
     return _Id;
 }
 
-unsigned Net::getMinlayer() const {
+unsigned GridNet::getMinlayer() const {
     return _layer;
 }
 
-size_t Net::getNumPin() const {
+size_t GridNet::getNumPin() const {
     return _pins.size();
 }
 
-Pin& Net::getPin(unsigned i) {
+Pin& GridNet::getPin(unsigned i) {
     return *_pins[i];
 }
 
-size_t Net::getNumSegments() const {
+size_t GridNet::getNumSegments() const {
     return _segments.size();
 }
 
-safe::vector<unsigned>& Net::getSegments() {
+safe::vector<unsigned>& GridNet::getSegments() {
     return _segments;
 }
 

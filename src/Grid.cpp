@@ -207,7 +207,7 @@ void Grid::moveCell(MasterCellType& mct) {
     }
 }
 
-void Grid::addNet(Net& net) {
+void Grid::addNet(GridNet& net) {
     // if (_nets.find(net.getId()) == _nets.end()) {
     if (!_nets.contains(net.getId())) {
         _nets[net.getId()] = &net;
@@ -215,12 +215,12 @@ void Grid::addNet(Net& net) {
     }
 }
 
-bool Grid::getNet(Net& net) {
+bool Grid::getNet(GridNet& net) {
     // return _nets.find(net.getId()) != _nets.end();
     return _nets.contains(net.getId());
 }
 
-Net* Grid::getNet(unsigned i) {
+GridNet* Grid::getNet(unsigned i) {
     // if (_nets.find(i) == _nets.end()) {
     if (!_nets.contains(i)) {
         return nullptr;

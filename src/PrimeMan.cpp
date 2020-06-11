@@ -229,7 +229,7 @@ void PrimeMan::readFile(std::fstream& input) {
             assert(_Layer2Idx.contains(buf));
             minLay = _Layer2Idx[buf];
         }
-        Net* net = new Net(str, i, numPins, minLay);
+        GridNet* net = new GridNet(str, i, numPins, minLay);
         _nets.push_back(net);
         std::string inst, masterPin;
         std::string delimiter = "/";
@@ -261,7 +261,7 @@ void PrimeMan::readFile(std::fstream& input) {
                   // <netName>
         // assert(_Net2Idx.count(str) == 1);
         // assert(_Net2Idx.contains(str));
-        Net* net = _nets[_Net2Idx.at(str)];
+        GridNet* net = _nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
     }
@@ -354,7 +354,7 @@ Cell& PrimeMan::getCell(unsigned i) {
     return *_cells[i];
 }
 
-Net& PrimeMan::getNet(unsigned i) {
+GridNet& PrimeMan::getNet(unsigned i) {
     return *_nets[i];
 }
 
@@ -423,7 +423,7 @@ void PrimeMan::assignRoute(int srow,
                            int erow,
                            int ecol,
                            int elay,
-                           Net* net) {
+                           GridNet* net) {
     net->addSegment(srow, scol, slay, erow, ecol, elay);
     for (int i = slay; i <= elay; ++i) {
         Layer* l = _layers[i];
@@ -446,7 +446,7 @@ void PrimeMan::outputRoute(std::fstream& output) {
     numRoutes /= 6;
     output << numRoutes << '\n';
     for (int i = 0, n = _nets.size(); i < n; ++i) {
-        Net* net = _nets[i];
+        GridNet* net = _nets[i];
         safe::vector<unsigned>& segments = net->getSegments();
         assert((segments.size() % 6) == 0);
         for (int j = 0, m = segments.size() / 6; j < m; ++j)

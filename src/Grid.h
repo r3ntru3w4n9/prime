@@ -96,9 +96,9 @@ class Grid {
     bool CanAddCell(MasterCellType& mct);
     void addCell(MasterCellType& mct);
     void moveCell(MasterCellType& mct);
-    void addNet(Net& net);
-    bool getNet(Net& net);
-    Net* getNet(unsigned i);
+    void addNet(GridNet& net);
+    bool getNet(GridNet& net);
+    GridNet* getNet(unsigned i);
 
     // accesser
     int getRow() const;
@@ -112,5 +112,5 @@ class Grid {
     Layer& _layer;
     Coordinate* _coordinate;
     safe::unordered_map<unsigned, int> _Cell2Demand;
-    safe::unordered_map<unsigned, Net*> _nets;
+    safe::unordered_map<unsigned, GridNet*> _nets;
 };

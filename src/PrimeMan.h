@@ -38,7 +38,7 @@
  *    recursively search for the Grids of the Net. Note that there are
  *    2 constraints when searching for the Grids: 1) Routing direction
  *    constraint and 2) Min Routing layer constraint
- * 
+ *
  * 3. Do the following steps when you move a cell :
  *    a. Use Cell::movable(PrimeMan::limited()) to check if you can move
  *       the cell.
@@ -49,7 +49,7 @@
  *       Coordinate::moveCell().
  *    d. Get the new Coordinate and use Coordinate::addCell().
  *    e. Call PrimeMan::MoveCell().
- * 
+ *
  * Q&A : (If you have any question, please directly add the question in
  *        this Q&A and make a sign in the commit message. Then I'll
  *        answer it ASAP.)
@@ -80,8 +80,8 @@ class PrimeMan {
 
     // modifier
     void moveCell(Cell& cell);
-    void decNumMoved();  // trigger it if you want to move a cell back to its original
-                         // position
+    void decNumMoved();  // trigger it if you want to move a cell back to its
+                         // original position
 
     // accesser(use getIdx() to get the idx of Grid and Coordinate)
     int getNumLayers() const;
@@ -93,7 +93,7 @@ class PrimeMan {
     Layer& getLayer(int layer);
     Coordinate& getCoordinate(unsigned idx);
     Cell& getCell(unsigned idx);
-    Net& getNet(unsigned idx);
+    GridNet& getNet(unsigned idx);
     Grid& getGrid(int layer, unsigned idx);
     MasterCellType& getMasterCell(unsigned idx);
     bool limited() const;
@@ -118,7 +118,7 @@ class PrimeMan {
     safe::vector<Coordinate*> _coordinates;
     safe::vector<MasterCellType*> _MasterCells;
     safe::vector<Cell*> _cells;
-    safe::vector<Net*> _nets;
+    safe::vector<GridNet*> _nets;
     safe::vector<unsigned> _movedCells;
 
     // private function
@@ -132,7 +132,7 @@ class PrimeMan {
                      int erow,
                      int ecol,
                      int elay,
-                     Net* net);
+                     GridNet* net);
     void outputRoute(std::fstream& output);
     void maxNetDegree() const;
 };

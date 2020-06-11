@@ -25,7 +25,7 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-class Net;
+class GridNet;
 class Cell;
 
 class Pin {
@@ -35,11 +35,11 @@ class Pin {
     Pin(const Pin& a);
 
     // modifier
-    void setNet(Net* net);
+    void setNet(GridNet* net);
 
     // accesser
     PinType& getPinType() const;
-    Net& get_net() const;
+    GridNet& get_net() const;
     Cell& get_cell() const;
     unsigned getRow() const;
     unsigned getColumn() const;
@@ -48,25 +48,20 @@ class Pin {
    private:
     PinType& _PT;
     Cell& _cell;
-    Net* _net;
+    GridNet* _net;
 };
 
-class Net {
+class GridNet {
    public:
     // Constructors(no copy constructor)
-    Net(const std::string NetName,
-        unsigned id,
-        unsigned PinNum,
-        unsigned layer);
+    GridNet(const std::string NetName,
+            unsigned id,
+            unsigned PinNum,
+            unsigned layer);
 
     // modifier
     void addPin(Pin* pin);
-    void addSegment(int srow,
-                    int scol,
-                    int slay,
-                    int erow,
-                    int ecol,
-                    int elay);
+    void addSegment(int srow, int scol, int slay, int erow, int ecol, int elay);
 
     // accesser
     const std::string& getName() const;
@@ -82,7 +77,7 @@ class Net {
     const unsigned _Id;
     const unsigned _layer;
     safe::vector<Pin*> _pins;
-    safe::vector<unsigned> _segments; // srow, scol, slay, erow, ecol, elay
+    safe::vector<unsigned> _segments;  // srow, scol, slay, erow, ecol, elay
 };
 
 class Cell {
