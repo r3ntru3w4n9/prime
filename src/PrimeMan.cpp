@@ -116,8 +116,7 @@ void PrimeMan::readFile(std::fstream& input) {
         // assert(_MasterCell2Idx.count(str) == 0);
         assert(!_MasterCell2Idx.contains(str));
         _MasterCell2Idx[str] = i;
-        MasterCellType* mct = new MasterCellType(str, i, _layer);
-        _MasterCells.push_back(mct);
+        MasterCellType mct = MasterCellType(str, i, _layer);
         int pin, blockage;
         input >> pin >> blockage;  // <pinCount> <blockageCount>
         for (int j = 0; j < pin; ++j) {
@@ -125,7 +124,7 @@ void PrimeMan::readFile(std::fstream& input) {
             assert(str == "Pin");
             input >> str >> buf;  // <pinName> <pinLayer>
             assert(_Layer2Idx.contains(buf));
-            mct->AddPin(str, _Layer2Idx[buf]);
+            mct.AddPin(str, _Layer2Idx[buf]);
         }
         for (int j = 0; j < blockage; ++j) {
             input >> str;  // Blkg
@@ -133,8 +132,9 @@ void PrimeMan::readFile(std::fstream& input) {
             input >> str >> buf >>
                 demand;  // <blockageName> <blockageLayer> <demand>
             assert(_Layer2Idx.contains(buf));
-            mct->AddBlkg(str, _Layer2Idx[buf], demand);
+            mct.AddBlkg(str, _Layer2Idx[buf], demand);
         }
+        _MasterCells.push_back(std::move(mct));
     }
 
     /*NumNeighborCellExtraDemand <count>
@@ -147,18 +147,20 @@ void PrimeMan::readFile(std::fstream& input) {
     for (int i = 0; i < count; ++i) {
         input >> str;  // sameGGrid || adjHGGrid
         input >> buf;  // <masterCellName1>
-        mc1 = _MasterCell2Idx[buf];
+        // FIXME the original version does not check, intentional?
+        mc1 = _MasterCell2Idx.at(buf);
         input >> buf;  // <masterCellName2>
-        mc2 = _MasterCell2Idx[buf];
+        // FIXME the original version does not check, intentional?
+        mc2 = _MasterCell2Idx.at(buf);
         input >> buf >> demand;  // <layerName> <demand>
         layer = _Layer2Idx[buf];
         if (str == "sameGGrid") {
-            _MasterCells[mc1]->AddExtraSame(mc2, demand, layer);
-            _MasterCells[mc2]->AddExtraSame(mc1, demand, layer);
+            _MasterCells[mc1].AddExtraSame(mc2, demand, layer);
+            _MasterCells[mc2].AddExtraSame(mc1, demand, layer);
         } else {
             assert(str == "adjHGGrid");
-            _MasterCells[mc1]->AddExtraadjH(mc2, demand, layer);
-            _MasterCells[mc2]->AddExtraadjH(mc1, demand, layer);
+            _MasterCells[mc1].AddExtraadjH(mc2, demand, layer);
+            _MasterCells[mc2].AddExtraadjH(mc1, demand, layer);
         }
         // } else if (str == "adjHGGrid") {
         //     _MasterCells[mc1]->AddExtraadjH(mc2, demand, layer);
@@ -183,9 +185,10 @@ void PrimeMan::readFile(std::fstream& input) {
         assert(!_Cell2Idx.contains(str));
         _Cell2Idx[str] = i;
         input >> buf;  // <masterCellName>
-        MasterCellType& MCT = *_MasterCells[_MasterCell2Idx[buf]];
-        input >> row >> column >>
-            buf;  // <gGridRowIdx> <gGridColIdx> <movableCstr>
+        // FIXME the original version does not check, intentional?
+        MasterCellType& MCT = _MasterCells[_MasterCell2Idx.at(buf)];
+        input >> row >> column >> buf;
+        // <gGridRowIdx> <gGridColIdx> <movableCstr>
         bool movable = false;
         if (buf == "Movable") {
             movable = true;
@@ -198,12 +201,12 @@ void PrimeMan::readFile(std::fstream& input) {
         // } else {
         //     assert(buf == "Fixed" || buf == "Movable");
         // }
-        Cell* cell = new Cell(str, MCT, movable, i);
-        _cells.push_back(cell);
+        Cell cell = Cell(str, MCT, movable, i);
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
-        cell->setCoordinate(rIdx, cIdx);
+        cell.setCoordinate(rIdx, cIdx);
         Coordinate* c = _coordinates[getIdx(rIdx, cIdx)];
-        c->addCell(*cell);
+        c->addCell(cell);
+        _cells.push_back(std::move(cell));
     }
 
     /*NumNets <netCount>
@@ -229,8 +232,15 @@ void PrimeMan::readFile(std::fstream& input) {
             assert(_Layer2Idx.contains(buf));
             minLay = _Layer2Idx[buf];
         }
-        GridNet* net = new GridNet(str, i, numPins, minLay);
-        _nets.push_back(net);
+
+        // ! deprecated
+        GridNet* grid_net = new GridNet(str, i, numPins, minLay);
+        _grid_nets.push_back(grid_net);
+
+        // ! substituted
+        TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
+        _tree_nets.push_back(std::move(tree_net));
+
         std::string inst, masterPin;
         std::string delimiter = "/";
         for (int j = 0; j < numPins; ++j) {
@@ -242,13 +252,14 @@ void PrimeMan::readFile(std::fstream& input) {
             pos++;
             masterPin = str.substr(pos, str.size() - pos);
             // assert(_Cell2Idx.count(inst) == 1);
-            assert(_Cell2Idx.contains(inst));
-            Cell* cell = _cells[_Cell2Idx[inst]];
-            Pin& pin = cell->getPin(masterPin);
-            net->addPin(&pin);
+            // assert(_Cell2Idx.contains(inst));
+            Cell& cell = _cells[_Cell2Idx.at(inst)];
+            Pin& pin = cell.getPin(masterPin);
+            grid_net->addPin(&pin);
         }
     }
 
+    safe::unordered_map<std::string, std::vector<Segment>> segments;
     /*NumRoutes <routeSegmentCount>
       <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx> <netName>*/
     int srow, scol, slay, erow, ecol, elay;
@@ -261,27 +272,31 @@ void PrimeMan::readFile(std::fstream& input) {
 
         // assert(_Net2Idx.count(str) == 1);
         // assert(_Net2Idx.contains(str));
-        GridNet* net = _nets[_Net2Idx.at(str)];
+        assert(slay >= 1 && elay >= 1);
+
+        // ! deprecated
+        GridNet* net = _grid_nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
+
+        // ! substituted
+        segments[str].push_back(Segment(srow - _rowBase, scol - _columnBase,
+                                        slay - 1, erow - _rowBase,
+                                        ecol - _columnBase, elay - 1));
     }
+
+    safe::unordered_map<std::string, TreeNet> all_nets;
 }
 
 PrimeMan::~PrimeMan() {
-    for (int i = 0, n = _layers.size(); i < n; ++i) {
-        delete _layers[i];
+    for (Layer* ptr : _layers) {
+        delete ptr;
     }
-    for (int i = 0, n = _coordinates.size(); i < n; ++i) {
-        delete _coordinates[i];
+    for (Coordinate* ptr : _coordinates) {
+        delete ptr;
     }
-    for (int i = 0, n = _MasterCells.size(); i < n; ++i) {
-        delete _MasterCells[i];
-    }
-    for (int i = 0, n = _cells.size(); i < n; ++i) {
-        delete _cells[i];
-    }
-    for (int i = 0, n = _nets.size(); i < n; ++i) {
-        delete _nets[i];
+    for (GridNet* ptr : _grid_nets) {
+        delete ptr;
     }
 }
 
@@ -331,7 +346,7 @@ size_t PrimeMan::getNumRows() const {
 }
 
 size_t PrimeMan::getNumNets() const {
-    return _nets.size();
+    return _grid_nets.size();
 }
 
 size_t PrimeMan::getNumCells() const {
@@ -351,11 +366,11 @@ Coordinate& PrimeMan::getCoordinate(unsigned i) {
 }
 
 Cell& PrimeMan::getCell(unsigned i) {
-    return *_cells[i];
+    return _cells[i];
 }
 
 GridNet& PrimeMan::getNet(unsigned i) {
-    return *_nets[i];
+    return *_grid_nets[i];
 }
 
 Grid& PrimeMan::getGrid(int layer, unsigned idx) {
@@ -363,7 +378,7 @@ Grid& PrimeMan::getGrid(int layer, unsigned idx) {
 }
 
 MasterCellType& PrimeMan::getMasterCell(unsigned idx) {
-    return *_MasterCells[idx];
+    return _MasterCells[idx];
 }
 
 bool PrimeMan::limited() const {
@@ -378,10 +393,10 @@ void PrimeMan::output(std::fstream& output) {
     int n = _movedCells.size();
     output << "NumMovedCellInst " << n << '\n';
     for (int i = 0; i < n; ++i) {
-        Cell* cell = _cells[i];
-        output << "CellInst " << cell->getCellName() << " "
-               << cell->getRow() + _rowBase << " "
-               << cell->getColumn() + _columnBase << '\n';
+        const Cell& cell = _cells[i];
+        output << "CellInst " << cell.getCellName() << " "
+               << cell.getRow() + _rowBase << " "
+               << cell.getColumn() + _columnBase << '\n';
     }
     outputRoute(output);
 }
@@ -398,8 +413,8 @@ void PrimeMan::constructCoordinate() {
     for (int i = 0; i < _columnRange; ++i) {
         for (int j = 0; j < _rowRange; ++j) {
             int left = getLeft(j, i), right = getRight(j, i);
-            Coordinate* c1 = (left == -1) ? 0 : _coordinates[left];
-            Coordinate* c2 = (right == -1) ? 0 : _coordinates[right];
+            Coordinate* c1 = (left == -1) ? nullptr : _coordinates[left];
+            Coordinate* c2 = (right == -1) ? nullptr : _coordinates[right];
             _coordinates[getIdx(j, i)]->addAdjH(c1, c2);
         }
     }
@@ -439,14 +454,14 @@ void PrimeMan::assignRoute(int srow,
 void PrimeMan::outputRoute(std::fstream& output) {
     output << "NumRoutes ";
     int numRoutes = 0;
-    for (int i = 0, n = _nets.size(); i < n; ++i) {
-        numRoutes += _nets[i]->getNumSegments();
+    for (int i = 0, n = _grid_nets.size(); i < n; ++i) {
+        numRoutes += _grid_nets[i]->getNumSegments();
     }
     assert((numRoutes % 6) == 0);
     numRoutes /= 6;
     output << numRoutes << '\n';
-    for (int i = 0, n = _nets.size(); i < n; ++i) {
-        GridNet* net = _nets[i];
+    for (int i = 0, n = _grid_nets.size(); i < n; ++i) {
+        GridNet* net = _grid_nets[i];
         safe::vector<unsigned>& segments = net->getSegments();
         assert((segments.size() % 6) == 0);
         for (int j = 0, m = segments.size() / 6; j < m; ++j)
@@ -461,8 +476,8 @@ void PrimeMan::outputRoute(std::fstream& output) {
 
 void PrimeMan::maxNetDegree() const {
     int maxDegree = 0;
-    for (int i = 0, n = _nets.size(); i < n; ++i) {
-        int d = _nets[i]->getNumPin();
+    for (int i = 0, n = _grid_nets.size(); i < n; ++i) {
+        int d = _grid_nets[i]->getNumPin();
         if (d > maxDegree) {
             maxDegree = d;
         }

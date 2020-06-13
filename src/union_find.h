@@ -9,3 +9,4 @@
 
 // TODO a general union-find
 // handles initial routing and reroute
+// ? map vs unordered_map for looking up

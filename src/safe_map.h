@@ -1,0 +1,89 @@
+// * Copyright (C) Ren-Chu Wang - All Rights Reserved
+// * Unauthorized copying of this file, via any medium is strictly prohibited
+// * Proprietary and confidential
+
+#pragma once
+
+#include <assert.h>
+
+#include <map>
+#include <memory>
+#include <sstream>
+
+namespace safe {
+
+template <typename K, typename V>
+class map {
+   public:
+    map() : field(std::map<K, V>()) {}
+    map(const map& hashmap) : field(hashmap.field) {}
+    map(map&& hashmap) : field(std::move(hashmap.field)) {}
+
+    map& operator=(const map& hashmap) {
+        field = hashmap.field;
+        return *this;
+    }
+    map& operator=(map&& hashmap) {
+        field = std::move(hashmap.field);
+        return *this;
+    }
+
+    void reserve(size_t capacity) { field.reserve(capacity); }
+
+    void rehash(size_t new_size) { field.rehash(new_size); }
+    size_t size() const { return field.size(); }
+
+    const V& operator[](const K& key) const { return field[key]; }
+    V& operator[](const K& key) { return field[key]; }
+
+    const V& at(const K& key) const {
+        assert(contains(key));
+        return field[key];
+    }
+    V& at(const K& key) {
+        assert(contains(key));
+        return field[key];
+    }
+
+    size_t erase(const K& key) {
+        assert(contains(key));
+        return field.erase(key);
+    }
+
+    typename std::map<K, V>::iterator begin() { return field.begin(); }
+    typename std::map<K, V>::const_iterator begin() const {
+        return field.begin();
+    }
+
+    typename std::map<K, V>::iterator end() { return field.end(); }
+    typename std::map<K, V>::const_iterator end() const { return field.end(); }
+
+    typename std::map<K, V>::iterator find(const K& key) {
+        return field.find(key);
+    }
+    typename std::map<K, V>::const_iterator find(const K& key) const {
+        return field.find(key);
+    }
+
+    bool contains(const K& key) const { return find(key) != end(); }
+
+    friend std::ostream& operator<<(std::ostream& out, const map& um) {
+        std::stringstream ss;
+        ss << "{";
+
+        auto iter = um.begin();
+        if (um.size() != 0) {
+            ss << iter->first << ":" << iter->second;
+        }
+        for (++iter; iter != um.end(); ++iter) {
+            ss << ", " << iter->first << ":" << iter->second;
+        }
+        ss << "}";
+        out << ss.str();
+        return out;
+    }
+
+   private:
+    std::map<K, V> field;
+};
+}  // namespace safe

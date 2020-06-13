@@ -18,6 +18,7 @@
 
 #include "Cell.h"
 #include "Grid.h"
+#include "TreeNet.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          DESCRIPTION                             ///
@@ -27,7 +28,7 @@
  * Cell.h : GridNet, Cell, Pin
  * Grid.h : Layer, Coordinate, Grid
  * MasterCell.h : PinType, BlockageType(probably useless), MasterCellType
- * 
+ *
  * 1. How to get elements :
  *    Cell : getCell()
  *    Net : getNet()
@@ -121,9 +122,15 @@ class PrimeMan {
     safe::unordered_map<std::string, unsigned> _Net2Idx;
     safe::vector<Layer*> _layers;
     safe::vector<Coordinate*> _coordinates;
-    safe::vector<MasterCellType*> _MasterCells;
-    safe::vector<Cell*> _cells;
-    safe::vector<GridNet*> _nets;
+    safe::vector<MasterCellType> _MasterCells;
+    safe::vector<Cell> _cells;
+
+    // ! deprecated
+    safe::vector<GridNet*> _grid_nets;
+
+    // ! substituted
+    safe::vector<TreeNet> _tree_nets;
+
     safe::vector<unsigned> _movedCells;
 
     // private function

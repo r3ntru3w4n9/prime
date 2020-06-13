@@ -113,6 +113,10 @@ class Cell {
          MasterCellType& MCT,
          bool movable,
          unsigned id);
+    Cell(Cell&& c);
+
+    // operator=
+    Cell& operator=(Cell&& c);
 
     // modifier
     void setRow(unsigned x);
@@ -124,7 +128,9 @@ class Cell {
     const std::string& getCellName() const;
     unsigned getId() const;
 
+    const MasterCellType& getMasterCell() const;
     MasterCellType& getMasterCell();
+
     int getMasterCellId() const;
 
     bool moved() const;
@@ -152,11 +158,11 @@ class Cell {
     friend std::ostream& operator<<(std::ostream& os, const Cell& cell);
 
    private:
-    const std::string _CellName;
-    MasterCellType& _MCT;
+    std::string _CellName;
+    MasterCellType* _MCT;
 
-    const unsigned _Id;
-    const bool _movable;
+    unsigned _Id;
+    bool _movable;
     bool _moved;
     unsigned _row;
     unsigned _column;

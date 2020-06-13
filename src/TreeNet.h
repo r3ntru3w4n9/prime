@@ -5,6 +5,7 @@
 #pragma once
 
 #include <assert.h>
+
 #include <memory>
 #include <string>
 
@@ -26,6 +27,14 @@ struct Point {
 };
 
 struct Segment {
+    Segment(unsigned s_x,
+            unsigned s_y,
+            unsigned s_z,
+            unsigned t_x,
+            unsigned t_y,
+            unsigned t_z)
+        : source(std::move(Point(s_x, s_y, s_z))),
+          target(std::move(Point(t_x, t_y, t_z))) {}
     Segment(Point&& p1, Point&& p2)
         : source(std::move(p1)), target(std::move(p2)) {}
 
@@ -35,6 +44,10 @@ struct Segment {
 class TreeNode {
    public:
     TreeNode(unsigned idx) : pin_index(idx) {}
+    ~TreeNode() {
+        delete left;
+        delete right;
+    }
 
    private:
     unsigned pin_index;
@@ -44,6 +57,7 @@ class TreeNode {
 
 class TreeNet {
    public:
+    // constructor
     TreeNet(std::string&& name,
             unsigned id,
             unsigned num_pins,
@@ -51,17 +65,50 @@ class TreeNet {
         : net_name(std::move(name)), net_id(id), min_layer(min_layer) {
         connected.reserve(num_pins);
     }
+    TreeNet(TreeNet&& tn)
+        : net_name(std::move(tn.net_name)),
+          net_id(tn.net_id),
+          min_layer(tn.min_layer),
+          connected(std::move(tn.connected)),
+          tree_root(tn.tree_root),
+          tree_size(tn.tree_size) {
+        if (size()) {
+            assert(tree_root != nullptr);
+        }
+        tn.tree_root = nullptr;
+    }
+
+    // destructor
+    ~TreeNet() { delete tree_root; }
+
+    // operator=
+    TreeNet& operator=(TreeNet&& tn) {
+        net_name = std::move(tn.net_name);
+        net_id = tn.net_id;
+        min_layer = tn.min_layer;
+
+        connected = std::move(tn.connected);
+
+        tree_root = tn.tree_root;
+        tree_size = tn.tree_size;
+
+        tn.tree_root = nullptr;
+
+        return *this;
+    }
 
     void add_pin(Pin&& pin) {
         assert(connected.size() < connected.capacity());
         connected.push_back(std::move(pin));
     }
 
-    void add_segments(const safe::vector<Segment>& segments) {
-        // TODO
-        // haven't worked out the details.
-        // ? Use union-find to merge the segments and initialize the tree?
-    }
+    // void add_segments(const safe::vector<Segment>& segments) {
+    //     // TODO
+    //     // haven't worked out the details.
+    //     // ? Use union-find to merge the segments and initialize the tree?
+    // }
+
+    size_t size() const { return connected.size(); }
 
    private:
     std::string net_name;

@@ -2,7 +2,7 @@
 
   FileName    [MasterCell.cpp]
 
-  Author      [Yang Chien Yi]
+  Author      [Yang Chien Yi, Ren-Chu Wang]
 
   This file describes the master cells and their elements, pins and
   blockages.
@@ -25,32 +25,35 @@
 
 // PinType
 PinType::PinType(const std::string PinName, int layer, MasterCellType& MCT)
-    : _PinName(PinName), _layer(layer), _MCT(MCT) {
+    : _PinName(PinName), _layer(layer), _MCT(&MCT) {
     assert(layer >= 0);
 }
 
-PinType::PinType(const PinType& a)
-    : _PinName(a._PinName), _layer(a._layer), _MCT(a._MCT) {
-    assert(a._layer >= 0);
-}
+// PinType::PinType(const PinType& a)
+//     : _PinName(a._PinName), _layer(a._layer), _MCT(a._MCT) {
+//     assert(a._layer >= 0);
+// }
 
-// ! this is tricky as there is no way to invalidate an l-value reference
 PinType::PinType(PinType&& a)
     : _PinName(std::move(a._PinName)), _layer(a._layer), _MCT(a._MCT) {
     assert(_layer >= 0);
+    a._MCT = nullptr;
 }
 
-PinType& PinType::operator=(const PinType& a) {
-    _PinName = a._PinName;
-    _layer = a._layer;
-    _MCT = a._MCT;
-    return *this;
-}
+// PinType& PinType::operator=(const PinType& a) {
+//     _PinName = a._PinName;
+//     _layer = a._layer;
+//     _MCT = a._MCT;
+//     return *this;
+// }
 
 PinType& PinType::operator=(PinType&& a) {
     _PinName = std::move(a._PinName);
     _layer = a._layer;
     _MCT = a._MCT;
+
+    a._MCT = nullptr;
+
     return *this;
 }
 
@@ -136,6 +139,19 @@ MasterCellType::MasterCellType(const std::string MCName, unsigned id, int layer)
         _adjHGridDemand.push_back(std::move(v4));
     }
 }
+
+MasterCellType::MasterCellType(MasterCellType&& mct)
+    : _MCName(std::move(mct._MCName)),
+      _Id(mct._Id),
+      _layer(mct._layer),
+      _LayerDemand(std::move(mct._LayerDemand)),
+      _Pins(std::move(mct._Pins)),
+      _Blkgs(std::move(mct._Blkgs)),
+      _SameGridMC(std::move(mct._SameGridMC)),
+      _SameGridDemand(std::move(mct._SameGridDemand)),
+      _adjHGridMC(std::move(mct._adjHGridMC)),
+      _adjHGridDemand(std::move(mct._adjHGridDemand)),
+      _PinName2Idx(std::move(mct._PinName2Idx)) {}
 
 void MasterCellType::AddBlkg(const std::string BlkgName,
                              int layer,

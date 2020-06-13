@@ -26,8 +26,6 @@
 ///                          DESCRIPTION                             ///
 ////////////////////////////////////////////////////////////////////////
 
-
-
 ////////////////////////////////////////////////////////////////////////
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
@@ -38,10 +36,10 @@ class PinType {
    public:
     // Constructors
     PinType(const std::string PinName, int layer, MasterCellType& MCT);
-    PinType(const PinType& a);
+    // PinType(const PinType& a);
     PinType(PinType&& a);
 
-    PinType& operator=(const PinType& a);
+    // PinType& operator=(const PinType& a);
     PinType& operator=(PinType&& a);
 
     // acceser
@@ -54,7 +52,7 @@ class PinType {
    private:
     std::string _PinName;
     int _layer;
-    MasterCellType& _MCT;
+    MasterCellType* _MCT;
 };
 
 std::ostream& operator<<(std::ostream& os, const PinType& PT);
@@ -89,6 +87,7 @@ class MasterCellType {
    public:
     // Constructor(no copy constructor)
     MasterCellType(const std::string MCName, unsigned id, int layer);
+    MasterCellType(MasterCellType&& mct);
 
     // ! no need for destructor
     // ~MasterCellType();
@@ -123,6 +122,7 @@ class MasterCellType {
     std::string _MCName;
     unsigned _Id;
     int _layer;
+
     safe::vector<int> _LayerDemand;
     safe::vector<PinType> _Pins;
     safe::vector<BlockageType> _Blkgs;

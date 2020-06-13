@@ -2,7 +2,7 @@
 
   FileName    [Cell.cpp]
 
-  Author      [Yang Chien Yi]
+  Author      [Yang Chien Yi, Ren-Chu Wang]
 
   This file describes the cells and their elements, pins and nets.
 
@@ -32,9 +32,9 @@ Pin::Pin(Pin&& p) : _PT(p._PT), _cell(p._cell), _net(p._net) {
 }
 
 Pin& Pin::operator=(Pin&& p) {
-    this->_PT = p._PT;
-    this->_cell = p._cell;
-    this->_net = p._net;
+    _PT = p._PT;
+    _cell = p._cell;
+    _net = p._net;
 
     p._PT = nullptr;
     p._cell = nullptr;
@@ -132,22 +132,50 @@ Cell::Cell(const std::string CellName,
            bool movable,
            unsigned id)
     : _CellName(CellName),
-      _MCT(MCT),
+      _MCT(&MCT),
       _Id(id),
       _movable(movable),
       _moved(false) {
-    size_t p = _MCT.getNumPins();
+    assert(_MCT != nullptr);
+
+    size_t p = getMasterCell().getNumPins();
     _pins.reserve(p);
-    size_t l = _MCT.getNumLayers();
+    size_t l = getMasterCell().getNumLayers();
     _Layer2pin.reserve(l);
     for (size_t i = 0; i < l; ++i) {
         safe::vector<Pin*> v = safe::vector<Pin*>();
         _Layer2pin.push_back(std::move(v));
     }
     for (size_t i = 0; i < p; ++i) {
-        _pins.push_back(std::move(Pin(_MCT.getPinType(i), *this)));
+        _pins.push_back(std::move(Pin(getMasterCell().getPinType(i), *this)));
         _Layer2pin[_pins[i].getLayer()].push_back(&_pins[i]);
     }
+}
+
+Cell::Cell(Cell&& c)
+    : _CellName(std::move(c._CellName)),
+      _MCT(c._MCT),
+      _Id(c._Id),
+      _movable(c._movable),
+      _moved(c._moved),
+      _row(c._row),
+      _column(c._column),
+      _pins(std::move(c._pins)),
+      _Layer2pin(std::move(c._Layer2pin)) {}
+
+Cell& Cell::operator=(Cell&& c) {
+    _CellName = std::move(c._CellName);
+    _MCT = c._MCT;
+    _Id = c._Id;
+
+    _movable = c._movable;
+    _moved = c._moved;
+    _row = c._row;
+    _column = c._column;
+    _pins = std::move(c._pins);
+    _Layer2pin = std::move(c._Layer2pin);
+
+    return *this;
 }
 
 void Cell::setRow(unsigned x) {
@@ -175,12 +203,18 @@ unsigned Cell::getId() const {
     return _Id;
 }
 
+const MasterCellType& Cell::getMasterCell() const {
+    assert(_MCT != nullptr);
+    return *_MCT;
+}
+
 MasterCellType& Cell::getMasterCell() {
-    return _MCT;
+    assert(_MCT != nullptr);
+    return *_MCT;
 }
 
 int Cell::getMasterCellId() const {
-    return _MCT.getId();
+    return getMasterCell().getId();
 }
 
 bool Cell::moved() const {
@@ -207,27 +241,27 @@ Pin& Cell::getPin(size_t i) {
 }
 
 Pin& Cell::getPin(std::string& str) {
-    return _pins[_MCT.getPin(str)];
+    return _pins[getMasterCell().getPin(str)];
 }
 
 int Cell::getLayerDemand(int i) const {
-    return _MCT.getLayerDemand(i);
+    return getMasterCell().getLayerDemand(i);
 }
 
 safe::vector<unsigned>& Cell::getSameGridMC(unsigned layer) {
-    return _MCT.getSameGridMC(layer);
+    return getMasterCell().getSameGridMC(layer);
 }
 
 safe::vector<unsigned>& Cell::getadjHGridMC(unsigned layer) {
-    return _MCT.getadjHGridMC(layer);
+    return getMasterCell().getadjHGridMC(layer);
 }
 
 safe::vector<int>& Cell::getSameGridDemand(unsigned layer) {
-    return _MCT.getSameGridDemand(layer);
+    return getMasterCell().getSameGridDemand(layer);
 }
 
 safe::vector<int>& Cell::getadjHGridDemand(unsigned layer) {
-    return _MCT.getadjHGridDemand(layer);
+    return getMasterCell().getadjHGridDemand(layer);
 }
 
 size_t Cell::getNumPins() const {
@@ -244,6 +278,6 @@ safe::vector<Pin*>& Cell::getPinLayer(int i) {
 
 std::ostream& operator<<(std::ostream& os, const Cell& cell) {
     os << "CellName : " << cell.getCellName()
-       << " MasterCellType : " << cell._MCT.getMCName() << '\n';
+       << " MasterCellType : " << cell.getMasterCell().getMCName() << '\n';
     return os;
 }
