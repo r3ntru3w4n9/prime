@@ -4,5 +4,8 @@
 
 #pragma once
 
-#include "safe_unordered_map.h"
-#include "safe_vector.h"
+#include "Cell.h"
+#include "Grid.h"
+
+// TODO a general union-find
+// handles initial routing and reroute

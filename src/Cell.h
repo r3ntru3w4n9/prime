@@ -21,22 +21,23 @@
 ///                          DESCRIPTION                             ///
 ////////////////////////////////////////////////////////////////////////
 
-/* Cell : 
+/*
+ * Cell :
  *      It is the class that describes a cell. It contains the following
  *  datas, master cell type, row, column, and its pins. Also, you can
  *  also look up if the cell is movable by calling movable().
- *  
+ *
  * Pin :
  *      It is the class that describes a pin. It contains the information
  *  about its pin type, the cell it belongs to, and the net it belongs to.
- *  You don't need to update the position of a pin because you can get 
+ *  You don't need to update the position of a pin because you can get
  *  its position with the cell and the net it belongs to.
- *  
+ *
  * Net :
  *      The structure of a GridNet is not yet determined. However, the
  *  basic structure still exists. It contains the segments of the route
  *  and the pins. It also contains the ||MIN LAYER ROUTING CONSTRAINT||.
-*/
+ */
 
 ////////////////////////////////////////////////////////////////////////
 ///                           CLASSES                                ///
@@ -45,11 +46,16 @@
 class GridNet;
 class Cell;
 
+// * using pointers instead of references may seem like a downgrad
+// * but move semantics are needed
 class Pin {
    public:
-    // Constructors
+    // constructor
     Pin(PinType& PT, Cell& cell);
-    Pin(const Pin& a);
+    Pin(Pin&& p);
+
+    // assignment
+    Pin& operator=(Pin&& p);
 
     // modifier
     void setNet(GridNet* net);
@@ -58,16 +64,18 @@ class Pin {
     PinType& getPinType() const;
     GridNet& get_net() const;
     Cell& get_cell() const;
+
     unsigned getRow() const;
     unsigned getColumn() const;
     int getLayer() const;
 
    private:
-    PinType& _PT;
-    Cell& _cell;
+    PinType* _PT;
+    Cell* _cell;
     GridNet* _net;
 };
 
+// ! deprecated
 class GridNet {
    public:
     // Constructors(no copy constructor)
@@ -93,6 +101,7 @@ class GridNet {
     const std::string _NetName;
     const unsigned _Id;
     const unsigned _minLayer;
+
     safe::vector<Pin*> _pins;
     safe::vector<unsigned> _segments;  // srow, scol, slay, erow, ecol, elay
 };
@@ -114,21 +123,28 @@ class Cell {
     // accesser
     const std::string& getCellName() const;
     unsigned getId() const;
+
     MasterCellType& getMasterCell();
     int getMasterCellId() const;
+
     bool moved() const;
-    bool movable(
-        bool constraint) const;  // constraint means the limit of movable number
+    // constraint means the limit of movable number
+    bool movable(bool constraint) const;
+
     unsigned getRow() const;
     unsigned getColumn() const;
+
     Pin& getPin(size_t i);
     Pin& getPin(std::string& str);
+
     int getLayerDemand(int layer) const;
     safe::vector<unsigned>& getSameGridMC(unsigned layer);
     safe::vector<unsigned>& getadjHGridMC(unsigned layer);
     safe::vector<int>& getSameGridDemand(unsigned layer);
     safe::vector<int>& getadjHGridDemand(unsigned layer);
+
     size_t getNumPins() const;
+
     const safe::vector<Pin*>& getPinLayer(int i) const;
     safe::vector<Pin*>& getPinLayer(int i);
 
@@ -138,11 +154,13 @@ class Cell {
    private:
     const std::string _CellName;
     MasterCellType& _MCT;
+
     const unsigned _Id;
     const bool _movable;
     bool _moved;
     unsigned _row;
     unsigned _column;
+
     safe::vector<Pin> _pins;
     safe::vector<safe::vector<Pin*>> _Layer2pin;
 };

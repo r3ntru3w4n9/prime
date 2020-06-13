@@ -23,16 +23,32 @@
 ////////////////////////////////////////////////////////////////////////
 
 // Pin
-Pin::Pin(PinType& PT, Cell& cell) : _PT(PT), _cell(cell) {}
+Pin::Pin(PinType& PT, Cell& cell) : _PT(&PT), _cell(&cell) {}
 
-Pin::Pin(const Pin& a) : _PT(a._PT), _cell(a._cell) {}
+Pin::Pin(Pin&& p) : _PT(p._PT), _cell(p._cell), _net(p._net) {
+    p._PT = nullptr;
+    p._cell = nullptr;
+    p._net = nullptr;
+}
+
+Pin& Pin::operator=(Pin&& p) {
+    this->_PT = p._PT;
+    this->_cell = p._cell;
+    this->_net = p._net;
+
+    p._PT = nullptr;
+    p._cell = nullptr;
+    p._net = nullptr;
+
+    return *this;
+}
 
 void Pin::setNet(GridNet* net) {
     _net = net;
 }
 
 PinType& Pin::getPinType() const {
-    return _PT;
+    return *_PT;
 }
 
 GridNet& Pin::get_net() const {
@@ -40,19 +56,19 @@ GridNet& Pin::get_net() const {
 }
 
 Cell& Pin::get_cell() const {
-    return _cell;
+    return *_cell;
 }
 
 unsigned Pin::getRow() const {
-    return _cell.getRow();
+    return _cell->getRow();
 }
 
 unsigned Pin::getColumn() const {
-    return _cell.getColumn();
+    return _cell->getColumn();
 }
 
 int Pin::getLayer() const {
-    return _PT.getLayer();
+    return _PT->getLayer();
 }
 
 // Net
@@ -60,7 +76,7 @@ GridNet::GridNet(const std::string NetName,
                  unsigned id,
                  unsigned PinNum,
                  unsigned layer)
-    : _NetName(NetName), _Id(id), _layer(layer) {
+    : _NetName(NetName), _Id(id), _minLayer(layer) {
     _pins.reserve(PinNum);
 }
 

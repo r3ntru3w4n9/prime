@@ -256,9 +256,9 @@ void PrimeMan::readFile(std::fstream& input) {
     assert(str == "NumRoutes");
     input >> count;  // <routeSegmentCount>
     for (int i = 0; i < count; ++i) {
-        input >> srow >> scol >> slay >> erow >> ecol >> elay >>
-            str;  // <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx>
-                  // <netName>
+        input >> srow >> scol >> slay >> erow >> ecol >> elay >> str;
+        // <sRowIdx> <sColIdx> <sLayIdx> <eRowIdx> <eColIdx> <eLayIdx> <netName>
+
         // assert(_Net2Idx.count(str) == 1);
         // assert(_Net2Idx.contains(str));
         GridNet* net = _nets[_Net2Idx.at(str)];

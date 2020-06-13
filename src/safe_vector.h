@@ -1,8 +1,6 @@
-/*
- *    Copyright (C) 2020 Ren-Chu Wang, All Rights Reserved
- *    Unauthorized copying of this file, via any medium is strictly prohibited
- *    Proprietary and confidential
- */
+// * Copyright (C) Ren-Chu Wang - All Rights Reserved
+// * Unauthorized copying of this file, via any medium is strictly prohibited
+// * Proprietary and confidential
 
 #pragma once
 
@@ -36,6 +34,7 @@ class vector {
 
     void resize(size_t new_size) { field.resize(new_size); }
     size_t size() const { return field.size(); }
+    size_t capacity() const { return field.capacity(); }
 
     void push_back(T& value) { field.push_back(value); }
     void push_back(T&& value) { field.push_back(std::move(value)); }

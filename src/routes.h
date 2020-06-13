@@ -4,5 +4,10 @@
 
 #pragma once
 
-#include "safe_unordered_map.h"
-#include "safe_vector.h"
+#include "Grid.h"
+
+// TODO handles different routing topologies
+
+enum class RouteType { LShape, ZShape, MazeRoute };
+
+// handles L shape routings
