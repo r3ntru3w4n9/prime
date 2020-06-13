@@ -91,7 +91,7 @@ unsigned GridNet::getId() const {
 }
 
 unsigned GridNet::getMinlayer() const {
-    return _layer;
+    return _minLayer;
 }
 
 size_t GridNet::getNumPin() const {

@@ -18,8 +18,25 @@
 #include "safe.h"
 
 ////////////////////////////////////////////////////////////////////////
-///                          PARAMETERS                              ///
+///                          DESCRIPTION                             ///
 ////////////////////////////////////////////////////////////////////////
+
+/* Cell : 
+ *      It is the class that describes a cell. It contains the following
+ *  datas, master cell type, row, column, and its pins. Also, you can
+ *  also look up if the cell is movable by calling movable().
+ *  
+ * Pin :
+ *      It is the class that describes a pin. It contains the information
+ *  about its pin type, the cell it belongs to, and the net it belongs to.
+ *  You don't need to update the position of a pin because you can get 
+ *  its position with the cell and the net it belongs to.
+ *  
+ * Net :
+ *      The structure of a GridNet is not yet determined. However, the
+ *  basic structure still exists. It contains the segments of the route
+ *  and the pins. It also contains the ||MIN LAYER ROUTING CONSTRAINT||.
+*/
 
 ////////////////////////////////////////////////////////////////////////
 ///                           CLASSES                                ///
@@ -75,7 +92,7 @@ class GridNet {
    private:
     const std::string _NetName;
     const unsigned _Id;
-    const unsigned _layer;
+    const unsigned _minLayer;
     safe::vector<Pin*> _pins;
     safe::vector<unsigned> _segments;  // srow, scol, slay, erow, ecol, elay
 };
