@@ -103,9 +103,9 @@ class TreeNet {
     }
 
     // void add_segments(const safe::vector<Segment>& segments) {
-    //     // TODO
-    //     // haven't worked out the details.
-    //     // ? Use union-find to merge the segments and initialize the tree?
+    // TODO
+    // haven't worked out the details.
+    // ? Use union-find to merge the segments and initialize the tree?
     // }
 
     size_t size() const { return connected.size(); }

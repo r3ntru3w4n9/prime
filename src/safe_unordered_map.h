@@ -29,6 +29,8 @@ class unordered_map {
     }
 
     void reserve(size_t capacity) { field.reserve(capacity); }
+    bool empty() const { return field.empty(); }
+    void clear() { field.clear(); }
 
     void rehash(size_t new_size) { field.rehash(new_size); }
     size_t size() const { return field.size(); }

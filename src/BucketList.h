@@ -25,6 +25,8 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
+// FIXME raw pointers everywhere
+
 class Node {
    public:
     // Constructor and destructor

@@ -48,27 +48,30 @@ void Pin::setNet(GridNet* net) {
 }
 
 PinType& Pin::getPinType() const {
+    assert(_PT != nullptr);
     return *_PT;
 }
 
 GridNet& Pin::get_net() const {
+    assert(_net != nullptr);
     return *_net;
 }
 
 Cell& Pin::get_cell() const {
+    assert(_cell != nullptr);
     return *_cell;
 }
 
 unsigned Pin::getRow() const {
-    return _cell->getRow();
+    return get_cell().getRow();
 }
 
 unsigned Pin::getColumn() const {
-    return _cell->getColumn();
+    return get_cell().getColumn();
 }
 
 int Pin::getLayer() const {
-    return _PT->getLayer();
+    return getPinType().getLayer();
 }
 
 // Net

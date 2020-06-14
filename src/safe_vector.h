@@ -35,6 +35,8 @@ class vector {
     void resize(size_t new_size) { field.resize(new_size); }
     size_t size() const { return field.size(); }
     size_t capacity() const { return field.capacity(); }
+    bool empty() const { return field.empty(); }
+    void clear() { field.clear(); }
 
     void push_back(T& value) { field.push_back(value); }
     void push_back(T&& value) { field.push_back(std::move(value)); }
