@@ -21,21 +21,24 @@
 ///                          DESCRIPTION                             ///
 ////////////////////////////////////////////////////////////////////////
 
-/* Layer :
+// TODO enum class Direction
+
+/*
+ * Layer :
  *       Its main purpose is to manage the grids on this layer and the
  *    routing direction. So remember to look up the routing direction
  *    before routing.
- * 
+ *
  * Coordinate :
  *       Its main purpose is to manage the "add" and "remove" of cells.
  *    If you're routing, you probably don't need this class.
- * 
+ *
  * Grid :
  *       Although the class has a lot of data members, the only situation
  *    when you need this is when you "remove" or "add" a wire from or
  *    into the Grid. Otherwise, the data members are well managed by
  *    other classes.
-*/
+ */
 
 ////////////////////////////////////////////////////////////////////////
 ///                           CLASSES                                ///

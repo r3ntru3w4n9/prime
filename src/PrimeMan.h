@@ -24,7 +24,8 @@
 ///                          DESCRIPTION                             ///
 ////////////////////////////////////////////////////////////////////////
 
-/* Which ".h" files does the classes belong to?
+/*
+ * Which ".h" files does the classes belong to?
  * Cell.h : GridNet, Cell, Pin
  * Grid.h : Layer, Coordinate, Grid
  * MasterCell.h : PinType, BlockageType(probably useless), MasterCellType
@@ -36,8 +37,9 @@
  *    Layer : getLayer()
  *    Grid : getGrid()
  *    Pin : getCell() first and then getPin() from the Cell
- *          getNet first and then getPin() from the Net.
+ *          getNet() first and then getPin() from the Net.
  *
+ ! FIXME does not apply to all Net classes
  * 2. How to get the route of a Net :
  *    Get a Pin from the Net then traverse through the Grids by
  *    searching if the Net is in the adjacent Grids from the pin and
@@ -54,7 +56,7 @@
  *    c. Get the Coordinate of the original position and use
  *       Coordinate::moveCell().
  *    d. Get the new Coordinate and use Coordinate::addCell().
- *    e. Call PrimeMan::MoveCell().
+ *    e. Call PrimeMan::moveCell().
  *
  * Q&A : (If you have any question, please directly add the question in
  *        this Q&A and make a sign in the commit message. Then I'll
@@ -65,7 +67,6 @@
  *    can get the cost if you remove a cell from it or add a cell into
  *    it.
  */
-
 ////////////////////////////////////////////////////////////////////////
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////

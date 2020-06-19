@@ -2,29 +2,41 @@
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
+// TODO handle union find and merging tree
+// Merging Tree Node
+
 #pragma once
 
-#include <iostream>
-#include <memory>
-#include <sstream>
+#include "Node.h"
 
-// TODO handle union find and merging tree
-
-// Merging Tree Node
+// ? inheritance vs new type pattern
 template <typename T>
-class Node {
+class UnionFindNode {
    public:
     // constructor
-    Node(T&& data) : data(std::move(data)), left(nullptr), right(nullptr) {}
-    Node(T&& data, Node& left, Node& right)
-        : data(std::move(data)), left(&left), right(&right) {}
-    ~Node() {
-        delete left;
-        delete right;
-    }
+    UnionFindNode(Node&& n) : node : (std::move(n){}) {}
+
+    // operator=
+    UnionFindNode(UnionFindNode&& ufn) { node = std::move(ufn.node); }
+
+    // attribute
+    bool has_parent() const { return node.has_parent(); }
+    bool has_left() const { return node.has_left(); }
+    bool has_right() const { return node.has_right(); }
+
+    // getter
+    UnionFindNode& parent() { return UnionFindNode }
 
    private:
-    // fields
-    T data;
-    Node *left, *right;
+    Node<T> node;
 };
+
+template <typename T>
+Node<T>& find(UnionFindNode<T>& node) {
+    if (node.has_parent()) {
+        Node& parent = node.parent();
+        node.parent(find(parent));
+    } else {
+        return node;
+    }
+}

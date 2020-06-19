@@ -103,6 +103,8 @@ class GridNet {
     const unsigned _minLayer;
 
     safe::vector<Pin*> _pins;
+
+    // ! TODO deprecate this
     safe::vector<unsigned> _segments;  // srow, scol, slay, erow, ecol, elay
 };
 
