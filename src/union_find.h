@@ -7,36 +7,44 @@
 
 #pragma once
 
-#include "Node.h"
+#include <assert.h>
 
-// ? inheritance vs new type pattern
+#include <memory>
+
+#include "Node.h"
+#include "safe.h"
+
 template <typename T>
-class UnionFindNode {
+class UnionFindTree {
    public:
     // constructor
-    UnionFindNode(Node&& n) : node : (std::move(n){}) {}
+    UnionFindTree(safe::vector<T>&& data_list) noexcept
+        : data(std::move(data_list)) {
+        nodes = safe::vector<TreeNode>();
+        nodes.reserve(data.size());
+        for (unsigned i = 0; i < data.size(); ++i) {
+            nodes.push_back(TreeNode((unsigned)i));
+        }
+    }
+    UnionFindTree(UnionFindTree&& tn) noexcept
+        : nodes(std::move(tn.nodes)), data(std::move(tn.data)) {}
 
     // operator=
-    UnionFindNode(UnionFindNode&& ufn) { node = std::move(ufn.node); }
+    UnionFindTree& operator=(UnionFindTree&& tn) {
+        nodes = std::move(tn.nodes);
+        data = std::move(tn.data);
 
-    // attribute
-    bool has_parent() const { return node.has_parent(); }
-    bool has_left() const { return node.has_left(); }
-    bool has_right() const { return node.has_right(); }
+        return *this;
+    }
 
-    // getter
-    UnionFindNode& parent() { return UnionFindNode }
+    const T& operator[](size_t idx) const { return data[idx]; }
+    T& operator[](size_t idx) { return data[idx]; }
+
+    const T& at(size_t idx) const { return (*this)[idx]; }
+    T& at(size_t idx) { return (*this)[idx]; }
 
    private:
-    Node<T> node;
+    // fields
+    safe::vector<TreeNode> nodes;
+    safe::vector<T> data;
 };
-
-template <typename T>
-Node<T>& find(UnionFindNode<T>& node) {
-    if (node.has_parent()) {
-        Node& parent = node.parent();
-        node.parent(find(parent));
-    } else {
-        return node;
-    }
-}

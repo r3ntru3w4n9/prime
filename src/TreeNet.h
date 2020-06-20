@@ -17,7 +17,7 @@
 
 class Point {
    public:
-    Point(unsigned x, unsigned y, unsigned z);
+    Point(unsigned x, unsigned y, unsigned z) noexcept;
 
     // getters
     unsigned x() const;
@@ -42,8 +42,8 @@ class Segment {
             unsigned s_z,
             unsigned t_x,
             unsigned t_y,
-            unsigned t_z);
-    Segment(Point&& p1, Point&& p2);
+            unsigned t_z) noexcept;
+    Segment(Point&& p1, Point&& p2) noexcept;
 
     // getters
     const Point& source() const;
@@ -60,37 +60,37 @@ class Segment {
     Point src, tgt;
 };
 
-class TreeNet {
-   public:
-    // constructor
-    TreeNet(std::string&& name,
-            unsigned id,
-            unsigned num_pins,
-            unsigned min_layer);
-    TreeNet(TreeNet&& tn);
-    // destructor
-    ~TreeNet();
+// class TreeNet {
+//    public:
+//     // constructor
+//     TreeNet(std::string&& name,
+//             unsigned id,
+//             unsigned num_pins,
+//             unsigned min_layer);
+//     TreeNet(TreeNet&& tn);
+//     // destructor
+//     ~TreeNet();
 
-    // operator=
-    TreeNet& operator=(TreeNet&& tn);
+//     // operator=
+//     TreeNet& operator=(TreeNet&& tn);
 
-    void add_pin(Pin&& pin);
-    // void add_segments(const safe::vector<Segment>& segments) {
-    // TODO
-    // haven't worked out the details.
-    // ? Use union-find to merge the segments and initialize the tree?
-    // }
+//     void add_pin(Pin&& pin);
+//     // void add_segments(const safe::vector<Segment>& segments) {
+//     // TODO
+//     // haven't worked out the details.
+//     // ? Use union-find to merge the segments and initialize the tree?
+//     // }
 
-    size_t size() const { return connected.size(); }
+//     size_t size() const { return connected.size(); }
 
-   private:
-    std::string net_name;
-    unsigned net_id;
-    unsigned min_layer;
+//    private:
+//     std::string net_name;
+//     unsigned net_id;
+//     unsigned min_layer;
 
-    safe::vector<Pin> connected;
+//     safe::vector<Pin> connected;
 
-    // TODO this is not the final type
-    Node<Segment>* tree_root;
-    unsigned tree_size;
-};
+//     // TODO this is not the final type
+//     TreeNode<Segment>* tree_root;
+//     unsigned tree_size;
+// };

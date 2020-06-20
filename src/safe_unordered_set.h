@@ -17,15 +17,15 @@ namespace safe {
 template <typename T>
 class unordered_set {
    public:
-    unordered_set() : field(std::unordered_set<T>()) {}
-    unordered_set(const unordered_set& set) : field(set.field) {}
-    unordered_set(unordered_set&& set) : field(std::move(set.field)) {}
+    unordered_set() noexcept : field(std::unordered_set<T>()) {}
+    unordered_set(const unordered_set& set) noexcept : field(set.field) {}
+    unordered_set(unordered_set&& set) noexcept : field(std::move(set.field)) {}
 
-    unordered_set& operator=(const unordered_set& set) {
+    unordered_set& operator=(const unordered_set& set) noexcept {
         field = set.field;
         return *this;
     }
-    unordered_set& operator=(unordered_set&& set) {
+    unordered_set& operator=(unordered_set&& set) noexcept {
         field = std::move(set.field);
         return *this;
     }

@@ -130,7 +130,7 @@ class PrimeMan {
     safe::vector<GridNet*> _grid_nets;
 
     // ! substituted
-    safe::vector<TreeNet> _tree_nets;
+    // safe::vector<TreeNet> _tree_nets;
 
     safe::vector<unsigned> _movedCells;
 

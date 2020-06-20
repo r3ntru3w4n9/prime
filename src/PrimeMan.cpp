@@ -238,8 +238,8 @@ void PrimeMan::readFile(std::fstream& input) {
         _grid_nets.push_back(grid_net);
 
         // ! substituted
-        TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
-        _tree_nets.push_back(std::move(tree_net));
+        // TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
+        // _tree_nets.push_back(std::move(tree_net));
 
         std::string inst, masterPin;
         std::string delimiter = "/";
@@ -285,7 +285,7 @@ void PrimeMan::readFile(std::fstream& input) {
                                         ecol - _columnBase, elay - 1));
     }
 
-    safe::unordered_map<std::string, TreeNet> all_nets;
+    // safe::unordered_map<std::string, TreeNet> all_nets;
 }
 
 PrimeMan::~PrimeMan() {

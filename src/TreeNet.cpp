@@ -6,7 +6,7 @@
 
 #include <memory>
 
-Point::Point(unsigned x, unsigned y, unsigned z) : i(x), j(y), k(z) {}
+Point::Point(unsigned x, unsigned y, unsigned z) noexcept : i(x), j(y), k(z) {}
 
 unsigned Point::x() const {
     return i;
@@ -37,11 +37,11 @@ Segment::Segment(unsigned s_x,
                  unsigned s_z,
                  unsigned t_x,
                  unsigned t_y,
-                 unsigned t_z)
+                 unsigned t_z) noexcept
     : src(std::move(Point(s_x, s_y, s_z))),
       tgt(std::move(Point(t_x, t_y, t_z))) {}
 
-Segment::Segment(Point&& p1, Point&& p2)
+Segment::Segment(Point&& p1, Point&& p2) noexcept
     : src(std::move(p1)), tgt(std::move(p2)) {}
 
 const Point& Segment::source() const {
@@ -68,47 +68,47 @@ void Segment::target(Point&& point) {
     tgt = std::move(point);
 }
 
-TreeNet::TreeNet(std::string&& name,
-                 unsigned id,
-                 unsigned num_pins,
-                 unsigned min_layer)
-    : net_name(std::move(name)), net_id(id), min_layer(min_layer) {
-    connected.reserve(num_pins);
-}
+// TreeNet::TreeNet(std::string&& name,
+//                  unsigned id,
+//                  unsigned num_pins,
+//                  unsigned min_layer)
+//     : net_name(std::move(name)), net_id(id), min_layer(min_layer) {
+//     connected.reserve(num_pins);
+// }
 
-TreeNet::TreeNet(TreeNet&& tn)
-    : net_name(std::move(tn.net_name)),
-      net_id(tn.net_id),
-      min_layer(tn.min_layer),
-      connected(std::move(tn.connected)),
-      tree_root(tn.tree_root),
-      tree_size(tn.tree_size) {
-    if (size()) {
-        assert(tree_root != nullptr);
-    }
-    tn.tree_root = nullptr;
-}
+// TreeNet::TreeNet(TreeNet&& tn)
+//     : net_name(std::move(tn.net_name)),
+//       net_id(tn.net_id),
+//       min_layer(tn.min_layer),
+//       connected(std::move(tn.connected)),
+//       tree_root(tn.tree_root),
+//       tree_size(tn.tree_size) {
+//     if (size()) {
+//         assert(tree_root != nullptr);
+//     }
+//     tn.tree_root = nullptr;
+// }
 
-TreeNet::~TreeNet() {
-    delete tree_root;
-}
+// TreeNet::~TreeNet() {
+//     delete tree_root;
+// }
 
-TreeNet& TreeNet::operator=(TreeNet&& tn) {
-    net_name = std::move(tn.net_name);
-    net_id = tn.net_id;
-    min_layer = tn.min_layer;
+// TreeNet& TreeNet::operator=(TreeNet&& tn) {
+//     net_name = std::move(tn.net_name);
+//     net_id = tn.net_id;
+//     min_layer = tn.min_layer;
 
-    connected = std::move(tn.connected);
+//     connected = std::move(tn.connected);
 
-    tree_root = tn.tree_root;
-    tree_size = tn.tree_size;
+//     tree_root = tn.tree_root;
+//     tree_size = tn.tree_size;
 
-    tn.tree_root = nullptr;
+//     tn.tree_root = nullptr;
 
-    return *this;
-}
+//     return *this;
+// }
 
-void TreeNet::add_pin(Pin&& pin) {
-    assert(connected.size() < connected.capacity());
-    connected.push_back(std::move(pin));
-}
+// void TreeNet::add_pin(Pin&& pin) {
+//     assert(connected.size() < connected.capacity());
+//     connected.push_back(std::move(pin));
+// }

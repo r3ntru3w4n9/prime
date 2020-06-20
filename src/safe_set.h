@@ -17,15 +17,15 @@ namespace safe {
 template <typename T>
 class set {
    public:
-    set() : field(std::set<T>()) {}
-    set(const set& set) : field(set.field) {}
-    set(set&& set) : field(std::move(set.field)) {}
+    set() noexcept : field(std::set<T>()) {}
+    set(const set& set) noexcept : field(set.field) {}
+    set(set&& set) noexcept : field(std::move(set.field)) {}
 
-    set& operator=(const set& set) {
+    set& operator=(const set& set) noexcept {
         field = set.field;
         return *this;
     }
-    set& operator=(set&& set) {
+    set& operator=(set&& set) noexcept {
         field = std::move(set.field);
         return *this;
     }

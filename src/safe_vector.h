@@ -17,15 +17,15 @@ namespace safe {
 template <typename T>
 class vector {
    public:
-    vector() : field(std::vector<T>()) {}
-    vector(const vector& vec) : field(vec.field) {}
-    vector(vector&& vec) : field(std::move(vec.field)) {}
+    vector() noexcept : field(std::vector<T>()) {}
+    vector(const vector& vec) noexcept : field(vec.field) {}
+    vector(vector&& vec) noexcept : field(std::move(vec.field)) {}
 
-    vector& operator=(const vector& vec) {
+    vector& operator=(const vector& vec) noexcept {
         field = vec.field;
         return *this;
     }
-    vector& operator=(vector&& vec) {
+    vector& operator=(vector&& vec) noexcept {
         field = std::move(vec.field);
         return *this;
     }

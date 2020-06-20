@@ -16,15 +16,15 @@ namespace safe {
 template <typename K, typename V>
 class map {
    public:
-    map() : field(std::map<K, V>()) {}
-    map(const map& hashmap) : field(hashmap.field) {}
-    map(map&& hashmap) : field(std::move(hashmap.field)) {}
+    map() noexcept : field(std::map<K, V>()) {}
+    map(const map& hashmap) noexcept : field(hashmap.field) {}
+    map(map&& hashmap) noexcept : field(std::move(hashmap.field)) {}
 
-    map& operator=(const map& hashmap) {
+    map& operator=(const map& hashmap) noexcept {
         field = hashmap.field;
         return *this;
     }
-    map& operator=(map&& hashmap) {
+    map& operator=(map&& hashmap) noexcept {
         field = std::move(hashmap.field);
         return *this;
     }
