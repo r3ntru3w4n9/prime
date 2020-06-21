@@ -14,12 +14,19 @@
 // * Tree uses its left child and right child
 class TreeNode {
    public:
+    // constructor
     TreeNode() noexcept;
-    TreeNode(unsigned self) noexcept;
+    TreeNode(unsigned idx) noexcept;
     TreeNode(unsigned self,
              unsigned parent,
              unsigned left,
              unsigned right) noexcept;
+    TreeNode(const TreeNode& tn) noexcept;
+    TreeNode(TreeNode&& tn) noexcept;
+
+    // operator=
+    TreeNode& operator=(const TreeNode& tn) noexcept;
+    TreeNode& operator=(TreeNode&& tn) noexcept;
 
     bool has_self() const;
     bool has_parent() const;

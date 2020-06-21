@@ -8,14 +8,56 @@
 
 TreeNode::TreeNode() noexcept : slf(-1), par(-1), lft(-1), rgt(-1) {}
 
-TreeNode::TreeNode(unsigned self) noexcept
-    : slf((int)self), par(-1), lft(-1), rgt(-1) {}
+TreeNode::TreeNode(unsigned idx) noexcept
+    : slf((int)idx), par((int)idx), lft(-1), rgt(-1) {}
 
 TreeNode::TreeNode(unsigned self,
                    unsigned parent,
                    unsigned left,
                    unsigned right) noexcept
     : slf((int)self), par((int)parent), lft((int)left), rgt((int)right) {}
+
+TreeNode::TreeNode(const TreeNode& tn) noexcept {
+    slf = tn.slf;
+    par = tn.par;
+    lft = tn.lft;
+    rgt = tn.rgt;
+}
+
+TreeNode::TreeNode(TreeNode&& tn) noexcept {
+    slf = tn.slf;
+    par = tn.par;
+    lft = tn.lft;
+    rgt = tn.rgt;
+
+    tn.slf = 0;
+    tn.par = 0;
+    tn.lft = 0;
+    tn.rgt = 0;
+}
+
+TreeNode& TreeNode::operator=(const TreeNode& tn) noexcept {
+    slf = tn.slf;
+    par = tn.par;
+    lft = tn.lft;
+    rgt = tn.rgt;
+
+    return *this;
+}
+
+TreeNode& TreeNode::operator=(TreeNode&& tn) noexcept {
+    slf = tn.slf;
+    par = tn.par;
+    lft = tn.lft;
+    rgt = tn.rgt;
+
+    tn.slf = 0;
+    tn.par = 0;
+    tn.lft = 0;
+    tn.rgt = 0;
+
+    return *this;
+}
 
 bool TreeNode::has_self() const {
     return slf >= 0;
