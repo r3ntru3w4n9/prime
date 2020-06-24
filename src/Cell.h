@@ -83,7 +83,7 @@ class GridNet {
             unsigned id,
             unsigned PinNum,
             unsigned layer) noexcept;
-    GridNet(GridNet&) noexcept;
+    GridNet(const GridNet& g) noexcept;
 
     // modifier
     void addPin(Pin* pin); // you don't need this

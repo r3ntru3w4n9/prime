@@ -4,6 +4,8 @@
 
 #pragma once
 
+
+#include "safe_assert.h"
 #include "safe_map.h"
 #include "safe_set.h"
 #include "safe_unordered_map.h"

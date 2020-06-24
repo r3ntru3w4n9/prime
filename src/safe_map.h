@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <assert.h>
-
 #include <iostream>
 #include <map>
 #include <memory>
 #include <sstream>
+
+#include "safe_assert.h"
 
 namespace safe {
 
@@ -40,16 +40,16 @@ class map {
     V& operator[](const K& key) { return field[key]; }
 
     const V& at(const K& key) const {
-        assert(contains(key));
+        safe::assert(contains(key));
         return field[key];
     }
     V& at(const K& key) {
-        assert(contains(key));
+        safe::assert(contains(key));
         return field[key];
     }
 
     size_t erase(const K& key) {
-        assert(contains(key));
+        safe::assert(contains(key));
         return field.erase(key);
     }
 

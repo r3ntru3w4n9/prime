@@ -1,7 +1,7 @@
-#include <safe_assert.h>
+#include <safe_safe::assert.h>
 
 void some_function() {
-    safe::assert(0);
+    safe::safe::assert(0);
 }
 
 int main(int argc, char const* argv[]) {

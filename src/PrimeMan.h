@@ -127,7 +127,7 @@ class PrimeMan {
     safe::vector<Cell> _cells;
 
     // ! deprecated
-    safe::vector<GridNet*> _grid_nets;
+    safe::vector<GridNet> _grid_nets;
 
     // ! substituted
     // safe::vector<TreeNet> _tree_nets;
@@ -145,7 +145,7 @@ class PrimeMan {
                      int erow,
                      int ecol,
                      int elay,
-                     GridNet* net);
+                     GridNet& net);
     void outputRoute(std::fstream& output);
     void maxNetDegree() const;
 };

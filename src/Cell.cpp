@@ -14,6 +14,8 @@
 
 #include "Cell.h"
 
+
+
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
 ////////////////////////////////////////////////////////////////////////
@@ -48,17 +50,17 @@ void Pin::setNet(GridNet* net) {
 }
 
 PinType& Pin::getPinType() const {
-    assert(_PT != nullptr);
+    safe::assert(_PT != nullptr);
     return *_PT;
 }
 
 GridNet& Pin::get_net() const {
-    assert(_net != nullptr);
+    safe::assert(_net != nullptr);
     return *_net;
 }
 
 Cell& Pin::get_cell() const {
-    assert(_cell != nullptr);
+    safe::assert(_cell != nullptr);
     return *_cell;
 }
 
@@ -83,10 +85,12 @@ GridNet::GridNet(const std::string NetName,
     _pins.reserve(PinNum);
 }
 
-GridNet::GridNet(GridNet& a) noexcept 
-    : _NetName(a._NetName), _Id(a._Id), _minLayer(a._minLayer), _pins(a._pins), _segments(a._segments) {
-
-}
+GridNet::GridNet(const GridNet& g) noexcept
+    : _NetName(g._NetName),
+      _Id(g._Id),
+      _minLayer(g._minLayer),
+      _pins(g._pins),
+      _segments(g._segments) {}
 
 void GridNet::addPin(Pin* pin) {
     _pins.push_back(pin);
@@ -144,7 +148,7 @@ Cell::Cell(const std::string CellName,
       _Id(id),
       _movable(movable),
       _moved(false) {
-    assert(_MCT != nullptr);
+    safe::assert(_MCT != nullptr);
 
     size_t p = getMasterCell().getNumPins();
     _pins.reserve(p);
@@ -212,12 +216,12 @@ unsigned Cell::getId() const {
 }
 
 const MasterCellType& Cell::getMasterCell() const {
-    assert(_MCT != nullptr);
+    safe::assert(_MCT != nullptr);
     return *_MCT;
 }
 
 MasterCellType& Cell::getMasterCell() {
-    assert(_MCT != nullptr);
+    safe::assert(_MCT != nullptr);
     return *_MCT;
 }
 

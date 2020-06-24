@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <assert.h>
+
 
 #include <memory>
 
@@ -66,7 +66,7 @@ class Tree {
     T& at(size_t idx) { return datum(idx); }
 
     void push(T&& dat) {
-        assert(nodes.size() == data.size());
+        safe::assert(nodes.size() == data.size());
         const unsigned size = nodes.size();
         nodes.push_back(std::move(TreeNode(size)));
         data.push_back(std::move(dat));
