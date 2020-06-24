@@ -78,7 +78,7 @@ class Coordinate {
     // modifier
     void addAdjH(Coordinate* c1, Coordinate* c2);  // you don't need this
     void addGrid(Grid* g);                         // you don't need this
-    bool CanAddCell(Cell& cell);  // to see if you can add this cell
+    bool CanAddCell(Cell& cell) const;  // to see if you can add this cell
     void addCell(Cell& cell);
     void moveCell(Cell& cell);
 
@@ -106,8 +106,6 @@ class Grid {
     void assignCoordinate(Coordinate* c);
     void incSupply(int d);
     void decSupply(int d);
-    bool addDemand(int n);
-    bool moveDemand(int n);
     void addNet(GridNet& net);
     bool canGetNet(GridNet& net);
     GridNet* getNet(unsigned i);

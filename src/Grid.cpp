@@ -79,17 +79,10 @@ void Coordinate::addGrid(Grid* g) {
     _grids.push_back(g);
 }
 
-bool Coordinate::CanAddCell(Cell& cell) {
+bool Coordinate::CanAddCell(Cell& cell) const {
     unsigned id = cell.getMasterCellId();
-    unsigned n;
-    if (_MCT2Num.contains(id)) {
-        assert(_MCT2Num[id] >= 1);
-        n = ++_MCT2Num[id];
-    } else {
-        n = 1;
-        _MCT2Num[id] = 1;
-    }
-    for (int i = 0; i < _grids.size(); ++i) {
+    const unsigned n = _MCT2Num[id];
+    for (int i = 0, m = _grids.size(); i < m; ++i) {
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
         safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
@@ -97,28 +90,39 @@ bool Coordinate::CanAddCell(Cell& cell) {
         safe::vector<int>& adjHGridDemand = cell.getadjHGridDemand(i);
         assert(sameGridMC.size() == sameGridDemand.size());
         assert(adjHGridMC.size() == adjHGridDemand.size());
-        for (int j = 0; j < sameGridMC.size(); ++j) {
+        for (int j = 0, o = sameGridMC.size(); j < o; ++j) {
             if (n <= _MCT2Num[sameGridMC[j]]) {
                 d += sameGridDemand[j];
             }
         }
-        for (int j = 0; j < adjHGridMC.size(); ++j) {
+        for (int j = 0, o = adjHGridMC.size(); j < o; ++j) {
             int k = adjHGridDemand[j];
             if (_c1) {
-                if (n <= _c1->_MCT2Num[adjHGridMC[j]]) {
-                    d += k;
-                    _c1->_grids[i]->addDemand(k);
+                if (n <= _c1->_MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= _c1->_MCT2Num[adjHGridMC[j]]) {
+                        if (_c1->_grids[i]->getSupply() < k) {
+                            return false;
+                        }
+                        d += k;
+                    }
                 }
             }
             if (_c2) {
-                if (n <= _c2->_MCT2Num[adjHGridMC[j]]) {
-                    d += adjHGridDemand[j];
-                    _c2->_grids[i]->addDemand(k);
+                if (n <= _c2->_MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= _c2->_MCT2Num[adjHGridMC[j]]) {
+                        if (_c2->_grids[i]->getSupply() < k) {
+                            return false;
+                        }
+                        d += k;
+                    }
                 }
             }
         }
-        _grids[i]->addDemand(d);
+        if (_grids[i]->getSupply() < d) {
+            return false;
+        }
     }
+    return true;
 }
 
 void Coordinate::addCell(Cell& cell) {
@@ -131,7 +135,7 @@ void Coordinate::addCell(Cell& cell) {
         n = 1;
         _MCT2Num[id] = 1;
     }
-    for (int i = 0; i < _grids.size(); ++i) {
+    for (int i = 0, m = _grids.size(); i < m; ++i) {
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
         safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
@@ -139,31 +143,68 @@ void Coordinate::addCell(Cell& cell) {
         safe::vector<int>& adjHGridDemand = cell.getadjHGridDemand(i);
         assert(sameGridMC.size() == sameGridDemand.size());
         assert(adjHGridMC.size() == adjHGridDemand.size());
-        for (int j = 0; j < sameGridMC.size(); ++j) {
+        for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
             if (n <= _MCT2Num[sameGridMC[j]]) {
                 d += sameGridDemand[j];
             }
         }
-        for (int j = 0; j < adjHGridMC.size(); ++j) {
+        for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
             int k = adjHGridDemand[j];
             if (_c1) {
                 if (n <= _c1->_MCT2Num[adjHGridMC[j]]) {
                     d += k;
-                    _c1->_grids[i]->addDemand(k);
+                    _c1->_grids[i]->decSupply(k);
                 }
             }
             if (_c2) {
                 if (n <= _c2->_MCT2Num[adjHGridMC[j]]) {
-                    d += adjHGridDemand[j];
-                    _c2->_grids[i]->addDemand(k);
+                    d += k;
+                    _c2->_grids[i]->decSupply(k);
                 }
             }
         }
-        _grids[i]->addDemand(d);
+        _grids[i]->decSupply(d);
     }
 }
 
-void Coordinate::moveCell(Cell& cell) {}
+void Coordinate::moveCell(Cell& cell) {
+    unsigned id = cell.getMasterCellId();
+    assert(_MCT2Num.contains(id));
+    unsigned n = --_MCT2Num[id];
+    if (n == 0) {
+        _MCT2Num.erase(id);
+    }
+    for (int i = 0, m = _grids.size(); i < m; ++i) {
+        int d = cell.getLayerDemand(i);
+        safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
+        safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
+        safe::vector<unsigned>& adjHGridMC = cell.getadjHGridMC(i);
+        safe::vector<int>& adjHGridDemand = cell.getadjHGridDemand(i);
+        assert(sameGridMC.size() == sameGridDemand.size());
+        assert(adjHGridMC.size() == adjHGridDemand.size());
+        for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
+            if (n < _MCT2Num[sameGridMC[j]]) {
+                d += sameGridDemand[j];
+            }
+        }
+        for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
+            int k = adjHGridDemand[j];
+            if (_c1) {
+                if (n < _c1->_MCT2Num[adjHGridMC[j]]) {
+                    d += k;
+                    _c1->_grids[i]->incSupply(k);
+                }
+            }
+            if (_c2) {
+                if (n <= _c2->_MCT2Num[adjHGridMC[j]]) {
+                    d += k;
+                    _c2->_grids[i]->incSupply(k);
+                }
+            }
+        }
+        _grids[i]->incSupply(d);
+    }
+}
 
 Grid& Coordinate::getGrid(size_t i) {
     return *_grids[i];
