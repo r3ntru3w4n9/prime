@@ -82,10 +82,11 @@ class GridNet {
     GridNet(const std::string NetName,
             unsigned id,
             unsigned PinNum,
-            unsigned layer);
+            unsigned layer) noexcept;
+    GridNet(GridNet&) noexcept;
 
     // modifier
-    void addPin(Pin* pin);
+    void addPin(Pin* pin); // you don't need this
     void addSegment(int srow, int scol, int slay, int erow, int ecol, int elay);
 
     // accesser

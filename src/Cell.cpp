@@ -78,9 +78,14 @@ int Pin::getLayer() const {
 GridNet::GridNet(const std::string NetName,
                  unsigned id,
                  unsigned PinNum,
-                 unsigned layer)
+                 unsigned layer) noexcept
     : _NetName(NetName), _Id(id), _minLayer(layer) {
     _pins.reserve(PinNum);
+}
+
+GridNet::GridNet(GridNet& a) noexcept 
+    : _NetName(a._NetName), _Id(a._Id), _minLayer(a._minLayer), _pins(a._pins), _segments(a._segments) {
+
 }
 
 void GridNet::addPin(Pin* pin) {
