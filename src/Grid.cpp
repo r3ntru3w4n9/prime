@@ -81,7 +81,13 @@ void Coordinate::addGrid(Grid* g) {
 
 bool Coordinate::CanAddCell(Cell& cell) const {
     unsigned id = cell.getMasterCellId();
-    const unsigned n = _MCT2Num[id];
+    unsigned n;
+    if (_MCT2Num.contains(id)) {
+        assert(_MCT2Num[id] >= 1);
+        n = _MCT2Num[id] + 1;
+    } else {
+        n = 1;
+    }
     for (int i = 0, m = _grids.size(); i < m; ++i) {
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
