@@ -75,7 +75,6 @@ class Pin {
     GridNet* _net;
 };
 
-// ! deprecated
 class GridNet {
    public:
     // Constructors(no copy constructor)

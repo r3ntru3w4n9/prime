@@ -235,7 +235,6 @@ void PrimeMan::readFile(std::fstream& input) {
             minLay = _Layer2Idx[buf];
         }
 
-        // ! deprecated
         _grid_nets.push_back(GridNet(str, i, numPins, minLay));
 
         // ! substituted
@@ -275,7 +274,6 @@ void PrimeMan::readFile(std::fstream& input) {
         // safe::assert(_Net2Idx.contains(str));
         safe::assert(slay >= 1 && elay >= 1);
 
-        // ! deprecated
         GridNet& net = _grid_nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);

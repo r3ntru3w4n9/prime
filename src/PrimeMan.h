@@ -126,7 +126,7 @@ class PrimeMan {
     safe::vector<MasterCellType> _MasterCells;
     safe::vector<Cell> _cells;
 
-    // ! deprecated
+    // ! 
     safe::vector<GridNet> _grid_nets;
 
     // ! substituted
