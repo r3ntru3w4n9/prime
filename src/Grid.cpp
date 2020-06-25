@@ -98,8 +98,10 @@ bool Coordinate::CanAddCell(Cell& cell) const {
         assert(sameGridMC.size() == sameGridDemand.size());
         assert(adjHGridMC.size() == adjHGridDemand.size());
         for (int j = 0, o = sameGridMC.size(); j < o; ++j) {
-            if (n <= _MCT2Num.find(sameGridMC[j])->second) {
-                d += sameGridDemand[j];
+            if (_MCT2Num.contains(sameGridMC[j])) {
+                if (n <= _MCT2Num.find(sameGridMC[j])->second) {
+                    d += sameGridDemand[j];
+                }
             }
         }
         for (int j = 0, o = adjHGridMC.size(); j < o; ++j) {
@@ -151,8 +153,10 @@ void Coordinate::addCell(Cell& cell) {
         assert(sameGridMC.size() == sameGridDemand.size());
         assert(adjHGridMC.size() == adjHGridDemand.size());
         for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
-            if (n <= _MCT2Num[sameGridMC[j]]) {
-                d += sameGridDemand[j];
+            if (_MCT2Num.contains(sameGridMC[j])) {
+                if (n <= _MCT2Num[sameGridMC[j]]) {
+                    d += sameGridDemand[j];
+                }
             }
         }
         for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
@@ -194,8 +198,10 @@ void Coordinate::moveCell(Cell& cell) {
         assert(sameGridMC.size() == sameGridDemand.size());
         assert(adjHGridMC.size() == adjHGridDemand.size());
         for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
-            if (n < _MCT2Num[sameGridMC[j]]) {
-                d += sameGridDemand[j];
+            if (_MCT2Num.contains(sameGridMC[j])) {
+                if (n < _MCT2Num[sameGridMC[j]]) {
+                    d += sameGridDemand[j];
+                }
             }
         }
         for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
@@ -238,7 +244,7 @@ Grid::Grid(int supply, Layer& layer)
     : _supply(supply), _layer(layer), _coordinate(nullptr) {}
 
 Grid::Grid(Grid& a)
-    : _supply(a._supply), _layer(a._layer), _coordinate(a._coordinate) {}
+    : _supply(a._supply), _layer(a._layer), _coordinate(a._coordinate), _nets(safe::unordered_map<unsigned,GridNet*>()) {}
 
 void Grid::assignCoordinate(Coordinate* c) {
     _coordinate = c;

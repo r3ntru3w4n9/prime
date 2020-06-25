@@ -9,7 +9,7 @@ Tree::Tree(void) noexcept : nodes(std::move(safe::vector<TreeNode>())) {}
 Tree::Tree(size_t size) noexcept
     : nodes(std::move(safe::vector<TreeNode>(size))) {}
 
-Tree::Tree(safe::vector<TreeNode>&& nodes) : nodes(std::move(nodes)) {}
+Tree::Tree(safe::vector<TreeNode>&& nodes) noexcept : nodes(std::move(nodes)) {}
 
 Tree::Tree(Tree&& tn) noexcept : nodes(std::move(tn.nodes)) {}
 
