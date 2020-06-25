@@ -28,17 +28,17 @@ class Tree {
 
     // getter
 
-    const TreeNode& node(size_t idx) const;
-    TreeNode& node(size_t idx);
+    const TreeNode& get(size_t idx) const;
+    TreeNode& get(size_t idx);
 
     bool has_self(size_t idx) const;
     bool has_parent(size_t idx) const;
     bool has_left(size_t idx) const;
     bool has_right(size_t idx) const;
 
-    unsigned node_parent(size_t idx) const;
-    unsigned node_left(size_t idx) const;
-    unsigned node_right(size_t idx) const;
+    unsigned parent(size_t idx) const;
+    unsigned left(size_t idx) const;
+    unsigned right(size_t idx) const;
 
     const TreeNode& operator[](size_t idx) const;
     TreeNode& operator[](size_t idx);
