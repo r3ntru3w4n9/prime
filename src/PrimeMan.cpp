@@ -56,6 +56,9 @@ void PrimeMan::readFile(std::fstream& input) {
     assert(str == "NumLayer");
     input >> _layer;  //<LayerCount>
     _layers.reserve(_layer);
+    for (int i = 0; i < _layer; ++i) {
+        _layers.push_back(0);
+    }
     constructCoordinate();
     for (int i = 0; i < _layer; ++i) {
         input >> str;  // Lay
@@ -80,7 +83,8 @@ void PrimeMan::readFile(std::fstream& input) {
         // }
         int supply;
         input >> supply;  //<defaultSupplyOfOneGGrid>
-        _layers.push_back(Layer(str, idx - 1, direction, supply, _area));
+        Layer* l = new Layer(str, idx - 1, direction, supply, _area);
+        _layers[idx - 1] = l;
     }
     connectCoordinateGrid();
 
@@ -93,7 +97,7 @@ void PrimeMan::readFile(std::fstream& input) {
     for (int i = 0; i < count; ++i) {
         input >> row >> column >> layer >> val;
         _layers[layer - 1]
-            .getGrid(getIdx(row - _rowBase, column - _columnBase))
+            ->getGrid(getIdx(row - _rowBase, column - _columnBase))
             .incSupply(val);
     }
 
@@ -158,7 +162,7 @@ void PrimeMan::readFile(std::fstream& input) {
         } else {
             assert(str == "adjHGGrid");
             _MasterCells[mc1].AddExtraadjH(mc2, demand, layer);
-            if(mc1 != mc2) {
+            if (mc1 != mc2) {
                 _MasterCells[mc2].AddExtraadjH(mc1, demand, layer);
             }
         }
@@ -290,6 +294,9 @@ PrimeMan::~PrimeMan() {
     for (Coordinate* ptr : _coordinates) {
         delete ptr;
     }
+    for (Layer* ptr : _layers) {
+        delete ptr;
+    }
 }
 
 int PrimeMan::getIdx(int row, int column) const {
@@ -350,7 +357,7 @@ size_t PrimeMan::getNumMasterCells() const {
 }
 
 Layer& PrimeMan::getLayer(int layer) {
-    return _layers[layer];
+    return *_layers[layer];
 }
 
 Coordinate& PrimeMan::getCoordinate(unsigned i) {
@@ -366,7 +373,7 @@ GridNet& PrimeMan::getNet(unsigned i) {
 }
 
 Grid& PrimeMan::getGrid(int layer, unsigned idx) {
-    return _layers[layer].getGrid(idx);
+    return _layers[layer]->getGrid(idx);
 }
 
 Grid& PrimeMan::getGrid(int layer, int row, int column) {
@@ -420,7 +427,7 @@ void PrimeMan::connectCoordinateGrid() {
     for (int i = 0; i < _area; ++i) {
         Coordinate* c = _coordinates[i];
         for (int j = 0; j < _layer; ++j) {
-            Layer& l = _layers[j];
+            Layer& l = *_layers[j];
             Grid& g = l.getGrid(i);
             g.assignCoordinate(c);
             c->addGrid(&g);
@@ -437,7 +444,7 @@ void PrimeMan::assignRoute(int srow,
                            GridNet& net) {
     // net.addSegment(srow, scol, slay, erow, ecol, elay);
     for (int i = slay; i <= elay; ++i) {
-        Layer& l = _layers[i];
+        Layer& l = *_layers[i];
         for (int j = scol; j <= ecol; ++j) {
             for (int k = srow; k <= erow; ++k) {
                 Grid& g = l.getGrid(getIdx(k, j));
