@@ -17,6 +17,7 @@
 #include <queue>
 #include <utility>
 #include <vector>
+
 #include "PrimeMan.h"
 
 ////////////////////////////////////////////////////////////////////////
@@ -35,7 +36,7 @@ enum cost_type {
 // typedef
 typedef std::vector<grid*> GridList;
 typedef std::vector<unsigned> IdxList;
-typedef std::priority_queue<Grid*, std::vector<Grid*>, MyComp> priority_grid;
+typedef std::priority_queue<grid*, std::vector<grid*>, MyComp> priority_grid;
 
 // initialization
 
@@ -43,31 +44,24 @@ class grid {
    public:
     grid() {}
     ~grid() {}
-    
-    bool routable(const unsigned) const {
-        return _global_search != _search;
-    }
 
-    int get_cost() const {
-        return _cost;
-    }
+    bool routable(const unsigned) const { return _global_search != _search; }
 
-    int get_estimated() const {
-        return _estimated_cost;
-    }
+    int get_cost() const { return _cost; }
+
+    int get_estimated() const { return _estimated_cost; }
 
     void assign_estimated(unsigned pi, int e) {
         _pi = pi;
         _estimated_cost = e;
     }
-    
-    void assign_cost(int cost) {
-        _cost = cost;
-    }
+
+    void assign_cost(int cost) { _cost = cost; }
 
     // functions
 
     static int _global_search;
+
    private:
     int _cost;
     unsigned _pi;
@@ -84,7 +78,7 @@ class MyComp {
     }
 };
 
-class Router {
+class Router3D {
    public:
     // friend class of cost functions
     friend class CostGen;
@@ -92,9 +86,15 @@ class Router {
     friend priority_grid;
 
     // public functions
-    Router(PrimeMan& pm);
-    ~Router();
-    int A_star(const unsigned);
+    Router3D(PrimeMan& pm);
+    ~Router3D();
+    int A_star(int srow,
+               int scol,
+               int slay,
+               int erow,
+               int ecol,
+               int elay,
+               GridNet& net);
 
     // cost functions
     int get_cost(unsigned a, unsigned b);

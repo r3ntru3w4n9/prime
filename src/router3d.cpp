@@ -2,7 +2,7 @@
 
 #include "iostream"
 
-Router::Router(PrimeMan& pm)
+Router3D::Router3D(PrimeMan& pm)
     :_pm(pm), _area(pm.getArea()) {
     size_t n = pm.getVolume();
     _GridList.reserve(n);
@@ -12,37 +12,12 @@ Router::Router(PrimeMan& pm)
     }
 }
 
-Router::~Router(){
+Router3D::~Router3D(){
     for (int i = 0, n = _GridList.size(); _vol; i++)
         delete _GridList[i];
 }
 
-bool Router::add_net(unsigned idx1, unsigned idx2) {
-    if (_GridList[idx1] != 0 || _GridList[idx2] != 0)
-        return false;  // idx initialized
-    _GridList[idx1] = new StartGrid(idx1, idx2);
-    _GridList[idx2] = new EndGrid(idx2);
-    init_clear(idx1, idx2);
-    init_clear(idx2, idx2);
-    return true;
-    //_IdxList.push_back(net[0]);
-    // for(int i = 1;i < net.size();i++)
-    //{
-    //    _GridList->add_end(net[i]);
-    //    Grid* end = _GridList[net[i]];
-    //    if(end !=0) return false;//idx initialized
-    //    end = new EndGrid();
-    //}
-}
-
-void Die::add_normal() {
-    for (int i = 0; i < _vol; i++) {
-        if (_GridList[i] == 0)
-            _GridList[i] = new NormalGrid(i);
-    }
-}
-
-int Die::A_star(const unsigned origin,
+int Router3D::A_star(const unsigned origin,
                 IdxList& ans)  // return the cost of the rout
 {
     _PriorityGrid = new priority_grid;
