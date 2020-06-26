@@ -242,6 +242,8 @@ void PrimeMan::readFile(std::fstream& input) {
         }
 
         _grid_nets.push_back(GridNet(str, i, numPins, minLay));
+        // TODO:
+        _quad_tree_nets.push_back(QuadTree(str, i, minLay));
 
         // ! substituted
         // TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
@@ -286,6 +288,7 @@ void PrimeMan::readFile(std::fstream& input) {
         // assert(_Net2Idx.contains(str));
         assert(slay >= 1 && elay >= 1);
 
+        // TODO: change to tree-based net data structure
         GridNet& net = _grid_nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
