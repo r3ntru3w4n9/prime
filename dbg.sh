@@ -1,1 +1,1 @@
-g++ -g -rdynamic src/*.cpp -o prime_dbg
+g++ -g src/*.cpp -o prime_dbg

@@ -67,7 +67,7 @@ void PrimeMan::readFile(std::fstream& input) {
         int idx;
         input >> idx;  //<Idx>
         assert(!_Layer2Idx.contains(str));
-        _Layer2Idx[str] = idx;
+        _Layer2Idx[str] = idx - 1;
         bool direction = false;
         input >> buf;  //<RoutingDirection>
         if (buf == "H") {
@@ -182,6 +182,9 @@ void PrimeMan::readFile(std::fstream& input) {
     input >> count;  // <cellInstCount>
     _cells.reserve(count);
     for (int i = 0; i < count; ++i) {
+        _cells.push_back(0);
+    }
+    for (int i = 0; i < count; ++i) {
         input >> str;  // CellInst
         assert(str == "CellInst");
         input >> str;  // <instName>
@@ -205,12 +208,13 @@ void PrimeMan::readFile(std::fstream& input) {
         // } else {
         //     assert(buf == "Fixed" || buf == "Movable");
         // }
-        Cell cell = Cell(str, MCT, movable, i);
+        Cell* cell = new Cell(str, MCT, movable, i);
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
-        cell.setCoordinate(rIdx, cIdx);
+        cell->setCoordinate(rIdx, cIdx);
         Coordinate* c = _coordinates[getIdx(rIdx, cIdx)];
-        c->addCell(cell);
-        _cells.push_back(std::move(cell));
+        c->addCell(*cell);
+        _cells[i] = cell;
+
     }
 
     /*NumNets <netCount>
@@ -255,9 +259,14 @@ void PrimeMan::readFile(std::fstream& input) {
             masterPin = str.substr(pos, str.size() - pos);
             // assert(_Cell2Idx.count(inst) == 1);
             // assert(_Cell2Idx.contains(inst));
-            Cell& cell = _cells[_Cell2Idx.at(inst)];
-            Pin& pin = cell.getPin(masterPin);
+            Cell* cell = _cells[_Cell2Idx.at(inst)];
+            Pin& pin = cell->getPin(masterPin);
+            // Cell& cell_ = pin.get_cell();
+            // std::cout << &cell << " " << &cell_ << std::endl;
             _grid_nets[i].addPin(&pin);
+            pin.setNet(&_grid_nets[i]);
+            Grid& g = _layers[pin.getLayer()]->getGrid(getIdx(pin.getRow(), pin.getColumn()));
+            g.addNet(_grid_nets[i]);
         }
     }
 
@@ -307,6 +316,10 @@ PrimeMan::~PrimeMan() {
     //debug
 
     for (Layer* ptr : _layers) {
+        delete ptr;
+    }
+
+    for (Cell* ptr : _cells) {
         delete ptr;
     }
 }
@@ -377,7 +390,7 @@ Coordinate& PrimeMan::getCoordinate(unsigned i) {
 }
 
 Cell& PrimeMan::getCell(unsigned i) {
-    return _cells[i];
+    return *_cells[i];
 }
 
 GridNet& PrimeMan::getNet(unsigned i) {
@@ -455,6 +468,15 @@ void PrimeMan::assignRoute(int srow,
                            int elay,
                            GridNet& net) {
     // net.addSegment(srow, scol, slay, erow, ecol, elay);
+    if(srow > erow) {
+        std::swap(srow, erow);
+    }
+    if(scol > ecol) {
+        std::swap(scol, ecol);
+    }
+    if(slay > elay) {
+        std::swap(slay, elay);
+    }
     for (int i = slay; i <= elay; ++i) {
         Layer& l = *_layers[i];
         for (int j = scol; j <= ecol; ++j) {

@@ -125,7 +125,7 @@ class PrimeMan {
     safe::vector<Layer*> _layers;
     safe::vector<Coordinate*> _coordinates;
     safe::vector<MasterCellType> _MasterCells;
-    safe::vector<Cell> _cells;
+    safe::vector<Cell*> _cells;
 
     // !
     safe::vector<GridNet> _grid_nets;

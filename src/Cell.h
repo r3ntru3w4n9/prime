@@ -115,11 +115,11 @@ class Cell {
     Cell(const std::string CellName,
          MasterCellType& MCT,
          bool movable,
-         unsigned id);
-    Cell(Cell&& c);
+         unsigned id) noexcept;
+    Cell(Cell&& c) noexcept;
 
     // operator=
-    Cell& operator=(Cell&& c);
+    Cell& operator=(Cell&& c) noexcept;
 
     // modifier
     void setRow(unsigned x);

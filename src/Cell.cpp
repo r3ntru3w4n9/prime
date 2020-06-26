@@ -144,7 +144,7 @@ Pin& GridNet::getPin(unsigned i) {
 Cell::Cell(const std::string CellName,
            MasterCellType& MCT,
            bool movable,
-           unsigned id)
+           unsigned id) noexcept
     : _CellName(CellName),
       _MCT(&MCT),
       _Id(id),
@@ -166,7 +166,7 @@ Cell::Cell(const std::string CellName,
     }
 }
 
-Cell::Cell(Cell&& c)
+Cell::Cell(Cell&& c) noexcept
     : _CellName(std::move(c._CellName)),
       _MCT(c._MCT),
       _Id(c._Id),
@@ -177,7 +177,7 @@ Cell::Cell(Cell&& c)
       _pins(std::move(c._pins)),
       _Layer2pin(std::move(c._Layer2pin)) {}
 
-Cell& Cell::operator=(Cell&& c) {
+Cell& Cell::operator=(Cell&& c) noexcept {
     _CellName = std::move(c._CellName);
     _MCT = c._MCT;
     _Id = c._Id;
