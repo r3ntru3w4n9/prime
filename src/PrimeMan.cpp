@@ -294,6 +294,18 @@ PrimeMan::~PrimeMan() {
     for (Coordinate* ptr : _coordinates) {
         delete ptr;
     }
+
+    //debug
+    std::fstream out("out.txt", std::ios::out);
+    for (Layer* ptr : _layers) {
+        for (int i = 0; i < _rowRange; ++i) {
+            for (int j = 0; j < _columnRange; ++j) {
+                out << ptr->getGrid(getIdx(i,j)).getSupply() << std::endl;
+            }
+        }
+    }
+    //debug
+
     for (Layer* ptr : _layers) {
         delete ptr;
     }
@@ -486,5 +498,5 @@ void PrimeMan::maxNetDegree() const {
             maxDegree = d;
         }
     }
-    std::cout << "Max Net Degree : " << maxDegree << '\n';
+    //std::cout << "Max Net Degree : " << maxDegree << '\n';
 }
