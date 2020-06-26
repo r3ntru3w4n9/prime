@@ -17,7 +17,7 @@ Router::~Router(){
         delete _GridList[i];
 }
 
-bool Die::add_net(unsigned idx1, unsigned idx2) {
+bool Router::add_net(unsigned idx1, unsigned idx2) {
     if (_GridList[idx1] != 0 || _GridList[idx2] != 0)
         return false;  // idx initialized
     _GridList[idx1] = new StartGrid(idx1, idx2);
