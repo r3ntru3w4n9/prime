@@ -372,6 +372,14 @@ size_t PrimeMan::getNumRows() const {
     return _rowRange;
 }
 
+size_t PrimeMan::getArea() const {
+    return _area;
+}
+
+size_t PrimeMan::getVolume() const {
+    return _area*_layer;
+}
+
 size_t PrimeMan::getNumNets() const {
     return _grid_nets.size();
 }

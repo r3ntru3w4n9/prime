@@ -95,6 +95,8 @@ class PrimeMan {
     int getNumLayers() const;
     size_t getNumColumns() const;
     size_t getNumRows() const;
+    size_t getArea() const;
+    size_t getVolume() const;
     size_t getNumNets() const;
     size_t getNumCells() const;
     size_t getNumMasterCells() const;

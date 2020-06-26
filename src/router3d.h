@@ -32,14 +32,6 @@ enum cost_type {
 
 };
 
-class MyComp {
-   public:
-    MyComp() {}
-    bool operator()(const Grid* lhs, const Grid* rhs) const {
-        return ((lhs->get_estimated()) > (rhs->get_estimated()));
-    }
-};
-
 // typedef
 typedef std::vector<grid*> GridList;
 typedef std::vector<unsigned> IdxList;
@@ -64,11 +56,14 @@ class grid {
         return _estimated_cost;
     }
 
-    void assign_estimated(unsigned _pi, int) {
-
+    void assign_estimated(unsigned pi, int e) {
+        _pi = pi;
+        _estimated_cost = e;
     }
-    void assign_cost(int);
-    void reset();
+    
+    void assign_cost(int cost) {
+        _cost = cost;
+    }
 
     // functions
 
@@ -79,6 +74,14 @@ class grid {
     unsigned _pin;
     int _estimated_cost;
     int _search;
+};
+
+class MyComp {
+   public:
+    MyComp() {}
+    bool operator()(const grid* lhs, const grid* rhs) const {
+        return ((lhs->get_estimated()) > (rhs->get_estimated()));
+    }
 };
 
 class Router {
