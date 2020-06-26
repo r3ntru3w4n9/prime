@@ -108,14 +108,15 @@ class Grid {
     void incSupply(int d);
     void decSupply(int d);
     void addNet(GridNet& net);
-    bool canGetNet(GridNet& net);
-    GridNet* getNet(unsigned i);
+    GridNet& getNet(unsigned i);
 
     // accesser
     int getRow() const;
     int getColumn() const;
     int getSupply() const;
     int getLayer() const;
+    bool canGetNet(GridNet& net) const;
+    bool canGetNet(unsigned i) const;
 
    private:
     int _supply;

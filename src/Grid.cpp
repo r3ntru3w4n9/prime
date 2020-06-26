@@ -266,17 +266,19 @@ void Grid::addNet(GridNet& net) {
     }
 }
 
-bool Grid::canGetNet(GridNet& net) {
+bool Grid::canGetNet(GridNet& net) const {
     // return _nets.find(net.getId()) != _nets.end();
     return _nets.contains(net.getId());
 }
 
-GridNet* Grid::getNet(unsigned i) {
+bool Grid::canGetNet(unsigned i) const {
+    return _nets.contains(i);
+}
+
+GridNet& Grid::getNet(unsigned i) {
     // if (_nets.find(i) == _nets.end()) {
-    if (!_nets.contains(i)) {
-        return nullptr;
-    }
-    return _nets[i];
+    assert(_nets.contains(i));
+    return *_nets[i];
 }
 
 int Grid::getRow() const {
