@@ -14,7 +14,10 @@
 #include "Cell.h"
 #include "safe.h"
 
-typedef std::pair<int, int> CoordPair;
+typedef std::pair<int, int> CoordPair; // Coordinate of points
+typedef std::pair<unsigned, unsigned> VEPair; // vertex index v.s. edge index pair
+const double DINF = 1e9;
+const double EPS  = 1e-8;
 class NetSegment;
 
 class QuadTree {
@@ -50,6 +53,15 @@ class QuadTree {
     void insert_node();
 
     void segment_to_tree();
+    inline bool dfs_tree_graph(safe::vector<VEPair> TreeGraph[], 
+                               safe::vector<bool>&  selected_edges, 
+                               const unsigned vNum, const unsigned pNum, 
+                               const unsigned now, const unsigned parent,
+                               const unsigned edge_idx);
+    inline unsigned dfs_tree_center(safe::vector<unsigned> SimpleTree[],
+                                    safe::vector<double>&  vertex_rank, 
+                                    const unsigned tree_size,
+                                    const unsigned now, const unsigned parent);
     void tree_to_segment();
 
     // friends
@@ -164,11 +176,8 @@ class NetSegment{
 class SimpleUnionFind{
    public:
     SimpleUnionFind() noexcept {};
-    SimpleUnionFind(int N) noexcept {
-        parent.resize(N);
-        rank.resize(N);
-        for(int i = 0; i < N; ++i) parent[i] = i;
-    }
+    SimpleUnionFind(int N) noexcept { reset(N); }
+    ~SimpleUnionFind() noexcept { clear(); }
 
     inline unsigned find(unsigned x) {
         return (x == parent[x]) ? x : parent[x] = find(parent[x]);
@@ -187,6 +196,13 @@ class SimpleUnionFind{
             parent[y] = x;
         }
     }
+    void clear() { parent.clear(); rank.clear(); }
+    void reset(int N){
+        clear();
+        parent.resize(N);
+        rank.resize(N);
+        for(int i = 0; i < N; ++i) parent[i] = i;
+    } 
     
    private:
     safe::vector<unsigned> parent;

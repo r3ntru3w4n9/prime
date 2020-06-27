@@ -36,8 +36,6 @@ void QuadTree::construct_tree(){
 
 // Private functions
 void QuadTree::segment_to_tree(){
-    // TODO: need to sort the segments?
-    // sort(segments->begin(), segments->end()); // sort the segments by coordinates
     bool operation = true;
     while(operation){ // merge overlapping segments
         operation = false;
@@ -101,26 +99,119 @@ void QuadTree::segment_to_tree(){
         }
         EdgeGraph.push_back(SimpleEdge(start_idx, end_idx, segments[i].get_length()));
     }
-    // Kruskal's MST algorithm
+    // Kruskal's MST algorithm O(ElogV + E)
     sort(EdgeGraph.begin(), EdgeGraph.end()); // sort by length of edges
     SimpleUnionFind union_find(vNum);
-    safe::vector<unsigned> selected_edges;
-    safe::vector<unsigned> TreeGraph[vNum]; // adjacent list storing MST
-    for(int i = 0; i < EdgeGraph.size() && selected_edges.size() < vNum - 1; ++i){
+    safe::vector<bool> selected_edges(vNum);
+    safe::vector<VEPair> TreeGraph[vNum]; // adjacent list for storing MST (unweighted)
+    for(int i = 0; i < EdgeGraph.size(); ++i){
         unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2();
         if(!union_find.same(v1, v2)){
-            selected_edges.push_back(i);
+            selected_edges[i] = true;
             union_find.merge(v1, v2);
-            TreeGraph[v1].push_back(v2);
-            TreeGraph[v2].push_back(v1);
+            TreeGraph[v1].push_back(VEPair(v2, i));
+            TreeGraph[v2].push_back(VEPair(v1, i));
         }
     }
-    // Remove redundant edges
+    union_find.clear();
+    // Remove redundant edges O(E)
+    dfs_tree_graph(TreeGraph, selected_edges, vNum, pNum, 0, 0, 0);
+    // Reconstruct pruned tree O(E)
+    for(int i = 0; i < vNum; ++i) TreeGraph[i].clear();
+    safe::vector<unsigned> SimpleTree[vNum];
+    unsigned tree_size = 1; // tree size = # of vertices = # of edges + 1
+    for(int i = 0; i < EdgeGraph.size(); ++i){
+        if(selected_edges[i]){
+            unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2();
+            SimpleTree[v1].push_back(v2);
+            SimpleTree[v2].push_back(v1);
+            ++tree_size;
+        }
+    }
 
     // Find the center of the tree
+    safe::vector<double>   vertex_rank(vNum, -1.0);
+    dfs_tree_center(SimpleTree, vertex_rank, tree_size, 0, 0);
+    unsigned found_center = 0;
+    double min_score = DINF;
+    for(int i = 0; i < vNum; ++i){
+        if(vertex_rank[i] > -EPS && vertex_rank[i] < min_score){
+            min_score = vertex_rank[i];
+            found_center = i;
+        }
+    }
+
+    // Translate vertex indices to new indices
+    
 
     // Construct quad tree
 
 
     segments.clear();
+}
+
+inline bool QuadTree::dfs_tree_graph(
+        safe::vector<VEPair> TreeGraph[], 
+        safe::vector<bool>& selected_edges, 
+        const unsigned vNum, 
+        const unsigned pNum, 
+        const unsigned now, 
+        const unsigned parent, 
+        const unsigned edge_idx){
+    // Use DFS to remove redundant edges O(E)
+    // If the end of a path is not a pin then some edges of this path are redundant.
+    bool has_pin = false;
+    for(int i = 0; i < TreeGraph[now].size(); ++i){
+        if(TreeGraph[now][i].first == parent) continue;
+        has_pin = has_pin || dfs_tree_graph(TreeGraph, selected_edges, vNum, pNum, TreeGraph[now][i].first, now, TreeGraph[now][i].second);
+    }
+    if(now < pNum || has_pin) return true;
+    else {
+        selected_edges[edge_idx] = false;
+        return false;
+    }
+}
+
+inline unsigned QuadTree::dfs_tree_center(
+        safe::vector<unsigned> SimpleTree[],
+        safe::vector<double>&  vertex_rank, 
+        const unsigned tree_size,
+        const unsigned now, 
+        const unsigned parent){
+    // Use DFS to find the center of the tree O(E)
+    safe::vector<unsigned> num_vertices;
+    for(int i = 0; i < SimpleTree[now].size(); ++i){
+        if(SimpleTree[now][i] != parent){
+            num_vertices.push_back(
+                dfs_tree_center(SimpleTree, vertex_rank, tree_size, SimpleTree[now][i], now)
+            );
+        }
+    }
+    int num_branch = 0;
+    if(now != parent){ // first DFS node will be now = parent = 0
+        num_branch = 1 + num_vertices.size();
+    } else {
+        num_branch = num_vertices.size();
+    }
+    if(num_branch == 0){ // only happens when there is only one node in the tree
+        vertex_rank[now] = 0.0;
+        return 0;
+    }
+    if(num_branch == 1){ // leaf node
+        vertex_rank[now] = DINF;
+        return 1;
+    }
+    double score = 0.0;
+    unsigned total = 0;
+    double average_score = ((double)tree_size - 1.0) / (double)num_branch;
+    for(int i = 0; i < num_vertices.size(); ++i){
+        total += num_vertices[i];
+        score += ((double)num_vertices[i] - average_score) *
+                 ((double)num_vertices[i] - average_score);
+    }
+    score += ((double)(tree_size - total - 1) - average_score) * 
+             ((double)(tree_size - total - 1) - average_score);
+    score /= (double)num_branch; // == variance
+    vertex_rank[now] = score;
+    return total + 1;
 }
