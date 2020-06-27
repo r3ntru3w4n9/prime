@@ -39,20 +39,20 @@ QuadNode::QuadNode(QuadNode&& qn) noexcept {
     down   =   qn.down; qn.down   = 0;
 }
 
-const bool QuadNode::is_root()    const { return parent == -1; }
-const bool QuadNode::has_self()   const { return self   >= 0; }
-const bool QuadNode::has_parent() const { return parent >= 0; }
-const bool QuadNode::has_left()   const { return left   >= 0; }
-const bool QuadNode::has_right()  const { return right  >= 0; }
-const bool QuadNode::has_up()     const { return up     >= 0; }
-const bool QuadNode::has_down()   const { return down   >= 0; }
+bool QuadNode::is_root()    const { return parent == -1; }
+bool QuadNode::has_self()   const { return self   >= 0; }
+bool QuadNode::has_parent() const { return parent >= 0; }
+bool QuadNode::has_left()   const { return left   >= 0; }
+bool QuadNode::has_right()  const { return right  >= 0; }
+bool QuadNode::has_up()     const { return up     >= 0; }
+bool QuadNode::has_down()   const { return down   >= 0; }
 
-const int QuadNode::get_self()   const { assert(has_self());   return self;   }
-const int QuadNode::get_parent() const { assert(has_parent()); return parent; }
-const int QuadNode::get_left()   const { assert(has_left());   return left;   }
-const int QuadNode::get_right()  const { assert(has_right());  return right;  }
-const int QuadNode::get_up()     const { assert(has_up());     return up;     }
-const int QuadNode::get_down()   const { assert(has_down());   return down;   }
+int QuadNode::get_self()   const { assert(has_self());   return self;   }
+int QuadNode::get_parent() const { assert(has_parent()); return parent; }
+int QuadNode::get_left()   const { assert(has_left());   return left;   }
+int QuadNode::get_right()  const { assert(has_right());  return right;  }
+int QuadNode::get_up()     const { assert(has_up());     return up;     }
+int QuadNode::get_down()   const { assert(has_down());   return down;   }
 
 void QuadNode::set_self   (int s) { self   = s; }
 void QuadNode::set_parent (int p) { parent = p; }
@@ -84,13 +84,13 @@ SimpleEdge::SimpleEdge() noexcept
 SimpleEdge::SimpleEdge(unsigned _v1, unsigned _v2, unsigned _w) noexcept 
     : v1(_v1), v2(_v2), weight(_w) {}
 
-const bool SimpleEdge::operator<(const SimpleEdge& se) const {
+bool SimpleEdge::operator<(const SimpleEdge& se) const {
     if(weight != se.weight) return weight < se.weight;
     else if(v1 != se.v1)    return v1 < se.v1;
     else                    return v2 < se.v2;
 }
 
-const unsigned SimpleEdge::get_v1()     const { return v1; }
-const unsigned SimpleEdge::get_v2()     const { return v2; }
-const unsigned SimpleEdge::get_weight() const { return weight; }
+unsigned SimpleEdge::get_v1()     const { return v1; }
+unsigned SimpleEdge::get_v2()     const { return v2; }
+unsigned SimpleEdge::get_weight() const { return weight; }
 

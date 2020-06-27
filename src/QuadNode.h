@@ -24,20 +24,20 @@ class QuadNode {
     QuadNode& operator=(const QuadNode& tn) noexcept;
     QuadNode& operator=(QuadNode&& tn) noexcept;
 
-    const bool is_root()    const;
-    const bool has_self()   const;
-    const bool has_parent() const;
-    const bool has_left()   const;
-    const bool has_right()  const;
-    const bool has_up()     const;
-    const bool has_down()   const;
+    bool is_root()    const;
+    bool has_self()   const;
+    bool has_parent() const;
+    bool has_left()   const;
+    bool has_right()  const;
+    bool has_up()     const;
+    bool has_down()   const;
 
-    const int get_self()    const;
-    const int get_parent()  const;
-    const int get_left()    const;
-    const int get_right()   const;
-    const int get_up()      const;
-    const int get_down()    const;
+    int get_self()    const;
+    int get_parent()  const;
+    int get_left()    const;
+    int get_right()   const;
+    int get_up()      const;
+    int get_down()    const;
 
     void set_self  (int s);
     void set_parent(int p);
@@ -65,11 +65,11 @@ class SimpleEdge {
     SimpleEdge() noexcept;
     SimpleEdge(unsigned _v1, unsigned _v2, unsigned _w) noexcept;
 
-    const bool operator<(const SimpleEdge& se) const;
+    bool operator<(const SimpleEdge& se) const;
 
-    const unsigned get_v1() const;
-    const unsigned get_v2() const;
-    const unsigned get_weight() const;
+    unsigned get_v1() const;
+    unsigned get_v2() const;
+    unsigned get_weight() const;
 
    private:
     unsigned v1, v2, weight;

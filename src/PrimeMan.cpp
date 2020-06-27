@@ -269,6 +269,8 @@ void PrimeMan::readFile(std::fstream& input) {
             Grid& g = _layers[pin.getLayer()]->getGrid(
                 getIdx(pin.getRow(), pin.getColumn()));
             g.addNet(_grid_nets[i]);
+            // TODO: add pin to quad tree
+            _quad_tree_nets[i].add_pin(&pin);
         }
     }
 
@@ -292,7 +294,9 @@ void PrimeMan::readFile(std::fstream& input) {
         GridNet& net = _grid_nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
-
+        _quad_tree_nets[_Net2Idx.at(str)].add_segment(
+            srow - _rowBase, scol - _columnBase, slay - 1,
+            erow - _rowBase, ecol - _columnBase, elay - 1);
         // ! substituted
         // segments[str].push_back(Segment(srow - _rowBase, scol - _columnBase,
         //                                 slay - 1, erow - _rowBase,
@@ -300,6 +304,10 @@ void PrimeMan::readFile(std::fstream& input) {
     }
 
     // safe::unordered_map<std::string, TreeNet> all_nets;
+    // TODO: construct quad trees
+    for(size_t i = 0; i < _quad_tree_nets.size(); ++i){
+        _quad_tree_nets[i].construct_tree();
+    }
 }
 
 PrimeMan::~PrimeMan() {
