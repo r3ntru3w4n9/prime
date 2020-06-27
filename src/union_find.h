@@ -19,7 +19,7 @@ unsigned find(unsigned idx, safe::vector<TreeNode>& tree) {
         return node.self();
     } else {
         // recursively calls parent
-        unsigned root = find(node.parent(), tree);
+        unsigned root = find<compression>(node.parent(), tree);
         if (compression) {
             node.parent(root);
         }

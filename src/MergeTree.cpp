@@ -52,7 +52,7 @@ void MergeTree::merge_tree(
             ++compared;
         }
     }
-    assert(compared == num_mtree);
+    assert(compared == num_pins - 1);
 
     assert(mtree.size() == num_mtree);
 }
