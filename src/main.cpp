@@ -12,7 +12,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "PrimeMan.h"
+#include "Chip.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     }
 
     // call solver
-    PrimeMan Mgr(inputfile);
+    Chip Mgr(inputfile);
 
     Mgr.log();
     // Mgr.output(outputfile);

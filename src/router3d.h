@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "PrimeMan.h"
+#include "Chip.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          DESCRIPTION                             ///
@@ -86,7 +86,7 @@ class Router3D {
     friend priority_grid;
 
     // public functions
-    Router3D(PrimeMan& pm);
+    Router3D(Chip& pm);
     ~Router3D();
     unsigned A_star(
         const unsigned srow,
@@ -119,7 +119,7 @@ class Router3D {
     unsigned get_idx_area(unsigned idx) const { return idx % _pm.getArea(); }
 
    private:
-    PrimeMan& _pm;
+    Chip& _pm;
     GridList _GridList;
     priority_grid* _PriorityGrid;
     cost_type _CostType;

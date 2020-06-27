@@ -1,6 +1,6 @@
 /***********************************************************************
 
-  FileName    [PrimeMan.h]
+  FileName    [Chip.h]
 
   Author      [Yang Chien Yi, Ren-Chu Wang]
 
@@ -49,7 +49,7 @@
  *    constraint and 2) Min Routing layer constraint
  *
  * 3. Do the following steps when you move a cell :
- *    a. Use Cell::movable(PrimeMan::limited()) to check if you can move
+ *    a. Use Cell::movable(Chip::limited()) to check if you can move
  *       the cell.
  *    b. Get the Coordinate of the position into which you want to move
  *       the cell and use Coordinate::CanAddCell() to check if it's
@@ -57,7 +57,7 @@
  *    c. Get the Coordinate of the original position and use
  *       Coordinate::moveCell().
  *    d. Get the new Coordinate and use Coordinate::addCell().
- *    e. Call PrimeMan::moveCell().
+ *    e. Call Chip::moveCell().
  *
  * Q&A : (If you have any question, please directly add the question in
  *        this Q&A and make a sign in the commit message. Then I'll
@@ -72,12 +72,12 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-class PrimeMan {
+class Chip {
    public:
     // Constructor
-    PrimeMan(std::fstream& input);
+    Chip(std::fstream& input);
     // destructor
-    ~PrimeMan();
+    ~Chip();
 
     // index(return -1 if out of bound)
     int getIdx(int row, int column) const;

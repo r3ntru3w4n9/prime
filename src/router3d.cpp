@@ -4,7 +4,7 @@
 
 int grid::_global_search = 0;
 
-Router3D::Router3D(PrimeMan& pm) : _pm(pm) {
+Router3D::Router3D(Chip& pm) : _pm(pm) {
     size_t n = pm.getVolume();
     _GridList.reserve(n);
     for (size_t i = 0; i < n; i++) {

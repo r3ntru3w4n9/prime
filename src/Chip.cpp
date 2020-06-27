@@ -1,10 +1,10 @@
 /***********************************************************************
 
-  FileName    [PrimeMan.cpp]
+  FileName    [Chip.cpp]
 
   Author      [Yang Chien Yi, Ren-Chu Wang]
 
-  This file describes the functions in "PrimeMan.h".
+  This file describes the functions in "Chip.h".
 
 ***********************************************************************/
 
@@ -12,7 +12,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "PrimeMan.h"
+#include "Chip.h"
 
 #include <assert.h>
 
@@ -26,11 +26,11 @@
 ///                          FUNCTIONS                               ///
 ////////////////////////////////////////////////////////////////////////
 
-PrimeMan::PrimeMan(std::fstream& input) {
+Chip::Chip(std::fstream& input) {
     readFile(input);
 }
 
-void PrimeMan::readFile(std::fstream& input) {
+void Chip::readFile(std::fstream& input) {
     std::string str;
     std::string buf;
 
@@ -310,7 +310,7 @@ void PrimeMan::readFile(std::fstream& input) {
     }
 }
 
-PrimeMan::~PrimeMan() {
+Chip::~Chip() {
     for (Coordinate* ptr : _coordinates) {
         delete ptr;
     }
@@ -335,28 +335,28 @@ PrimeMan::~PrimeMan() {
     }
 }
 
-int PrimeMan::getIdx(int row, int column) const {
+int Chip::getIdx(int row, int column) const {
     assert(column >= 0 && column < _columnRange && row >= 0 && row < _rowRange);
     return column * _rowRange + row;
 }
 
-int PrimeMan::getLeft(int row, int column) const {
+int Chip::getLeft(int row, int column) const {
     return (column == 0) ? -1 : getIdx(row, column - 1);
 }
 
-int PrimeMan::getRight(int row, int column) const {
+int Chip::getRight(int row, int column) const {
     return (column == _columnRange - 1) ? -1 : getIdx(row, column + 1);
 }
 
-int PrimeMan::getDown(int row, int column) const {
+int Chip::getDown(int row, int column) const {
     return (row == 0) ? -1 : getIdx(row - 1, column);
 }
 
-int PrimeMan::getUp(int row, int column) const {
+int Chip::getUp(int row, int column) const {
     return (row == _rowRange - 1) ? -1 : getIdx(row + 1, column);
 }
 
-void PrimeMan::moveCell(Cell& cell) {
+void Chip::moveCell(Cell& cell) {
     assert(cell.movable(limited()));
     if (cell.moved()) {
         return;
@@ -364,79 +364,79 @@ void PrimeMan::moveCell(Cell& cell) {
     _movedCells.push_back(cell.getId());
 }
 
-void PrimeMan::decNumMoved() {
+void Chip::decNumMoved() {
     assert(_movedCells.size() > 0);
 }
 
-int PrimeMan::getNumLayers() const {
+int Chip::getNumLayers() const {
     return _layers.size();
 }
 
-size_t PrimeMan::getNumColumns() const {
+size_t Chip::getNumColumns() const {
     return _columnRange;
 }
 
-size_t PrimeMan::getNumRows() const {
+size_t Chip::getNumRows() const {
     return _rowRange;
 }
 
-size_t PrimeMan::getArea() const {
+size_t Chip::getArea() const {
     return _area;
 }
 
-size_t PrimeMan::getVolume() const {
+size_t Chip::getVolume() const {
     return _area*_layer;
 }
 
-size_t PrimeMan::getNumNets() const {
+size_t Chip::getNumNets() const {
     return _grid_nets.size();
 }
 
-size_t PrimeMan::getNumCells() const {
+size_t Chip::getNumCells() const {
     return _cells.size();
 }
 
-size_t PrimeMan::getNumMasterCells() const {
+size_t Chip::getNumMasterCells() const {
     return _MasterCells.size();
 }
 
-Layer& PrimeMan::getLayer(int layer) {
+Layer& Chip::getLayer(int layer) {
     return *_layers[layer];
 }
 
-Coordinate& PrimeMan::getCoordinate(unsigned i) {
+Coordinate& Chip::getCoordinate(unsigned i) {
     return *_coordinates[i];
 }
 
-Cell& PrimeMan::getCell(unsigned i) {
+Cell& Chip::getCell(unsigned i) {
     return *_cells[i];
 }
 
-GridNet& PrimeMan::getNet(unsigned i) {
+GridNet& Chip::getNet(unsigned i) {
     return _grid_nets[i];
 }
 
-Grid& PrimeMan::getGrid(int layer, unsigned idx) {
+Grid& Chip::getGrid(int layer, unsigned idx) {
     return _layers[layer]->getGrid(idx);
 }
 
-Grid& PrimeMan::getGrid(int layer, int row, int column) {
+Grid& Chip::getGrid(int layer, int row, int column) {
     return getGrid(layer, getIdx(row, column));
 }
 
-MasterCellType& PrimeMan::getMasterCell(unsigned idx) {
+MasterCellType& Chip::getMasterCell(unsigned idx) {
     return _MasterCells[idx];
 }
 
-bool PrimeMan::limited() const {
+bool Chip::limited() const {
     return _movedCells.size() == _maxMove;
 }
 
-void PrimeMan::log() const {
+void Chip::log() const {
     maxNetDegree();
 }
 
-// void PrimeMan::output(std::fstream& output) {
+// void Chip::output(std::fstream& output) {
 //     int n = _movedCells.size();
 //     output << "NumMovedCellInst " << n << '\n';
 //     for (int i = 0; i < n; ++i) {
@@ -448,7 +448,7 @@ void PrimeMan::log() const {
 //     outputRoute(output);
 // }
 
-void PrimeMan::constructCoordinate() {
+void Chip::constructCoordinate() {
     _area = _columnRange * _rowRange;
     _coordinates.reserve(_area);
     for (int i = 0; i < _columnRange; ++i) {
@@ -467,7 +467,7 @@ void PrimeMan::constructCoordinate() {
     }
 }
 
-void PrimeMan::connectCoordinateGrid() {
+void Chip::connectCoordinateGrid() {
     for (int i = 0; i < _area; ++i) {
         Coordinate* c = _coordinates[i];
         for (int j = 0; j < _layer; ++j) {
@@ -479,7 +479,7 @@ void PrimeMan::connectCoordinateGrid() {
     }
 }
 
-void PrimeMan::assignRoute(int srow,
+void Chip::assignRoute(int srow,
                            int scol,
                            int slay,
                            int erow,
@@ -507,7 +507,7 @@ void PrimeMan::assignRoute(int srow,
     }
 }
 
-// void PrimeMan::outputRoute(std::fstream& output) {
+// void Chip::outputRoute(std::fstream& output) {
 //     output << "NumRoutes ";
 //     int numRoutes = 0;
 //     for (int i = 0, n = _grid_nets.size(); i < n; ++i) {
@@ -531,7 +531,7 @@ void PrimeMan::assignRoute(int srow,
 //     }
 // }
 
-void PrimeMan::maxNetDegree() const {
+void Chip::maxNetDegree() const {
     int maxDegree = 0;
     for (int i = 0, n = _grid_nets.size(); i < n; ++i) {
         int d = _grid_nets[i].getNumPin();
