@@ -18,8 +18,8 @@ template <typename T>
 class set {
    public:
     set(void) noexcept : field(std::set<T>()) {}
-    set(const set& set) noexcept : field(set.field) {}
-    set(set&& set) noexcept : field(std::move(set.field)) {}
+    explicit set(const set& set) noexcept : field(set.field) {}
+    explicit set(set&& set) noexcept : field(std::move(set.field)) {}
 
     set& operator=(const set& set) noexcept {
         field = set.field;

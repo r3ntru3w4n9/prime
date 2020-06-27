@@ -18,8 +18,10 @@ template <typename T>
 class unordered_set {
    public:
     unordered_set(void) noexcept : field(std::unordered_set<T>()) {}
-    unordered_set(const unordered_set& set) noexcept : field(set.field) {}
-    unordered_set(unordered_set&& set) noexcept : field(std::move(set.field)) {}
+    explicit unordered_set(const unordered_set& set) noexcept
+        : field(set.field) {}
+    explicit unordered_set(unordered_set&& set) noexcept
+        : field(std::move(set.field)) {}
 
     unordered_set& operator=(const unordered_set& set) noexcept {
         field = set.field;

@@ -17,8 +17,8 @@ template <typename K, typename V>
 class map {
    public:
     map(void) noexcept : field(std::map<K, V>()) {}
-    map(const map& hashmap) noexcept : field(hashmap.field) {}
-    map(map&& hashmap) noexcept : field(std::move(hashmap.field)) {}
+    explicit map(const map& hashmap) noexcept : field(hashmap.field) {}
+    explicit map(map&& hashmap) noexcept : field(std::move(hashmap.field)) {}
 
     map& operator=(const map& hashmap) noexcept {
         field = hashmap.field;

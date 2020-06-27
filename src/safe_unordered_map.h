@@ -17,9 +17,9 @@ template <typename K, typename V>
 class unordered_map {
    public:
     unordered_map(void) noexcept : field(std::unordered_map<K, V>()) {}
-    unordered_map(const unordered_map& hashmap) noexcept
+    explicit unordered_map(const unordered_map& hashmap) noexcept
         : field(hashmap.field) {}
-    unordered_map(unordered_map&& hashmap) noexcept
+    explicit unordered_map(unordered_map&& hashmap) noexcept
         : field(std::move(hashmap.field)) {}
 
     unordered_map& operator=(const unordered_map& hashmap) noexcept {
