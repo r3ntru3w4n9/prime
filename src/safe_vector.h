@@ -18,10 +18,11 @@ template <typename T>
 class vector {
    public:
     vector(void) noexcept : field(std::vector<T>()) {}
-    vector(const vector& vec) noexcept : field(vec.field) {}
-    vector(vector&& vec) noexcept : field(std::move(vec.field)) {}
+    explicit vector(const vector& vec) noexcept : field(vec.field) {}
+    explicit vector(vector&& vec) noexcept : field(std::move(vec.field)) {}
     vector(size_t size) noexcept : field(std::move(std::vector<T>(size))) {}
-    vector(size_t size, T value) noexcept : field(std::move(std::vector<T>(size, value))) {}
+    vector(size_t size, const T& value) noexcept
+        : field(std::move(std::vector<T>(size, value))) {}
 
     vector& operator=(const vector& vec) noexcept {
         field = vec.field;
