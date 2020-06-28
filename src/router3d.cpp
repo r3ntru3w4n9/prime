@@ -59,32 +59,34 @@ bool Router3D::propagate(const unsigned pi,
     unsigned y = get_column(pi);
     unsigned z = get_layer(pi);
     int cost = _GridList[pi]->get_cost();
-    if(_pm.getLayer(z).getDirection()) {
-        if (x > 0)  // left
-        {
-            if (sub_propagate(cost, pi, pi - 1, target, allow_middle_point, net))
-                return true;
-        }
-        if (x < (_pm.getNumRows() - 1))  // right
-        {
-            if (sub_propagate(cost, pi, pi + 1, target, allow_middle_point, net))
-                return true;
-        }
-    } else {
-        if (y > 0)  // back
-        {
-            if (sub_propagate(cost, pi, pi - _pm.getNumRows(), target,
-                            allow_middle_point, net))
-                return true;
-        }
-        if (y < (_pm.getNumColumns() - 1))  // front
-        {
-            if (sub_propagate(cost, pi, pi + _pm.getNumRows(), target,
-                            allow_middle_point, net))
-                return true;
+    if(z >= net.getMinlayer()) {
+        if(_pm.getLayer(z).getDirection()) {
+            if (x > 0)  // left
+            {
+                if (sub_propagate(cost, pi, pi - 1, target, allow_middle_point, net))
+                    return true;
+            }
+            if (x < (_pm.getNumRows() - 1))  // right
+            {
+                if (sub_propagate(cost, pi, pi + 1, target, allow_middle_point, net))
+                    return true;
+            }
+        } else {
+            if (y > 0)  // back
+            {
+                if (sub_propagate(cost, pi, pi - _pm.getNumRows(), target,
+                                allow_middle_point, net))
+                    return true;
+            }
+            if (y < (_pm.getNumColumns() - 1))  // front
+            {
+                if (sub_propagate(cost, pi, pi + _pm.getNumRows(), target,
+                                allow_middle_point, net))
+                    return true;
+            }
         }
     }
-    if (z > net.getMinlayer())  // down
+    if (z > 0)  // down
     {
         if (sub_propagate(cost, pi, pi - _pm.getArea(), target,
                           allow_middle_point, net))

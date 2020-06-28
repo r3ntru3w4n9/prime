@@ -368,7 +368,7 @@ void Chip::decNumMoved() {
     assert(_movedCells.size() > 0);
 }
 
-int Chip::getNumLayers() const {
+size_t Chip::getNumLayers() const {
     return _layers.size();
 }
 

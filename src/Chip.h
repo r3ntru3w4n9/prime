@@ -92,7 +92,7 @@ class Chip {
                          // original position
 
     // accesser(use getIdx() to get the idx of Grid and Coordinate)
-    int getNumLayers() const;
+    size_t getNumLayers() const;
     size_t getNumColumns() const;
     size_t getNumRows() const;
     size_t getArea() const;

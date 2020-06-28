@@ -124,7 +124,7 @@ class Router3D {
     }
     unsigned get_idx_area(unsigned idx) const { return idx % _pm.getArea(); }
 
-    // private functions
+    // A_star functions
     bool propagate(const unsigned, const unsigned, const bool, const GridNet&);
     bool sub_propagate(const int,
                        const unsigned,
