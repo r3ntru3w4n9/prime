@@ -34,6 +34,11 @@ class QuadNode {
     bool has_left()   const;
     bool has_right()  const;
 
+    bool really_has_up()    const;
+    bool really_has_down()  const;
+    bool really_has_left()  const;
+    bool really_has_right() const;
+
     int get_self()    const;
     int get_parent()  const;
     int get_up()      const;

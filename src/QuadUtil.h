@@ -166,5 +166,31 @@ int clamp(int _x, int _min, int _max){
     if(_x > _max) return _max;
     return _x;
 }
-
 int ABS(int _x){ return _x > 0 ? _x : -_x; }
+unsigned dir2Num(const std::string s){
+    if(s.compare("up") == 0)    return 1;
+    if(s.compare("down") == 0)  return 2;
+    if(s.compare("left") == 0)  return 3;
+    if(s.compare("right") == 0) return 4;
+    assert(false);
+    return 0;
+}
+std::string num2Dir(const unsigned dir){
+    if(dir == 1) return "up";
+    if(dir == 2) return "down";
+    if(dir == 3) return "left";
+    if(dir == 4) return "right";
+    assert(false);
+    return 0;
+}
+unsigned opposite_dir(unsigned dir){
+    if(dir == 1) return 2;
+    if(dir == 2) return 1;
+    if(dir == 3) return 4;
+    if(dir == 4) return 3;
+    assert(false);
+    return 0;
+}
+unsigned opposite_dir(const std::string s){
+    return opposite_dir(dir2Num(s));
+}

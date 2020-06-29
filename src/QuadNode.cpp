@@ -47,6 +47,11 @@ bool QuadNode::has_down()   const { return down   >= 0; }
 bool QuadNode::has_left()   const { return left   >= 0; }
 bool QuadNode::has_right()  const { return right  >= 0; }
 
+bool QuadNode::really_has_up()    const { return has_up()    && up    != parent; }
+bool QuadNode::really_has_down()  const { return has_down()  && down  != parent; }
+bool QuadNode::really_has_left()  const { return has_left()  && left  != parent; }
+bool QuadNode::really_has_right() const { return has_right() && right != parent;}
+
 int QuadNode::get_self()   const { return self;   }
 int QuadNode::get_parent() const { return parent; }
 int QuadNode::get_up()     const { return up;     }
@@ -109,4 +114,3 @@ bool SimpleEdge::operator<(const SimpleEdge& se) const {
 unsigned SimpleEdge::get_v1()     const { return v1; }
 unsigned SimpleEdge::get_v2()     const { return v2; }
 unsigned SimpleEdge::get_weight() const { return weight; }
-
