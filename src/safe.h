@@ -6,6 +6,7 @@
 
 #include "safe_map.h"
 #include "safe_set.h"
+#include "safe_typedefs.h"
 #include "safe_unordered_map.h"
 #include "safe_unordered_set.h"
 #include "safe_vector.h"

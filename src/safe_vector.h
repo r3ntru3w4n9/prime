@@ -42,10 +42,13 @@ class vector {
     bool empty(void) const { return field.empty(); }
     void clear(void) { field.clear(); }
 
-    void push_back(T& value) { field.push_back(value); }
+    void push_back(const T& value) { field.push_back(value); }
     void push_back(T&& value) { field.push_back(std::move(value)); }
 
     void pop_back(void) { return field.pop_back(); }
+
+    const T& front(void) const { return field.front(); }
+    T& front(void) { return field.front(); }
 
     const T& operator[](size_t index) const {
         assert(index < field.size());
@@ -91,6 +94,12 @@ class vector {
         out << ss.str();
         return out;
     }
+
+    // typedefs
+    typedef typename std::vector<T>::size_type size_type;
+    typedef typename std::vector<T>::value_type value_type;
+    typedef typename std::vector<T>::reference reference;
+    typedef typename std::vector<T>::const_reference const_reference;
 
    private:
     std::vector<T> field;

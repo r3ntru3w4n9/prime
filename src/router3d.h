@@ -14,11 +14,10 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <queue>
 #include <utility>
-#include <vector>
 
 #include "Chip.h"
+#include "safe.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          DESCRIPTION                             ///
@@ -68,15 +67,17 @@ class grid {
 class MyComp {
    public:
     MyComp() {}
-    bool operator()(const std::shared_ptr<grid> lhs, const std::shared_ptr<grid> rhs) const {
+    bool operator()(const std::shared_ptr<grid> lhs,
+                    const std::shared_ptr<grid> rhs) const {
         return ((lhs->get_estimated()) > (rhs->get_estimated()));
     }
 };
 
 // typedef
-typedef std::vector<std::shared_ptr<grid>> GridList;
-typedef std::vector<unsigned> IdxList;
-typedef std::priority_queue<std::shared_ptr<grid>, GridList, MyComp> priority_grid;
+typedef safe::vector<std::shared_ptr<grid>> GridList;
+typedef safe::vector<unsigned> IdxList;
+typedef std::priority_queue<std::shared_ptr<grid>, GridList, MyComp>
+    priority_grid;
 
 class Router3D {
    public:
@@ -93,7 +94,8 @@ class Router3D {
                                         // a middle point of the same net
         const GridNet& net,
         IdxList& ans,  // row, column, layer
-        cost_type t);  // start, end, net, return route, cost type; true if there is a route, false if no
+        cost_type t);  // start, end, net, return route, cost type; true if
+                       // there is a route, false if no
 
     bool L_shape();
 

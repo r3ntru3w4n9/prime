@@ -1,6 +1,6 @@
 #include "router3d.h"
 
-#include "iostream"
+#include <iostream>
 
 int grid::_global_search = 0;
 
@@ -21,12 +21,14 @@ bool Router3D::A_star(const unsigned srow,
                       const unsigned elay,
                       const bool allow_middle_point,
                       const GridNet& net,
-                      std::vector<unsigned>& ans,
+                      safe::vector<unsigned>& ans,
                       cost_type t)  // return the cost of the rout
 {
     _CostType = t;
     grid::_global_search++;
-    if(_PriorityGrid) delete _PriorityGrid;
+    if (_PriorityGrid) {
+        delete _PriorityGrid;
+    }
     _PriorityGrid = new priority_grid;
     const unsigned origin = get_idx(srow, scol, slay);
     unsigned x = origin;
@@ -55,29 +57,31 @@ bool Router3D::propagate(const unsigned pi,
     unsigned y = get_column(pi);
     unsigned z = get_layer(pi);
     int cost = _GridList[pi]->get_cost();
-    if(z >= net.getMinlayer()) {
-        if(_pm.getLayer(z).getDirection()) {
+    if (z >= net.getMinlayer()) {
+        if (_pm.getLayer(z).getDirection()) {
             if (x > 0)  // left
             {
-                if (sub_propagate(cost, pi, pi - 1, target, allow_middle_point, net))
+                if (sub_propagate(cost, pi, pi - 1, target, allow_middle_point,
+                                  net))
                     return true;
             }
             if (x < (_pm.getNumRows() - 1))  // right
             {
-                if (sub_propagate(cost, pi, pi + 1, target, allow_middle_point, net))
+                if (sub_propagate(cost, pi, pi + 1, target, allow_middle_point,
+                                  net))
                     return true;
             }
         } else {
             if (y > 0)  // back
             {
                 if (sub_propagate(cost, pi, pi - _pm.getNumRows(), target,
-                                allow_middle_point, net))
+                                  allow_middle_point, net))
                     return true;
             }
             if (y < (_pm.getNumColumns() - 1))  // front
             {
                 if (sub_propagate(cost, pi, pi + _pm.getNumRows(), target,
-                                allow_middle_point, net))
+                                  allow_middle_point, net))
                     return true;
             }
         }
