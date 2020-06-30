@@ -46,4 +46,4 @@ evaluator/*
 *.dSYM
 dbg/*
 /*.sh
-/*.txt
+*.txt*
