@@ -17,6 +17,15 @@ namespace safe {
 template <typename T>
 class vector {
    public:
+    // typedef
+    typedef typename std::vector<T>::size_type size_type;
+    typedef typename std::vector<T>::value_type value_type;
+    typedef typename std::vector<T>::reference reference;
+    typedef typename std::vector<T>::const_reference const_reference;
+    typedef typename std::vector<T>::iterator iterator;
+    typedef typename std::vector<T>::const_iterator const_iterator;
+
+    // constructor
     vector(void) noexcept : field(std::vector<T>()) {}
     explicit vector(const vector& vec) noexcept : field(vec.field) {}
     explicit vector(vector&& vec) noexcept : field(std::move(vec.field)) {}
@@ -24,6 +33,7 @@ class vector {
     vector(size_t size, const T& value) noexcept
         : field(std::move(std::vector<T>(size, value))) {}
 
+    // operator=
     vector& operator=(const vector& vec) noexcept {
         field = vec.field;
         return *this;
@@ -34,11 +44,11 @@ class vector {
     }
 
     // * wrapper functions
-    void reserve(size_t capacity) { field.reserve(capacity); }
+    void reserve(size_type capacity) { field.reserve(capacity); }
 
-    void resize(size_t new_size) { field.resize(new_size); }
-    size_t size(void) const { return field.size(); }
-    size_t capacity(void) const { return field.capacity(); }
+    void resize(size_type new_size) { field.resize(new_size); }
+    size_type size(void) const { return field.size(); }
+    size_type capacity(void) const { return field.capacity(); }
     bool empty(void) const { return field.empty(); }
     void clear(void) { field.clear(); }
 
@@ -47,35 +57,31 @@ class vector {
 
     void pop_back(void) { return field.pop_back(); }
 
-    const T& front(void) const { return field.front(); }
     T& front(void) { return field.front(); }
+    const T& front(void) const { return field.front(); }
 
-    const T& operator[](size_t index) const {
-        assert(index < field.size());
-        return field[index];
-    }
     T& operator[](size_t index) {
         assert(index < field.size());
         return field[index];
     }
+    const T& operator[](size_t index) const {
+        assert(index < field.size());
+        return field[index];
+    }
 
-    const T& at(size_t index) const { return (*this)[index]; }
     T& at(size_t index) { return (*this)[index]; }
+    const T& at(size_t index) const { return (*this)[index]; }
 
-    typename std::vector<T>::iterator begin(void) { return field.begin(); }
-    typename std::vector<T>::const_iterator begin(void) const {
-        return field.begin();
-    }
+    iterator begin(void) { return field.begin(); }
+    const_iterator begin(void) const { return field.begin(); }
 
-    typename std::vector<T>::iterator end(void) { return field.end(); }
-    typename std::vector<T>::const_iterator end(void) const {
-        return field.end();
-    }
+    iterator end(void) { return field.end(); }
+    const_iterator end(void) const { return field.end(); }
 
-    typename std::vector<T>::iterator find(const T& element) {
+    iterator find(const T& element) {
         return std::find(field.begin(), field.end(), element);
     }
-    typename std::vector<T>::const_iterator find(const T& element) const {
+    const_iterator find(const T& element) const {
         return std::find(field.begin(), field.end(), element);
     }
 
@@ -94,12 +100,6 @@ class vector {
         out << ss.str();
         return out;
     }
-
-    // typedefs
-    typedef typename std::vector<T>::size_type size_type;
-    typedef typename std::vector<T>::value_type value_type;
-    typedef typename std::vector<T>::reference reference;
-    typedef typename std::vector<T>::const_reference const_reference;
 
    private:
     std::vector<T> field;

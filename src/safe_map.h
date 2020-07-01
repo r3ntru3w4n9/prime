@@ -16,10 +16,19 @@ namespace safe {
 template <typename K, typename V>
 class map {
    public:
-    map(void) noexcept : field(std::map<K, V>()) {}
+    // typedef
+    typedef typename std::map<K, V>::size_type size_type;
+    typedef typename std::map<K, V>::key_type key_type;
+    typedef typename std::map<K, V>::value_type value_type;
+    typedef typename std::map<K, V>::iterator iterator;
+    typedef typename std::map<K, V>::const_iterator const_iterator;
+
+    // constructor
+    explicit map(void) noexcept : field(std::map<K, V>()) {}
     explicit map(const map& hashmap) noexcept : field(hashmap.field) {}
     explicit map(map&& hashmap) noexcept : field(std::move(hashmap.field)) {}
 
+    // operator=
     map& operator=(const map& hashmap) noexcept {
         field = hashmap.field;
         return *this;
@@ -29,12 +38,12 @@ class map {
         return *this;
     }
 
-    void reserve(size_t capacity) { field.reserve(capacity); }
+    void reserve(size_type capacity) { field.reserve(capacity); }
     bool empty(void) const { return field.empty(); }
     void clear(void) { field.clear(); }
 
-    void rehash(size_t new_size) { field.rehash(new_size); }
-    size_t size(void) const { return field.size(); }
+    void rehash(size_type new_size) { field.rehash(new_size); }
+    size_type size(void) const { return field.size(); }
 
     const V& operator[](const K& key) const { return find(key)->second; }
     V& operator[](const K& key) { return field[key]; }
@@ -49,27 +58,19 @@ class map {
         return field[key];
     }
 
-    size_t erase(const K& key) {
+    size_type erase(const key_type& key) {
         assert(contains(key));
         return field.erase(key);
     }
 
-    typename std::map<K, V>::iterator begin(void) { return field.begin(); }
-    typename std::map<K, V>::const_iterator begin(void) const {
-        return field.begin();
-    }
+    iterator begin(void) { return field.begin(); }
+    const_iterator begin(void) const { return field.begin(); }
 
-    typename std::map<K, V>::iterator end(void) { return field.end(); }
-    typename std::map<K, V>::const_iterator end(void) const {
-        return field.end();
-    }
+    iterator end(void) { return field.end(); }
+    const_iterator end(void) const { return field.end(); }
 
-    typename std::map<K, V>::iterator find(const K& key) {
-        return field.find(key);
-    }
-    typename std::map<K, V>::const_iterator find(const K& key) const {
-        return field.find(key);
-    }
+    iterator find(const K& key) { return field.find(key); }
+    const_iterator find(const K& key) const { return field.find(key); }
 
     bool contains(const K& key) const { return find(key) != end(); }
 
@@ -92,4 +93,5 @@ class map {
    private:
     std::map<K, V> field;
 };
+
 }  // namespace safe

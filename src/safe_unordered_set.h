@@ -17,12 +17,20 @@ namespace safe {
 template <typename T>
 class unordered_set {
    public:
-    unordered_set(void) noexcept : field(std::unordered_set<T>()) {}
+    // typedef
+    typedef typename std::unordered_set<T>::size_type size_type;
+    typedef typename std::unordered_set<T>::value_type value_type;
+    typedef typename std::unordered_set<T>::const_iterator const_iterator;
+    typedef typename std::unordered_set<T>::iterator iterator;
+
+    // constructor
+    explicit unordered_set(void) noexcept : field(std::unordered_set<T>()) {}
     explicit unordered_set(const unordered_set& set) noexcept
         : field(set.field) {}
     explicit unordered_set(unordered_set&& set) noexcept
         : field(std::move(set.field)) {}
 
+    // operator=
     unordered_set& operator=(const unordered_set& set) noexcept {
         field = set.field;
         return *this;
@@ -35,33 +43,23 @@ class unordered_set {
     // * wrapper functions
     void clear(void) { field.clear(); }
     bool empty(void) const { return field.empty(); }
-    std::pair<typename std::unordered_set<T>::iterator, bool> insert(
-        const T& val) {
+    std::pair<iterator, bool> insert(const T& val) {
         return field.insert(std::move(val));
     }
-    std::pair<typename std::unordered_set<T>::iterator, bool> insert(T&& val) {
+    std::pair<iterator, bool> insert(T&& val) {
         return field.insert(std::move(val));
     }
+    void erase(iterator position) { field.erase(position); }
+    size_type erase(const value_type& val) { return field.erase(val); }
 
-    typename std::unordered_set<T>::iterator begin(void) {
-        return field.begin();
-    }
-    typename std::unordered_set<T>::const_iterator begin(void) const {
-        return field.begin();
-    }
+    iterator begin(void) { return field.begin(); }
+    const_iterator begin(void) const { return field.begin(); }
 
-    typename std::unordered_set<T>::iterator end(void) { return field.end(); }
-    typename std::unordered_set<T>::const_iterator end(void) const {
-        return field.end();
-    }
+    iterator end(void) { return field.end(); }
+    const_iterator end(void) const { return field.end(); }
 
-    typename std::unordered_set<T>::iterator find(const T& element) {
-        return field.find(element);
-    }
-    typename std::unordered_set<T>::const_iterator find(
-        const T& element) const {
-        return field.find(element);
-    }
+    iterator find(const T& element) { return field.find(element); }
+    const_iterator find(const T& element) const { return field.find(element); }
 
     bool contains(const T& element) const { return find(element) != end(); }
 
