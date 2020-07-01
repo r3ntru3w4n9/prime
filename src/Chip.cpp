@@ -241,7 +241,7 @@ void Chip::readFile(std::fstream& input) {
 
         _grid_nets.push_back(GridNet(str, i, numPins, minLay));
         // TODO:
-        _quad_tree_nets.push_back(QuadTree(str, i, minLay, _rowRange, _columnRange));
+        // _quad_tree_nets.push_back(QuadTree(str, i, minLay, _rowRange, _columnRange));
 
         // ! substituted
         // TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
@@ -268,7 +268,7 @@ void Chip::readFile(std::fstream& input) {
                 getIdx(pin.getRow(), pin.getColumn()));
             g.addNet(_grid_nets[i]);
             // TODO: add pin to quad tree
-            _quad_tree_nets[i].add_pin(&pin);
+            // _quad_tree_nets[i].add_pin(&pin);
         }
     }
 
@@ -292,9 +292,9 @@ void Chip::readFile(std::fstream& input) {
         GridNet& net = _grid_nets[_Net2Idx.at(str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
-        _quad_tree_nets[_Net2Idx.at(str)].add_segment(
-            srow - _rowBase, scol - _columnBase, slay - 1,
-            erow - _rowBase, ecol - _columnBase, elay - 1);
+        // _quad_tree_nets[_Net2Idx.at(str)].add_segment(
+        //     srow - _rowBase, scol - _columnBase, slay - 1,
+        //     erow - _rowBase, ecol - _columnBase, elay - 1);
         // ! substituted
         // segments[str].push_back(Segment(srow - _rowBase, scol - _columnBase,
         //                                 slay - 1, erow - _rowBase,
@@ -303,9 +303,9 @@ void Chip::readFile(std::fstream& input) {
 
     // safe::unordered_map<std::string, TreeNet> all_nets;
     // TODO: construct quad trees
-    for(size_t i = 0; i < _quad_tree_nets.size(); ++i){
-        _quad_tree_nets[i].construct_tree();
-    }
+    // for(size_t i = 0; i < _quad_tree_nets.size(); ++i){
+    //     _quad_tree_nets[i].construct_tree();
+    // }
 }
 
 Chip::~Chip() {

@@ -133,7 +133,7 @@ class Chip {
     // !
     safe::vector<GridNet> _grid_nets;
     // FIXME this should not be placed here:
-    safe::vector<QuadTree> _quad_tree_nets;
+    // safe::vector<QuadTree> _quad_tree_nets;
 
     // ! substituted
     // safe::vector<TreeNet> _tree_nets;
