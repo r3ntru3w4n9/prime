@@ -311,7 +311,17 @@ void Chip::readFile(std::fstream& input) {
 }
 
 Chip::~Chip() {
-
+    // _Layer2Idx.clear();
+    // _MasterCell2Idx.clear();
+    // _Cell2Idx.clear();
+    // _Net2Idx.clear();
+    // _layers.clear();
+    // _coordinates.clear();
+    // _MasterCells.clear();
+    // _cells.clear();
+    // _grid_nets.clear();
+    // _movedCells.clear();
+    
     // debug
     // std::fstream out("out.txt", std::ios::out);
     // for (Layer* ptr : _layers) {
@@ -367,6 +377,14 @@ size_t Chip::getNumColumns() const {
 
 size_t Chip::getNumRows() const {
     return _rowRange;
+}
+
+size_t Chip::getRowBase() const {
+    return _rowBase;
+}
+
+size_t Chip::getColumnBase() const {
+    return _columnBase;
 }
 
 size_t Chip::getArea() const {

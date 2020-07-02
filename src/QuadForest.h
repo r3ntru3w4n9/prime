@@ -15,20 +15,25 @@ class QuadForest{
    public:
     QuadForest() noexcept;
     QuadForest(Chip& chip) noexcept;
-    ~QuadForest() noexcept;
+    // ~QuadForest() noexcept;
 
     void construct_forest(Chip& chip);
 
-    unsigned size() const;
-    QuadTree& get_tree(unsigned idx);
+    size_t size() const;
+    QuadTree& get_tree(size_t idx);
     QuadTree& get_tree(std::string s);
+    QuadTree& operator[](size_t idx);
+    const QuadTree& operator[](size_t idx) const;
 
     void push_back(const QuadTree& qt);
     void push_back(QuadTree&& qt);
 
-    void clear();
+    // void clear();
+    void return_segments(Chip& chip);
 
    private:
+    int                     baseRowIdx;
+    int                     baseColIdx;
     int                        maxRows;
     int                        maxCols;
     int                      maxLayers;
@@ -37,4 +42,7 @@ class QuadForest{
 
     safe::vector<std::shared_ptr<Pin>> pins;
     safe::vector<unsigned>     pins_in_tree;
+
+    // friend
+    friend std::ostream& operator<<(std::ostream& out, QuadForest& qf);
 };

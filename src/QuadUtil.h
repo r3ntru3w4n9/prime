@@ -21,6 +21,7 @@ class NetSegment{
     // constructor
     NetSegment() noexcept;
     NetSegment(int xs, int ys, int xe, int ye, int l) noexcept;
+    NetSegment(int xs, int ys, int xe, int ye, int l, int le) noexcept;
 
     // NetSegment& operator=(const NetSegment& ns) noexcept {
     //     x_start = ns.get_xs(); x_end = ns.get_xe();
@@ -42,8 +43,9 @@ class NetSegment{
     const int& get_xe() const;
     const int& get_ye() const;
     const int& get_layer() const;
+    const int& get_layer_end() const;
     CoordPair get_start() const;
-    CoordPair get_end()   const;
+    CoordPair get_end() const;
     // direction: true -> vertical, false -> horizontal
     bool get_direction() const;
     unsigned get_length() const;
@@ -57,7 +59,7 @@ class NetSegment{
     NetSegment split_segment(CoordPair& coord);
 
    private:
-    int x_start, y_start, x_end, y_end, layer;
+    int x_start, y_start, x_end, y_end, layer_start, layer_end;
 
     friend std::ostream& operator<<(std::ostream& out, const NetSegment& ns);
 };

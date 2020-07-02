@@ -95,6 +95,8 @@ class Chip {
     size_t getNumLayers() const;
     size_t getNumColumns() const;
     size_t getNumRows() const;
+    size_t getRowBase() const;
+    size_t getColumnBase() const;
     size_t getArea() const;
     size_t getVolume() const;
     size_t getNumNets() const;

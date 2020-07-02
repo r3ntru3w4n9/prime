@@ -5,24 +5,24 @@
 #include "QuadTree.h"
 
 QuadTree::QuadTree() noexcept
-    : _NetName(""), _NetId(-1), _minLayer(-1), _maxRows(0), _maxCols(0), root_idx(-1), flag(0) {
+    : _NetName(""), _NetId(-1), _baseRow(-1), _baseCol(-1), _minLayer(-1), _maxRows(0), _maxCols(0), root_idx(-1), flag(0) {
     segments.clear();
 }
 
-QuadTree::QuadTree(std::string n, int n_id, int min_lay, int max_row, int max_col) noexcept
-    : _NetName(n), _NetId((int)n_id), _minLayer((int)min_lay), _maxRows((int)max_row), _maxCols((int)max_col), root_idx(-1), flag(0) {
+QuadTree::QuadTree(std::string n, int n_id, int min_lay, int base_row, int base_col, int max_row, int max_col) noexcept
+    : _NetName(n), _NetId(n_id), _baseRow(base_row), _baseCol(base_col), _minLayer(min_lay), _maxRows(max_row), _maxCols(max_col), root_idx(-1), flag(0) {
     segments.clear();
 }
 
-QuadTree::~QuadTree() noexcept {
-    reset_tree();
-}
+// QuadTree::~QuadTree() noexcept {
+//     reset_tree();
+// }
 
 // access to basic attributes
-const std::string& QuadTree::get_name() const { return  _NetName; }
-const int& QuadTree::get_net_id()       const { return    _NetId; }
-const int& QuadTree::get_min_layer()    const { return _minLayer; }
-const int& QuadTree::get_root_idx()     const { return  root_idx; }
+std::string QuadTree::get_name() const { return  _NetName; }
+int QuadTree::get_net_id()       const { return    _NetId; }
+int QuadTree::get_min_layer()    const { return _minLayer; }
+int QuadTree::get_root_idx()     const { return  root_idx; }
 bool QuadTree::is_built()               const { return root_idx != -1; }
 
 // get nodes / pins
@@ -63,8 +63,11 @@ QuadNode& QuadTree::get_node(const unsigned _x, const unsigned _y){
     assert(is_built() && idx >= 0);
     return nodes[idx];
 }
-safe::vector<std::shared_ptr<Pin>>& QuadTree::get_pin_list() {
+safe::vector<std::shared_ptr<Pin>>& QuadTree::get_pin_list(){
     return pins;
+}
+safe::vector<NetSegment>& QuadTree::get_segments(){
+    return segments;
 }
 
 unsigned QuadTree::get_net_length() const { return 0; }
@@ -94,11 +97,16 @@ void QuadTree::construct_tree(){
     segment_to_tree();
     // optimize();
 }
-
+void QuadTree::convert_to_segments(){
+    tree_to_segment();
+}
 void QuadTree::reset_tree(){
     root_idx = -1;
     flag = 0;
     nodes.clear();
+    for(size_t i = 0; i < pins.size(); ++i){
+        pins[i].reset();
+    }
     pins.clear();
     coord2Node.clear();
 }
@@ -191,6 +199,7 @@ inline int QuadTree::move_pin(unsigned idx, int delta_x, int delta_y){
 // }
 
 void QuadTree::segment_to_tree(){
+    print_segments();
     safe::unordered_map<unsigned, CoordPair> Vertices;
     safe::map<CoordPair, unsigned> Coord2Vertices;
     safe::vector<SimpleEdge> EdgeGraph;
@@ -204,19 +213,25 @@ void QuadTree::segment_to_tree(){
             Coord2Vertices[pinCoord] = pNum;
             Vertices[pNum] = pinCoord;
             VertexLayer[pNum] = pins[i]->getLayer();
+            pins2NodeIdx.push_back(pNum);
             ++pNum;
+        } else { // Different pins with same x, y coordinate but on different layers
+            pins2NodeIdx.push_back(Coord2Vertices[pinCoord]);
         }
     } // Now we know the number of pins is pNum
-    assert(pNum == pins.size());
-    
-    assert(segments.size() > 0);
-    print_segments();
+    assert(pins.size() == pins2NodeIdx.size());
+
+    // assert(segments.size() > 0);
     bool operation = true;
-    while(operation){ // merge overlapping segments
+    while(operation && segments.size() > 0){ // merge overlapping segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
             for(size_t j = i + 1; j < segments.size(); ++j){
-                if(segments[i].check_overlap(segments[j])){
+                if(segments[i].check_overlap(segments[j])
+                   && !Coord2Vertices.contains(segments[i].get_start())
+                   && !Coord2Vertices.contains(segments[i].get_end())
+                   && !Coord2Vertices.contains(segments[j].get_start())
+                   && !Coord2Vertices.contains(segments[j].get_end())){
                     std::cout << "i = " << i << " j = " << j << std::endl;
                     segments[i].merge_segment(segments[j]);
                     segments[j] = segments[segments.size() - 1];
@@ -228,7 +243,7 @@ void QuadTree::segment_to_tree(){
         }
         if(operation) print_segments();
     } operation = true;
-    while(operation){ // split intersected segments
+    while(operation && segments.size() > 0){ // split intersected segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
             for(size_t j = i + 1; j < segments.size(); ++j){
@@ -453,9 +468,93 @@ unsigned QuadTree::check_direction(const CoordPair c_1, const CoordPair c_2) con
     return 0;
 }
 
+void QuadTree::tree_to_segment() {
+    segments.clear();
+    dfs_extract_segments(0, -1);
+    // Fix problems of different pins with same coordinates but different layers.
+    // Add via for those pins
+    for(size_t i = 0; i < pins.size(); ++i){
+        if(nodes[pins2NodeIdx[i]].get_layer() != pins[i]->getLayer()){
+            segments.push_back(
+                NetSegment(nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
+                           nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
+                           nodes[pins2NodeIdx[i]].get_layer(), pins[i]->getLayer()));
+        }
+    }
+}
+
+inline void QuadTree::dfs_extract_segments(const unsigned now, const int parent){
+    if(nodes[now].has_up() && nodes[now].get_up() != parent){
+        int up = nodes[now].get_up();
+        segments.push_back(
+            NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(), 
+                        nodes[up].get_coord_x(), nodes[up].get_coord_y(), 
+                        nodes[now].get_layer()));
+        if(nodes[now].get_layer() != nodes[up].get_layer()){
+            segments.push_back(
+                NetSegment(nodes[up].get_coord_x(), nodes[up].get_coord_y(), 
+                           nodes[up].get_coord_x(), nodes[up].get_coord_y(), 
+                           nodes[now].get_layer(), nodes[up].get_layer())); // via
+        }
+        dfs_extract_segments(up, now);
+    }
+    if(nodes[now].has_down() && nodes[now].get_down() != parent){
+        int down = nodes[now].get_down();
+        segments.push_back(
+            NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(), 
+                        nodes[down].get_coord_x(), nodes[down].get_coord_y(), 
+                        nodes[now].get_layer()));
+        if(nodes[now].get_layer() != nodes[down].get_layer()){
+            segments.push_back(
+                NetSegment(nodes[down].get_coord_x(), nodes[down].get_coord_y(), 
+                           nodes[down].get_coord_x(), nodes[down].get_coord_y(), 
+                           nodes[now].get_layer(), nodes[down].get_layer())); // via
+        }
+        dfs_extract_segments(down, now);
+    }
+    if(nodes[now].has_left() && nodes[now].get_left() != parent){
+        int left = nodes[now].get_left();
+        segments.push_back(
+            NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(), 
+                        nodes[left].get_coord_x(), nodes[left].get_coord_y(), 
+                        nodes[now].get_layer()));
+        if(nodes[now].get_layer() != nodes[left].get_layer()){
+            segments.push_back(
+                NetSegment(nodes[left].get_coord_x(), nodes[left].get_coord_y(), 
+                           nodes[left].get_coord_x(), nodes[left].get_coord_y(), 
+                           nodes[now].get_layer(), nodes[left].get_layer())); // via
+        }
+        dfs_extract_segments(left, now);
+    }
+    if(nodes[now].has_right() && nodes[now].get_right() != parent){
+        int right = nodes[now].get_right();
+        segments.push_back(
+            NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(), 
+                        nodes[right].get_coord_x(), nodes[right].get_coord_y(), 
+                        nodes[now].get_layer()));
+        if(nodes[now].get_layer() != nodes[right].get_layer()){
+            segments.push_back(
+                NetSegment(nodes[right].get_coord_x(), nodes[right].get_coord_y(), 
+                           nodes[right].get_coord_x(), nodes[right].get_coord_y(), 
+                           nodes[now].get_layer(), nodes[right].get_layer())); // via
+        }
+        dfs_extract_segments(right, now);
+    }
+}
 
 void QuadTree::print_segments() {
     for(size_t i = 0; i < segments.size(); ++i) {
         std::cout << "i = " << i << ", " << segments[i] << std::endl;
     }
 }
+
+std::ostream& operator<<(std::ostream& out, const QuadTree& qt){
+    // out << "NumRoutes" << qt.segments.size() << std::endl;
+    for(size_t i = 0; i < qt.segments.size(); ++i){
+        out << qt.segments[i].get_xs() + qt._baseRow << " " << qt.segments[i].get_ys() + qt._baseCol << " " << qt.segments[i].get_layer() << " "
+            << qt.segments[i].get_xe() + qt._baseRow << " " << qt.segments[i].get_ye() + qt._baseCol << " " << qt.segments[i].get_layer_end() << " "
+            << qt._NetName << std::endl;
+    }
+    return out;
+}
+

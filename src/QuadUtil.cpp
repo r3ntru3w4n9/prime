@@ -5,16 +5,29 @@
 #include "QuadUtil.h"
 
 NetSegment::NetSegment() noexcept
-    : x_start(-1), y_start(-1), x_end(-1), y_end(-1), layer(-1) {}
+    : x_start(-1), y_start(-1), x_end(-1), y_end(-1), layer_start(-1), layer_end(-1) {}
 
 NetSegment::NetSegment(int xs, int ys, int xe, int ye, int l) noexcept
-    : x_start(xs), y_start(ys), x_end(xe), y_end(ye), layer(l) {
+    : x_start(xs), y_start(ys), x_end(xe), y_end(ye), layer_start(l), layer_end(l) {
     if(x_start > x_end || y_start > y_end){
         std::swap(x_start, x_end);
         std::swap(y_start, y_end);
     }
     assert(x_start <= x_end);
     assert(y_start <= y_end);
+}
+NetSegment::NetSegment(int xs, int ys, int xe, int ye, int l, int le) noexcept
+    : x_start(xs), y_start(ys), x_end(xe), y_end(ye), layer_start(l), layer_end(le) {
+    if(x_start > x_end || y_start > y_end){
+        std::swap(x_start, x_end);
+        std::swap(y_start, y_end);
+    }
+    if(layer_start > layer_end){
+        std::swap(layer_start, layer_end);
+    }
+    assert(x_start <= x_end);
+    assert(y_start <= y_end);
+    assert(layer_start <= layer_end);
 }
 
 bool NetSegment::operator<(const NetSegment& ns) const {
@@ -26,7 +39,7 @@ bool NetSegment::operator<(const NetSegment& ns) const {
     else if (y_start > ns.get_ys()) return false;
     else if (y_end   < ns.get_ye()) return  true;
     else if (y_end   > ns.get_ye()) return false;
-    else if (layer   < ns.get_layer()) return true;
+    else if (layer_start < ns.get_layer()) return true;
     else return true;
 }
 bool NetSegment::operator!=(const NetSegment& ns) const {
@@ -37,7 +50,8 @@ const int& NetSegment::get_xs() const { return x_start; }
 const int& NetSegment::get_ys() const { return y_start; }
 const int& NetSegment::get_xe() const { return   x_end; }
 const int& NetSegment::get_ye() const { return   y_end; }
-const int& NetSegment::get_layer() const { return layer; }
+const int& NetSegment::get_layer() const { return layer_start; }
+const int& NetSegment::get_layer_end() const { return layer_end; }
 CoordPair NetSegment::get_start() const { return CoordPair(x_start, y_start); }
 CoordPair NetSegment::get_end()   const { return CoordPair(x_end,   y_end);   }
 bool NetSegment::get_direction() const { return (x_start < x_end) ? true : false; }
@@ -94,11 +108,11 @@ void NetSegment::merge_segment(NetSegment& ns) { // merge two parallel segments
 }
 NetSegment NetSegment::split_segment(CoordPair& coord) { // split segment
     if(get_direction() && x_start < coord.first && x_end > coord.first){ // vertical (difference: x)
-        NetSegment splitted(coord.first, y_start, x_end, y_end, layer);
+        NetSegment splitted(coord.first, y_start, x_end, y_end, layer_start);
         x_end = coord.first;
         return splitted;
     } else if (!get_direction() && y_start < coord.second && y_end > coord.second) { // horizontal
-        NetSegment splitted(x_start, coord.second, x_end, y_end, layer);
+        NetSegment splitted(x_start, coord.second, x_end, y_end, layer_start);
         y_end = coord.second;
         return splitted;
     } else {

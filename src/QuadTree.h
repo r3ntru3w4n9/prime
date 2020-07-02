@@ -27,15 +27,16 @@ class QuadTree {
     QuadTree() noexcept;
     QuadTree(std::string n, 
         int n_id, int min_lay, 
+        int base_row, int base_col,
         int max_row, int max_col) noexcept;
-    ~QuadTree() noexcept;
+    // ~QuadTree() noexcept;
 
     // access to basic attributes
-    const std::string&    get_name() const;
-    const int&          get_net_id() const;
-    const int&       get_min_layer() const;
-    const int&        get_root_idx() const;
-    bool                  is_built() const;
+    std::string    get_name() const;
+    int          get_net_id() const;
+    int       get_min_layer() const;
+    int        get_root_idx() const;
+    bool           is_built() const;
 
     // get nodes / pins
     unsigned  size() const;
@@ -51,6 +52,7 @@ class QuadTree {
     QuadNode& get_node(const CoordPair& _coord);
     QuadNode& get_node(const unsigned _x, const unsigned _y);
     safe::vector<std::shared_ptr<Pin>>& get_pin_list();
+    safe::vector<NetSegment>& get_segments();
 
     // get information about the net
     unsigned get_net_length() const;
@@ -68,11 +70,14 @@ class QuadTree {
     void add_pin(std::shared_ptr<Pin> p); // TODO: is this necessary?
     void add_segment(int srow, int scol, int slay, int erow, int ecol, int elay);
     void construct_tree();
+    void convert_to_segments();
     void reset_tree();
 
    private:
     const std::string                _NetName;
     const int                          _NetId;
+    const int                        _baseRow;
+    const int                        _baseCol;
     const int                       _minLayer;
     const int                        _maxRows;
     const int                        _maxCols;
@@ -82,7 +87,8 @@ class QuadTree {
     safe::vector<QuadNode>              nodes; // pins will be at the front of this vector
     safe::map<CoordPair, unsigned> coord2Node;
     safe::vector<std::shared_ptr<Pin>>   pins; // TODO: is this necessary?
-    
+    safe::vector<unsigned>       pins2NodeIdx;
+
     // Temporary members for constructing the tree
     safe::vector<NetSegment>         segments;
 
@@ -116,11 +122,13 @@ class QuadTree {
                                    const unsigned now, const int parent);
     unsigned check_direction(const CoordPair c_1, const CoordPair c_2) const;
     
-    void tree_to_segment(); // TODO: return net as segments
+    void tree_to_segment();
+    inline void dfs_extract_segments(const unsigned now, const int parent);
     
     // Debug functions
     void print_segments();
     
     // friends
     // TODO: print tree
+    friend std::ostream& operator<<(std::ostream& out, const QuadTree& qt);
 };
