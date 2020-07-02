@@ -12,7 +12,6 @@
 
 #include "Chip.h"
 #include "QuadNode.h"
-#include "QuadUtil.h"
 #include "Cell.h"
 #include "safe.h"
 
@@ -63,7 +62,7 @@ class QuadTree {
     int move_horizontal(unsigned idx, int delta_y);
 
     // operations on the whole net
-    void optimize(unsigned max_iter = DEFAULT_OPT);
+    // void optimize(unsigned max_iter = DEFAULT_OPT);
 
     // constructing the tree
     void add_pin(std::shared_ptr<Pin> p); // TODO: is this necessary?
@@ -97,7 +96,7 @@ class QuadTree {
     inline int move_pin(unsigned idx, int delta_x, int delta_y);
     
     // Optimization
-    void self_optimize();
+    // void self_optimize();
 
     // Segment / Tree conversion functions
     void segment_to_tree();
@@ -112,12 +111,15 @@ class QuadTree {
                                     const unsigned now, const unsigned parent);
     inline void dfs_construct_tree(safe::vector<unsigned> SimpleTree[],
                                    safe::unordered_map<unsigned, CoordPair>& Vertices,
+                                   safe::unordered_map<unsigned, int>& VertexLayer,
                                    safe::vector<int>& new_idx_mapping,
                                    const unsigned now, const int parent);
     unsigned check_direction(const CoordPair c_1, const CoordPair c_2) const;
     
     void tree_to_segment(); // TODO: return net as segments
-
+    
+    // Debug functions
+    void print_segments();
     
     // friends
     // TODO: print tree

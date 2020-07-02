@@ -9,8 +9,6 @@
 #include <assert.h>
 
 #include "QuadTree.h"
-#include "QuadNode.h"
-#include "QuadUtil.h"
 
 // Manage all nets
 class QuadForest{
@@ -27,6 +25,8 @@ class QuadForest{
 
     void push_back(const QuadTree& qt);
     void push_back(QuadTree&& qt);
+
+    void clear();
 
    private:
     int                        maxRows;

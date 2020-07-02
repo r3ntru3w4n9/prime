@@ -68,7 +68,7 @@ safe::vector<std::shared_ptr<Pin>>& QuadTree::get_pin_list() {
 }
 
 unsigned QuadTree::get_net_length() const { return 0; }
-unsigned QuadTree::get_subnet_length(unsigned idx) const { return 0; }
+unsigned QuadTree::get_subnet_length(unsigned idx) const { assert(idx < nodes.size()); return 0; }
 CoordPair QuadTree::get_bounding_box_size() const { return CoordPair(); }
 
 int QuadTree::move_vertical(unsigned idx, int delta_x){
@@ -80,9 +80,9 @@ int QuadTree::move_horizontal(unsigned idx, int delta_y){
     return move_pin(idx, 0, delta_y);
 }
 
-void QuadTree::optimize(unsigned max_iter = DEFAULT_OPT){
-    // TODO:
-}
+// void QuadTree::optimize(unsigned max_iter = DEFAULT_OPT){
+//     // TODO:
+// }
 
 void QuadTree::add_pin(std::shared_ptr<Pin> p) { pins.push_back(p); }
 void QuadTree::add_segment(int srow, int scol, int slay, 
@@ -122,7 +122,7 @@ void QuadTree::merge_nodes(QuadNode& n_1, QuadNode& n_2, const std::string dir){
     // merge node n_1 to n_2 from dir (direction)
     assert(can_merge(n_1, n_2, dir));
     unsigned direction = dir2Num(dir), opp_direction = opposite_dir(dir);
-    assert(direction >= 1 && direction <= 4);
+    assert(direction >= 1 && direction <= 4 && opp_direction >= 1 && opp_direction <=4);
     if(direction == 1 || direction == 2){
         if(!n_2.has_left())  n_2.set_left(n_1.get_left());
         if(!n_2.has_right()) n_2.set_right(n_1.get_right());
@@ -139,7 +139,6 @@ void QuadTree::delete_node(){
     // TODO:
 }
 inline int QuadTree::move_pin(unsigned idx, int delta_x, int delta_y){
-    if(idx < 0) return 0;
     assert(is_built() && idx < size());
     assert(delta_x * delta_y == 0); // move in one direction at a time
     if(nodes[idx].get_flag() == flag) return 0;
@@ -184,20 +183,41 @@ inline int QuadTree::move_pin(unsigned idx, int delta_x, int delta_y){
     } else {       // horizontal
 
     }
+    return 0;
 }
 
-void QuadTree::self_optimize(){
+// void QuadTree::self_optimize(){
 
-}
+// }
 
 void QuadTree::segment_to_tree(){
+    safe::unordered_map<unsigned, CoordPair> Vertices;
+    safe::map<CoordPair, unsigned> Coord2Vertices;
+    safe::vector<SimpleEdge> EdgeGraph;
+    safe::unordered_map<unsigned, int> VertexLayer;
+    // Construct vertices from pins
+    unsigned pNum = 0;
+    for(size_t i = 0; i < pins.size(); ++i){ // Add pins to Vertices
+        CoordPair pinCoord(pins[i]->getRow(), pins[i]->getColumn());
+        std::cout << "pin " << i << " (" << pinCoord.first << ", " << pinCoord.second << ")" << std::endl;
+        if(!Coord2Vertices.contains(pinCoord)){ // Assume that all pins have different coordinates
+            Coord2Vertices[pinCoord] = pNum;
+            Vertices[pNum] = pinCoord;
+            VertexLayer[pNum] = pins[i]->getLayer();
+            ++pNum;
+        }
+    } // Now we know the number of pins is pNum
+    assert(pNum == pins.size());
+    
     assert(segments.size() > 0);
+    print_segments();
     bool operation = true;
     while(operation){ // merge overlapping segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
             for(size_t j = i + 1; j < segments.size(); ++j){
                 if(segments[i].check_overlap(segments[j])){
+                    std::cout << "i = " << i << " j = " << j << std::endl;
                     segments[i].merge_segment(segments[j]);
                     segments[j] = segments[segments.size() - 1];
                     segments.pop_back();
@@ -206,12 +226,15 @@ void QuadTree::segment_to_tree(){
                 }
             }
         }
+        if(operation) print_segments();
     } operation = true;
     while(operation){ // split intersected segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
             for(size_t j = i + 1; j < segments.size(); ++j){
                 CoordPair intersection = segments[i].get_instersect(segments[j]);
+                // std::cout << "i = " << i << " j = " << j << " intersection = " 
+                //           << intersection.first << ", " << intersection.second << std::endl;
                 if(intersection != CoordPair(-1, -1)){
                     NetSegment splitted_1 = segments[i].split_segment(intersection);
                     NetSegment splitted_2 = segments[j].split_segment(intersection);
@@ -222,20 +245,8 @@ void QuadTree::segment_to_tree(){
             }
         }
     }
-    safe::unordered_map<unsigned, CoordPair> Vertices;
-    safe::map<CoordPair, unsigned> Coord2Vertices;
-    safe::vector<SimpleEdge> EdgeGraph;
-    // Construct vertices from pins
-    unsigned pNum = 0;
-    for(size_t i = 0; i < pins.size(); ++i){ // Add pins to Vertices
-        CoordPair pinCoord(pins[i]->getRow(), pins[i]->getColumn());
-        if(!Coord2Vertices.contains(pinCoord)){
-            Coord2Vertices[pinCoord] = pNum;
-            Vertices[pNum] = pinCoord;
-            ++pNum;
-        }
-    } // Now we know the number of pins is pNum
-    assert(pNum == pins.size());
+    print_segments();
+    
     // Construct graph by segments
     unsigned vNum = pNum;
     for(size_t i = 0; i < segments.size(); ++i){ // Add segments to graph
@@ -246,6 +257,7 @@ void QuadTree::segment_to_tree(){
             start_idx = Coord2Vertices[start_coord];
         } else {
             Vertices[vNum] = start_coord;
+            VertexLayer[vNum] = segments[i].get_layer();
             Coord2Vertices[start_coord] = vNum;
             start_idx = vNum++;
         }
@@ -253,6 +265,7 @@ void QuadTree::segment_to_tree(){
             end_idx = Coord2Vertices[end_coord];
         } else {
             Vertices[vNum] = end_coord;
+            VertexLayer[vNum] = segments[i].get_layer();
             Coord2Vertices[end_coord] = vNum;
             end_idx = vNum++;
         }
@@ -280,6 +293,7 @@ void QuadTree::segment_to_tree(){
     safe::vector<unsigned> SimpleTree[vNum];
     unsigned tree_size = 1; // tree size = # of vertices = # of edges + 1
     for(size_t i = 0; i < EdgeGraph.size(); ++i){
+        std::cout << selected_edges[i] << std::endl;
         if(selected_edges[i]){
             unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2();
             SimpleTree[v1].push_back(v2);
@@ -304,12 +318,14 @@ void QuadTree::segment_to_tree(){
     safe::vector<int> new_idx_mapping(vNum); // maps old indices to new ones
     unsigned new_idx = 0;
     for(size_t i = 0; i < vNum; ++i){
+        std::cout << vertex_rank[i] << std::endl;
         if(vertex_rank[i] > -EPS){
             new_idx_mapping[i] = new_idx++;
         } else {
             new_idx_mapping[i] = -1;
         }
     }
+    std::cout << new_idx << " " << tree_size << std::endl;
     assert(new_idx == tree_size);
 
     // Construct quad nodes
@@ -317,7 +333,7 @@ void QuadTree::segment_to_tree(){
         nodes.push_back(QuadNode(i));
     }
     // Construct quad tree
-    dfs_construct_tree(SimpleTree, Vertices, new_idx_mapping, found_center, -1);
+    dfs_construct_tree(SimpleTree, Vertices, VertexLayer, new_idx_mapping, found_center, -1);
     
     // Final preperation
     root_idx = new_idx_mapping[found_center];
@@ -325,6 +341,7 @@ void QuadTree::segment_to_tree(){
     for(size_t i = 0; i < nodes.size(); ++i){ // set coordinate to node index mapping
         coord2Node[nodes[i].get_coord()] = i;
     }
+    std::cout << "tree size: " << nodes.size() << std::endl;
 
     segments.clear();
 }
@@ -401,11 +418,13 @@ inline unsigned QuadTree::dfs_tree_center(
 inline void QuadTree::dfs_construct_tree(
         safe::vector<unsigned> SimpleTree[],
         safe::unordered_map<unsigned, CoordPair>& Vertices,
+        safe::unordered_map<unsigned, int>& VertexLayer,
         safe::vector<int>& new_idx_mapping,
         const unsigned now, 
         const int parent){
     // Use DFS to construct quad tree
     nodes[new_idx_mapping[now]].set_parent(parent);
+    nodes[new_idx_mapping[now]].set_layer(VertexLayer[now]);
     nodes[new_idx_mapping[now]].reset_coord(Vertices[now]);
     for(size_t i = 0; i < SimpleTree[now].size(); ++i){
         unsigned direction = check_direction(Vertices[now], Vertices[SimpleTree[now][i]]);
@@ -419,7 +438,7 @@ inline void QuadTree::dfs_construct_tree(
             nodes[new_idx_mapping[now]].set_right(new_idx_mapping[SimpleTree[now][i]]);
         }
         if((int)SimpleTree[now][i] != parent){
-            dfs_construct_tree(SimpleTree, Vertices, new_idx_mapping, SimpleTree[now][i], now);
+            dfs_construct_tree(SimpleTree, Vertices, VertexLayer, new_idx_mapping, SimpleTree[now][i], now);
         }
     }
 }
@@ -432,4 +451,11 @@ unsigned QuadTree::check_direction(const CoordPair c_1, const CoordPair c_2) con
     if(c_1.first == c_2.first && c_1.second >  c_2.second) return 4; // right
     assert(false);
     return 0;
+}
+
+
+void QuadTree::print_segments() {
+    for(size_t i = 0; i < segments.size(); ++i) {
+        std::cout << "i = " << i << ", " << segments[i] << std::endl;
+    }
 }

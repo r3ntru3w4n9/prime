@@ -9,8 +9,6 @@
 
 #include "QuadUtil.h"
 
-typedef std::pair<int, int> CoordPair; // Coordinate of points
-
 class QuadNode {
    public:
     // constructor

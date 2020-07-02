@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "Chip.h"
+#include "QuadForest.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -23,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
-    // strart
+    // start
     if (argc != 3) {
         std::cout << "Usage: ./cell_move_router <input.txt> <output.txt>"
                   << std::endl;
@@ -47,6 +48,11 @@ int main(int argc, char* argv[]) {
     Chip Mgr(inputfile);
 
     Mgr.log();
+
+    // Test QuadForest functionality
+    // QuadForest qf(Mgr);
+    // std::cout << qf.size() << std::endl;
+
     // Mgr.output(outputfile);
     return 0;
 }

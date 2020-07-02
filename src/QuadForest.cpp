@@ -8,12 +8,16 @@ QuadForest::QuadForest() noexcept {}
 QuadForest::QuadForest(Chip& chip) noexcept {
     construct_forest(chip);
 }
+QuadForest::~QuadForest() noexcept {
+    clear();
+}
 
 void QuadForest::construct_forest(Chip& chip) {
     // Get basic information
     maxRows   = chip.getNumRows();
     maxCols   = chip.getNumColumns();
     maxLayers = chip.getNumLayers();
+    std::cout << "Rows: " << maxRows << " Columns: " << maxCols << " Layers: " << maxLayers << std::endl;
 
     // Get net segments from Chip
     size_t num_nets = chip.getNumNets();
@@ -57,4 +61,12 @@ void QuadForest::push_back(const QuadTree& qt) {
 }
 void QuadForest::push_back(QuadTree&& qt) {
     qtrees.push_back(std::move(qt));
+}
+
+void QuadForest::clear(){
+    qtrees.clear();
+    maxRows = maxCols = maxLayers = 0;
+    name2NetIdx.clear();
+    pins.clear();
+    pins_in_tree.clear();
 }
