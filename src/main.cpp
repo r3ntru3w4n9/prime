@@ -12,8 +12,8 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "Chip.h"
-#include "QuadForest.h"
+#include "core/Chip.h"
+#include "quad/QuadForest.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///

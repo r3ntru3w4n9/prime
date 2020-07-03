@@ -25,11 +25,10 @@ void QuadForest::construct_forest(Chip& chip) {
     size_t num_nets = chip.getNumNets();
     for(size_t i = 0; i < num_nets; ++i){
         GridNet& net = chip.getNet(i); // get net i
-        std::string net_name     = net.getName();
-        unsigned    net_id       = net.getId();
+        unsigned    net_id       = net.getIdx();
         unsigned    net_minlayer = net.getMinlayer();
 
-        QuadTree qt(net_name, net_id, net_minlayer, baseRowIdx, baseColIdx, maxRows, maxCols);
+        QuadTree qt(net_id, net_minlayer, baseRowIdx, baseColIdx, maxRows, maxCols);
         // Get pins
         size_t pin_num = net.getNumPin();
         for(size_t j = 0; j < pin_num; ++j){

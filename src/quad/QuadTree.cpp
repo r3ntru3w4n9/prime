@@ -5,12 +5,12 @@
 #include "QuadTree.h"
 
 QuadTree::QuadTree() noexcept
-    : _NetName(""), _NetId(-1), _baseRow(-1), _baseCol(-1), _minLayer(-1), _maxRows(0), _maxCols(0), root_idx(-1), flag(0) {
+    : _NetId(-1), _baseRow(-1), _baseCol(-1), _minLayer(-1), _maxRows(0), _maxCols(0), root_idx(-1), flag(0) {
     segments.clear();
 }
 
-QuadTree::QuadTree(std::string n, int n_id, int min_lay, int base_row, int base_col, int max_row, int max_col) noexcept
-    : _NetName(n), _NetId(n_id), _baseRow(base_row), _baseCol(base_col), _minLayer(min_lay), _maxRows(max_row), _maxCols(max_col), root_idx(-1), flag(0) {
+QuadTree::QuadTree(int n_id, int min_lay, int base_row, int base_col, int max_row, int max_col) noexcept
+    :  _NetId(n_id), _baseRow(base_row), _baseCol(base_col), _minLayer(min_lay), _maxRows(max_row), _maxCols(max_col), root_idx(-1), flag(0) {
     segments.clear();
 }
 
@@ -19,7 +19,6 @@ QuadTree::QuadTree(std::string n, int n_id, int min_lay, int base_row, int base_
 // }
 
 // access to basic attributes
-std::string QuadTree::get_name() const { return  _NetName; }
 int QuadTree::get_net_id()       const { return    _NetId; }
 int QuadTree::get_min_layer()    const { return _minLayer; }
 int QuadTree::get_root_idx()     const { return  root_idx; }

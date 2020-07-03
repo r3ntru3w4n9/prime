@@ -350,6 +350,14 @@ size_t Chip::getNumLayers() const {
     return _layers.size();
 }
 
+size_t Chip::getColumnBase() const {
+    return _columnBase;
+}
+
+size_t Chip::getRowBase() const {
+    return _rowBase;
+}
+
 size_t Chip::getNumColumns() const {
     return _columnRange;
 }

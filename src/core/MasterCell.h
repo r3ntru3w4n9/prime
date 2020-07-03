@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include "safe.h"
+#include "../safe/safe.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          DESCRIPTION                             ///

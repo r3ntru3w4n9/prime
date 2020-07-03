@@ -7,7 +7,7 @@
 #include <iostream>
 #include <memory>
 
-#include "safe.h"
+#include "safe/safe.h"
 
 // * UnionFind uses its parent pointer
 // * Tree uses its left child and right child

@@ -10,10 +10,9 @@
 #include <utility>
 #include <algorithm>
 
-#include "Chip.h"
+#include "../core/Chip.h"
 #include "QuadNode.h"
-#include "Cell.h"
-#include "safe.h"
+#include "../safe/safe.h"
 
 typedef std::pair<unsigned, unsigned> VEPair; // vertex index v.s. edge index pair
 const double DINF = 1e9;
@@ -25,10 +24,9 @@ class QuadTree {
    public:
     // constructor
     QuadTree() noexcept;
-    QuadTree(std::string n, 
-        int n_id, int min_lay, 
-        int base_row, int base_col,
-        int max_row, int max_col) noexcept;
+    QuadTree(int n_id, int min_lay, 
+             int base_row, int base_col,
+             int max_row, int max_col) noexcept;
     // ~QuadTree() noexcept;
 
     // access to basic attributes
