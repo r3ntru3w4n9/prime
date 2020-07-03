@@ -56,9 +56,6 @@ void Chip::readFile(std::fstream& input) {
     assert(str == "NumLayer");
     input >> _layer;  //<LayerCount>
     _layers.reserve(_layer);
-    for (int i = 0; i < _layer; ++i) {
-        _layers.push_back(0);
-    }
     constructCoordinate();
     for (int i = 0; i < _layer; ++i) {
         input >> str;  // Lay
@@ -66,9 +63,7 @@ void Chip::readFile(std::fstream& input) {
         input >> str;  //<LayerName>
         int idx;
         input >> idx;  //<Idx>
-        assert(!_Layer2Idx.contains(str));
-        _Layer2Idx[str] = idx - 1;
-        bool direction = false;
+        bool direction;
         input >> buf;  //<RoutingDirection>
         if (buf == "H") {
             direction = false;
@@ -83,10 +78,8 @@ void Chip::readFile(std::fstream& input) {
         // }
         int supply;
         input >> supply;  //<defaultSupplyOfOneGGrid>
-        Layer* l = new Layer(str, idx - 1, direction, supply, _area);
-        _layers[idx - 1].reset(l);
+        _layers.push_back(std::move(Layer(idx - 1, direction, supply, _area)));
     }
-    connectCoordinateGrid();
 
     /*NumNonDefaultSupplyGGrid <nonDefaultSupplyGGridCount>
       <rowIdx> <colIdx> <LayIdx> <incrOrDecrValue>*/
@@ -97,7 +90,7 @@ void Chip::readFile(std::fstream& input) {
     for (int i = 0; i < count; ++i) {
         input >> row >> column >> layer >> val;
         _layers[layer - 1]
-            ->getGrid(getIdx(row - _rowBase, column - _columnBase))
+            .getGrid(getIdx(row - _rowBase, column - _columnBase))
             .incSupply(val);
     }
 
@@ -116,25 +109,21 @@ void Chip::readFile(std::fstream& input) {
         assert(str == "MasterCell");
         input >> str;  // <masterCellName>
         // assert(_MasterCell2Idx.count(str) == 0);
-        assert(!_MasterCell2Idx.contains(str));
-        _MasterCell2Idx[str] = i;
-        MasterCellType mct = MasterCellType(str, i, _layer);
+        MasterCellType mct = MasterCellType(i, _layer);
         int pin, blockage;
         input >> pin >> blockage;  // <pinCount> <blockageCount>
         for (int j = 0; j < pin; ++j) {
             input >> str;  // Pin
             assert(str == "Pin");
             input >> str >> buf;  // <pinName> <pinLayer>
-            assert(_Layer2Idx.contains(buf));
-            mct.AddPin(str, _Layer2Idx[buf]);
+            mct.AddPin(j, str2Idx("M",buf));
         }
         for (int j = 0; j < blockage; ++j) {
             input >> str;  // Blkg
             assert(str == "Blkg");
             input >> str >> buf >>
                 demand;  // <blockageName> <blockageLayer> <demand>
-            assert(_Layer2Idx.contains(buf));
-            mct.AddBlkg(str, _Layer2Idx[buf], demand);
+            mct.AddBlkg(str2Idx("M",buf), demand);
         }
         _MasterCells.push_back(std::move(mct));
     }
@@ -150,12 +139,12 @@ void Chip::readFile(std::fstream& input) {
         input >> str;  // sameGGrid || adjHGGrid
         input >> buf;  // <masterCellName1>
         // FIXME the original version does not check, intentional?
-        mc1 = _MasterCell2Idx.at(buf);
+        mc1 = str2Idx("MC",buf);
         input >> buf;  // <masterCellName2>
         // FIXME the original version does not check, intentional?
-        mc2 = _MasterCell2Idx.at(buf);
+        mc2 = str2Idx("MC",buf);
         input >> buf >> demand;  // <layerName> <demand>
-        layer = _Layer2Idx[buf];
+        layer = str2Idx("M",buf);
         if (str == "sameGGrid") {
             _MasterCells[mc1].AddExtraSame(mc2, demand, layer);
             _MasterCells[mc2].AddExtraSame(mc1, demand, layer);
@@ -182,21 +171,16 @@ void Chip::readFile(std::fstream& input) {
     input >> count;  // <cellInstCount>
     _cells.reserve(count);
     for (int i = 0; i < count; ++i) {
-        _cells.push_back(0);
-    }
-    for (int i = 0; i < count; ++i) {
         input >> str;  // CellInst
         assert(str == "CellInst");
         input >> str;  // <instName>
         // assert(_Cell2Idx.count(str) == 0);
-        assert(!_Cell2Idx.contains(str));
-        _Cell2Idx[str] = i;
         input >> buf;  // <masterCellName>
         // FIXME the original version does not check, intentional?
-        MasterCellType& MCT = _MasterCells[_MasterCell2Idx.at(buf)];
+        MasterCellType& MCT = _MasterCells[str2Idx("MC",buf)];
         input >> row >> column >> buf;
         // <gGridRowIdx> <gGridColIdx> <movableCstr>
-        bool movable = false;
+        bool movable;
         if (buf == "Movable") {
             movable = true;
         } else {
@@ -208,11 +192,11 @@ void Chip::readFile(std::fstream& input) {
         // } else {
         //     assert(buf == "Fixed" || buf == "Movable");
         // }
-        Cell* cell = new Cell(str, MCT, movable, i);
+        _cells.push_back(std::move(Cell(MCT, i, movable, _layer)));
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
-        cell->setCoordinate(rIdx, cIdx);
-        _coordinates[getIdx(rIdx, cIdx)]->addCell(*cell);
-        _cells[i].reset(cell);
+        Cell& cell = _cells[i];
+        cell.setCoordinate(rIdx, cIdx);
+        _coordinates[getIdx(rIdx, cIdx)].addCell(cell, _coordinates, _layers);
     }
 
     /*NumNets <netCount>
@@ -228,20 +212,17 @@ void Chip::readFile(std::fstream& input) {
         input >> str;      // <netName>
         input >> numPins;  // <numPins>
         // assert(_Net2Idx.count(str) == 0);
-        assert(!_Net2Idx.contains(str));
-        _Net2Idx[str] = i;
         int minLay;
         input >> buf;  // <minRoutingLayConstraint>
         if (buf == "NoCstr") {
             minLay = 0;
         } else {
-            assert(_Layer2Idx.contains(buf));
-            minLay = _Layer2Idx[buf];
+            minLay = str2Idx("M",buf);
         }
 
-        _grid_nets.push_back(GridNet(str, i, numPins, minLay));
+        _grid_nets.push_back(std::move(GridNet(i, numPins, minLay)));
         // TODO:
-        // _quad_tree_nets.push_back(QuadTree(str, i, minLay, _rowRange, _columnRange));
+        //_quad_tree_nets.push_back(QuadTree(str, i, minLay, _rowRange, _columnRange));
 
         // ! substituted
         // TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
@@ -259,16 +240,16 @@ void Chip::readFile(std::fstream& input) {
             masterPin = str.substr(pos, str.size() - pos);
             // assert(_Cell2Idx.count(inst) == 1);
             // assert(_Cell2Idx.contains(inst));
-            Pin& pin = _cells[_Cell2Idx.at(inst)]->getPin(masterPin);
+            Pin& pin = _cells[str2Idx("C",inst)].getPin(str2Idx("P",masterPin));
             // Cell& cell_ = pin.get_cell();
             // std::cout << &cell << " " << &cell_ << std::endl;
-            _grid_nets[i].addPin(std::shared_ptr<Pin>(&pin));
-            pin.setNet(std::shared_ptr<GridNet>(&_grid_nets[i]));
-            Grid& g = _layers[pin.getLayer()]->getGrid(
-                getIdx(pin.getRow(), pin.getColumn()));
+            _grid_nets[i].addPin(pin);
+            pin.setNet(_grid_nets[i]);
+            Grid& g = _layers[pin.getLayer()].getGrid(
+                getIdx(getPinRow(pin), getPinColumn(pin)));
             g.addNet(_grid_nets[i]);
             // TODO: add pin to quad tree
-            // _quad_tree_nets[i].add_pin(&pin);
+            //_quad_tree_nets[i].add_pin(&pin);
         }
     }
 
@@ -289,11 +270,9 @@ void Chip::readFile(std::fstream& input) {
         assert(slay >= 1 && elay >= 1);
 
         // TODO: change to tree-based net data structure
-        GridNet& net = _grid_nets[_Net2Idx.at(str)];
-        net.addSegment(srow - _rowBase, scol - _columnBase, slay - 1, 
-                       erow - _rowBase, ecol - _columnBase, elay - 1);
-        // assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
-        //             erow - _rowBase, ecol - _columnBase, elay - 1, net);
+        GridNet& net = _grid_nets[str2Idx("N",str)];
+        assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
+                    erow - _rowBase, ecol - _columnBase, elay - 1, net);
         // _quad_tree_nets[_Net2Idx.at(str)].add_segment(
         //     srow - _rowBase, scol - _columnBase, slay - 1,
         //     erow - _rowBase, ecol - _columnBase, elay - 1);
@@ -311,17 +290,7 @@ void Chip::readFile(std::fstream& input) {
 }
 
 Chip::~Chip() {
-    // _Layer2Idx.clear();
-    // _MasterCell2Idx.clear();
-    // _Cell2Idx.clear();
-    // _Net2Idx.clear();
-    // _layers.clear();
-    // _coordinates.clear();
-    // _MasterCells.clear();
-    // _cells.clear();
-    // _grid_nets.clear();
-    // _movedCells.clear();
-    
+
     // debug
     // std::fstream out("out.txt", std::ios::out);
     // for (Layer* ptr : _layers) {
@@ -355,12 +324,22 @@ int Chip::getUp(int row, int column) const {
     return (row == _rowRange - 1) ? -1 : getIdx(row + 1, column);
 }
 
-void Chip::moveCell(Cell& cell) {
-    assert(cell.movable(limited()));
-    if (cell.moved()) {
-        return;
+bool Chip::moveCell(Cell& cell, unsigned origin, unsigned target) {
+    if(!cell.movable(limited())) {
+        return false;
     }
-    _movedCells.push_back(cell.getId());
+    Coordinate& c_target = _coordinates[target];
+    if(!c_target.CanAddCell(cell, _coordinates, _layers)) {
+        return false;
+    }
+    if(!cell.moved()) {
+        _movedCells.push_back(cell.getIdx());
+    }
+    Coordinate& c_origin = _coordinates[origin];
+    c_origin.moveCell(cell, _coordinates, _layers);
+    c_target.addCell(cell, _coordinates, _layers);
+    _movedCells.push_back(cell.getIdx());
+    return true;
 }
 
 void Chip::decNumMoved() {
@@ -377,14 +356,6 @@ size_t Chip::getNumColumns() const {
 
 size_t Chip::getNumRows() const {
     return _rowRange;
-}
-
-size_t Chip::getRowBase() const {
-    return _rowBase;
-}
-
-size_t Chip::getColumnBase() const {
-    return _columnBase;
 }
 
 size_t Chip::getArea() const {
@@ -408,26 +379,38 @@ size_t Chip::getNumMasterCells() const {
 }
 
 Layer& Chip::getLayer(int layer) {
-    return *_layers[layer];
+    return _layers[layer];
 }
 
 Coordinate& Chip::getCoordinate(unsigned i) {
-    return *_coordinates[i];
+    return _coordinates[i];
 }
 
 Cell& Chip::getCell(unsigned i) {
-    return *_cells[i];
+    return _cells[i];
+}
+
+const Pin& Chip::getPin(GridNet& net, unsigned idx){
+    return net.getPin(idx, _cells);
+}
+
+unsigned Chip::getPinRow(Pin& pin) {
+    return _cells[pin.get_cell_idx()].getRow();
+}
+
+unsigned Chip::getPinColumn(Pin& pin) {
+    return _cells[pin.get_cell_idx()].getColumn();
 }
 
 GridNet& Chip::getNet(unsigned i) {
     return _grid_nets[i];
 }
 
-Grid& Chip::getGrid(int layer, unsigned idx) {
-    return _layers[layer]->getGrid(idx);
+Grid& Chip::getGrid(unsigned layer, unsigned idx) {
+    return _layers[layer].getGrid(idx);
 }
 
-Grid& Chip::getGrid(int layer, int row, int column) {
+Grid& Chip::getGrid(unsigned layer, unsigned row, unsigned column) {
     return getGrid(layer, getIdx(row, column));
 }
 
@@ -436,6 +419,7 @@ MasterCellType& Chip::getMasterCell(unsigned idx) {
 }
 
 bool Chip::limited() const {
+    assert(_movedCells.size() <= _maxMove);
     return _movedCells.size() == _maxMove;
 }
 
@@ -460,28 +444,13 @@ void Chip::constructCoordinate() {
     _coordinates.reserve(_area);
     for (int i = 0; i < _columnRange; ++i) {
         for (int j = 0; j < _rowRange; ++j) {
-            std::shared_ptr<Coordinate> c(new Coordinate(j, i, _layer));
-            _coordinates.push_back(c);
+            _coordinates.push_back(std::move(Coordinate(j, i, _layer)));
         }
     }
     for (int i = 0; i < _columnRange; ++i) {
         for (int j = 0; j < _rowRange; ++j) {
             int left = getLeft(j, i), right = getRight(j, i);
-            std::shared_ptr<Coordinate> c1 = (left == -1) ? nullptr : _coordinates[left];
-            std::shared_ptr<Coordinate> c2 = (right == -1) ? nullptr : _coordinates[right];
-            _coordinates[getIdx(j, i)]->addAdjH(c1, c2);
-        }
-    }
-}
-
-void Chip::connectCoordinateGrid() {
-    for (int i = 0; i < _area; ++i) {
-        std::shared_ptr<Coordinate> c = _coordinates[i];
-        for (int j = 0; j < _layer; ++j) {
-            Layer& l = *_layers[j];
-            Grid& g = l.getGrid(i);
-            g.assignCoordinate(c);
-            c->addGrid(std::shared_ptr<Grid>(&g));
+            _coordinates[getIdx(j, i)].addAdjH(left, right);
         }
     }
 }
@@ -504,7 +473,7 @@ void Chip::assignRoute(int srow,
         std::swap(slay, elay);
     }
     for (int i = slay; i <= elay; ++i) {
-        Layer& l = *_layers[i];
+        Layer& l = _layers[i];
         for (int j = scol; j <= ecol; ++j) {
             for (int k = srow; k <= erow; ++k) {
                 Grid& g = l.getGrid(getIdx(k, j));
@@ -547,4 +516,10 @@ void Chip::maxNetDegree() const {
         }
     }
     // std::cout << "Max Net Degree : " << maxDegree << '\n';
+}
+
+unsigned str2Idx(std::string title, std::string& str) {
+    size_t pos = str.find(title) + title.size();
+    std::string inst = str.substr(pos,str.size() - pos);
+    return std::stoul(inst) - 1;
 }

@@ -25,99 +25,85 @@
 ////////////////////////////////////////////////////////////////////////
 
 // Pin
-Pin::Pin(PinType& PT, Cell& cell) : _PT(&PT), _cell(&cell) {}
+Pin::Pin(unsigned idx, unsigned layer, Cell& cell) : _idx(idx), _layer(layer) ,_cell(cell.getIdx()) {}
 
-Pin::Pin(Pin&& p) : _PT(p._PT), _cell(p._cell), _net(p._net) {
-    p._PT = nullptr;
-    p._cell = nullptr;
-    p._net = nullptr;
-}
+// Pin::Pin(const Pin& pin) : _idx(pin._idx), _layer(pin._layer), _cell(pin._cell), _net(pin._net) {}
 
-Pin& Pin::operator=(Pin&& p) {
-    _PT = p._PT;
-    _cell = p._cell;
-    _net = p._net;
+Pin::Pin(Pin&& pin) : _idx(pin._idx), _layer(pin._layer), _cell(pin._cell), _net(pin._net) {}
 
-    p._PT = nullptr;
-    p._cell = nullptr;
-    p._net = nullptr;
-
+Pin& Pin::operator=(Pin&& pin){
+    _idx = pin._idx;
+    _layer = pin._layer;
+    _cell = pin._cell;
+    _net = pin._net;
     return *this;
 }
 
-void Pin::setNet(std::shared_ptr<GridNet> net) {
-    _net = net;
+void Pin::setNet(GridNet& net) {
+    _net = net.getIdx();
 }
 
-PinType& Pin::getPinType() const {
-    assert(_PT != nullptr);
-    return *_PT;
+unsigned Pin::getIdx() const {
+    return _idx;
 }
 
-GridNet& Pin::get_net() const {
-    assert(_net != nullptr);
-    return *_net;
+unsigned Pin::get_net_idx() const{
+    return _net;
 }
 
-Cell& Pin::get_cell() const {
-    assert(_cell != nullptr);
-    return *_cell;
+unsigned Pin::get_cell_idx() const{
+    return _cell;
 }
 
-unsigned Pin::getRow() const {
-    return get_cell().getRow();
-}
-
-unsigned Pin::getColumn() const {
-    return get_cell().getColumn();
-}
-
-int Pin::getLayer() const {
-    return getPinType().getLayer();
+unsigned Pin::getLayer() const {
+    return _layer;
 }
 
 // Net
-GridNet::GridNet(const std::string NetName,
-                 unsigned id,
+GridNet::GridNet(unsigned idx,
                  unsigned PinNum,
-                 unsigned layer) noexcept
-    : _NetName(NetName), _Id(id), _minLayer(layer) {
+                 unsigned minLayer)
+    : _idx(idx), _minLayer(minLayer) {
     _pins.reserve(PinNum);
 }
 
-GridNet::GridNet(const GridNet& g) noexcept
-    : _NetName(g._NetName),
-      _Id(g._Id),
-      _minLayer(g._minLayer),
-      _pins(g._pins)
-//   ,
-//   _segments(g._segments)
-{}
+// GridNet::GridNet(const GridNet& g)
+//     : _idx(g._idx),
+//       _minLayer(g._minLayer),
+//       _pins(g._pins) {}
 
-void GridNet::addPin(std::shared_ptr<Pin> pin) {
-    _pins.push_back(pin);
+// GridNet::GridNet(const GridNet& g)
+//     : _idx(std::move(g._idx)),
+//       _minLayer(std::move(g._minLayer)),
+//       _pins(std::move(g._pins)) {}
+
+GridNet& GridNet::operator=(GridNet&& net){
+    _idx = net._idx;
+    _minLayer = net._minLayer;
+    _pins = std::move(net._pins);
+    return *this;
 }
 
-void GridNet::addSegment(int srow,
-                         int scol,
-                         int slay,
-                         int erow,
-                         int ecol,
-                         int elay) {
-    _segments.push_back(srow);
-    _segments.push_back(scol);
-    _segments.push_back(slay);
-    _segments.push_back(erow);
-    _segments.push_back(ecol);
-    _segments.push_back(elay);
+void GridNet::addPin(Pin& pin) {
+    _pins.push_back(std::make_pair(pin.get_cell_idx(),pin.getIdx()));
 }
 
-const std::string& GridNet::getName() const {
-    return _NetName;
-}
+// void GridNet::addSegment(int srow,
+//                          int scol,
+//                          int slay,
+//                          int erow,
+//                          int ecol,
+//                          int elay) {
+//     _segments.push_back(srow);
+//     _segments.push_back(scol);
+//     _segments.push_back(slay);
+//     _segments.push_back(erow);
+//     _segments.push_back(ecol);
+//     _segments.push_back(elay);
+// }
 
-unsigned GridNet::getId() const {
-    return _Id;
+unsigned GridNet::getIdx() const {
+    return _idx;
 }
 
 unsigned GridNet::getMinlayer() const {
@@ -128,49 +114,55 @@ size_t GridNet::getNumPin() const {
     return _pins.size();
 }
 
-Pin& GridNet::getPin(unsigned i) {
-    return *_pins[i];
-}
-std::shared_ptr<Pin> GridNet::getPinPtr(unsigned i) {
-    return _pins[i];
+Pin& GridNet::getPin(unsigned i, safe::vector<Cell>& cells) {
+
+    return (cells[_pins[i].first].getPin(_pins[i].second));
 }
 
-size_t GridNet::getNumSegments() const {
-    return _segments.size();
-}
+// size_t GridNet::getNumSegments() const {
+//     return _segments.size();
+// }
 
-safe::vector<unsigned>& GridNet::getSegments() {
-    return _segments;
-}
+// safe::vector<unsigned>& GridNet::getSegments() {
+//     return _segments;
+// }
 
 // Cell
-Cell::Cell(const std::string CellName,
-           MasterCellType& MCT,
-           bool movable,
-           unsigned id) noexcept
-    : _CellName(CellName),
-      _MCT(MCT),
-      _Id(id),
+Cell::Cell(MasterCellType& MCT,
+         unsigned idx,
+         bool movable,
+         unsigned layers)
+    : _MCT(MCT),
+      _idx(idx),
       _movable(movable),
       _moved(false) {
     size_t p = getMasterCell().getNumPins();
     _pins.reserve(p);
-    size_t l = getMasterCell().getNumLayers();
-    _Layer2pin.reserve(l);
-    for (size_t i = 0; i < l; ++i) {
-        safe::vector<std::shared_ptr<Pin>> v;
+    _Layer2pin.reserve(layers);
+    for (size_t i = 0; i < layers; ++i) {
+        safe::vector<unsigned> v;
         _Layer2pin.push_back(std::move(v));
     }
     for (size_t i = 0; i < p; ++i) {
-        _pins.push_back(std::move(Pin(getMasterCell().getPinType(i), *this)));
-        _Layer2pin[_pins[i].getLayer()].push_back(std::shared_ptr<Pin>(&_pins[i]));
+        _pins.push_back(std::move(Pin(i,getMasterCell().getPinLayer(i), *this)));
+        assert(_pins[i].getIdx() == i);
+        _Layer2pin[_pins[i].getLayer()].push_back(i);
     }
 }
 
-Cell::Cell(Cell&& c) noexcept
-    : _CellName(std::move(c._CellName)),
-      _MCT(c._MCT),
-      _Id(c._Id),
+// Cell::Cell(const Cell& c)
+//     : _MCT(c._MCT),
+//       _idx(c._idx),
+//       _movable(c._movable),
+//       _moved(c._moved),
+//       _row(c._row),
+//       _column(c._column),
+//       _pins(c._pins),
+//       _Layer2pin(c._Layer2pin) {}
+
+Cell::Cell(Cell&& c)
+    : _MCT(c._MCT),
+      _idx(c._idx),
       _movable(c._movable),
       _moved(c._moved),
       _row(c._row),
@@ -178,20 +170,16 @@ Cell::Cell(Cell&& c) noexcept
       _pins(std::move(c._pins)),
       _Layer2pin(std::move(c._Layer2pin)) {}
 
-Cell& Cell::operator=(Cell&& c) noexcept {
-    _CellName = std::move(c._CellName);
-    _MCT = std::move(c._MCT);
-    _Id = c._Id;
-
-    _movable = c._movable;
-    _moved = c._moved;
-    _row = c._row;
-    _column = c._column;
-    _pins = std::move(c._pins);
-    _Layer2pin = std::move(c._Layer2pin);
-
-    return *this;
-}
+// Cell& Cell::operator=(Cell&& c){
+//     _MCT = std::move(c._MCT);
+//     _idx = c._idx;
+//     _movable = c._movable;
+//     _moved = c._moved;
+//     _row = c._row;
+//     _column = c._column;
+//     _pins = std::move(c._pins);
+//     _Layer2pin = std::move(c._Layer2pin);
+// }
 
 void Cell::setRow(unsigned x) {
     _row = x;
@@ -210,12 +198,8 @@ void Cell::move() {
     _moved = true;
 }
 
-const std::string& Cell::getCellName() const {
-    return _CellName;
-}
-
-unsigned Cell::getId() const {
-    return _Id;
+unsigned Cell::getIdx() const {
+    return _idx;
 }
 
 const MasterCellType& Cell::getMasterCell() const {
@@ -226,8 +210,8 @@ MasterCellType& Cell::getMasterCell() {
     return _MCT;
 }
 
-int Cell::getMasterCellId() const {
-    return getMasterCell().getId();
+unsigned Cell::getMasterCellId() const {
+    return getMasterCell().getIdx();
 }
 
 bool Cell::moved() const {
@@ -250,15 +234,11 @@ unsigned Cell::getColumn() const {
     return _column;
 }
 
-Pin& Cell::getPin(size_t i) {
+Pin& Cell::getPin(unsigned i) {
     return _pins[i];
 }
 
-Pin& Cell::getPin(std::string& str) {
-    return _pins[getMasterCell().getPin(str)];
-}
-
-int Cell::getLayerDemand(int i) const {
+int Cell::getLayerDemand(unsigned i) const {
     return getMasterCell().getLayerDemand(i);
 }
 
@@ -282,16 +262,6 @@ size_t Cell::getNumPins() const {
     return _pins.size();
 }
 
-const safe::vector<std::shared_ptr<Pin>>& Cell::getPinLayer(int i) const {
+const safe::vector<unsigned>& Cell::getPinLayer(unsigned i) const {
     return _Layer2pin[i];
-}
-
-safe::vector<std::shared_ptr<Pin>>& Cell::getPinLayer(int i) {
-    return _Layer2pin[i];
-}
-
-std::ostream& operator<<(std::ostream& os, const Cell& cell) {
-    os << "CellName : " << cell.getCellName()
-       << " MasterCellType : " << cell.getMasterCell().getMCName() << '\n';
-    return os;
 }

@@ -28,87 +28,29 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-class MasterCellType;
-
-class PinType {
-   public:
-    // Constructors
-    PinType(const std::string PinName, int layer, MasterCellType& MCT);
-    // PinType(const PinType& a);
-    PinType(PinType&& a);
-
-    // PinType& operator=(const PinType& a);
-    PinType& operator=(PinType&& a);
-
-    // acceser
-    const std::string& getPinName() const;
-    int getLayer() const;
-
-    // friend
-    friend std::ostream& operator<<(std::ostream& os, const PinType& PT);
-
-   private:
-    std::string _PinName;
-    int _layer;
-    MasterCellType& _MCT;
-};
-
-std::ostream& operator<<(std::ostream& os, const PinType& PT);
-
-class BlockageType {
-   public:
-    // Constructors
-    BlockageType(const std::string BlkgName, int layer, int demand);
-    BlockageType(const BlockageType& a);
-    BlockageType(BlockageType&& a);
-
-    BlockageType& operator=(const BlockageType& a);
-    BlockageType& operator=(BlockageType&& a);
-
-    // accesor
-    const std::string& getBlkgName() const;
-    int getLayer() const;
-    int getDemand() const;
-
-    // friend
-    friend std::ostream& operator<<(std::ostream& os, const BlockageType& BT);
-
-   private:
-    std::string _BlkgName;
-    int _layer;
-    int _demand;
-};
-
-std::ostream& operator<<(std::ostream& os, const BlockageType& BT);
-
 class MasterCellType {
    public:
-    // Constructor(no copy constructor)
-    MasterCellType(const std::string MCName, unsigned id, int layer);
+    // Constructors
+    MasterCellType(unsigned idx, unsigned layer);
+    MasterCellType(const MasterCellType& mct) = delete;
     MasterCellType(MasterCellType&& mct);
 
-    // ! no need for destructor
-    // ~MasterCellType();
-
-    MasterCellType& operator=(MasterCellType&& a);
+    // Assignment
+    MasterCellType& operator=(const MasterCellType& mct) = delete;
+    MasterCellType& operator=(MasterCellType&& mct);
 
     // Modifier
-    void AddBlkg(const std::string BlkgName, int layer, int demand);
-    void AddPin(const std::string PinName, int layer);
-    void AddExtraSame(unsigned MC, int demand, int layer);
-    void AddExtraadjH(unsigned MC, int demand, int layer);
+    void AddBlkg(unsigned layer, int demand);
+    void reservePin(size_t s);
+    void AddPin(unsigned idx, unsigned layer);
+    void AddExtraSame(unsigned MC, int demand, unsigned layer);
+    void AddExtraadjH(unsigned MC, int demand, unsigned layer);
 
     // acceser
-    const std::string& getMCName() const;
-    unsigned getId() const;
-    unsigned getNumLayers() const;
-    int getLayerDemand(int i) const;
+    unsigned getIdx() const;
+    int getLayerDemand(unsigned layer) const;
     size_t getNumPins() const;
-    size_t getNumBlkgs() const;
-    PinType& getPinType(size_t i);
-    PinType& getPinType(std::string& str);
-    size_t getPin(std::string& str) const;
-    BlockageType& getBlkg(size_t i);
+    unsigned getPinLayer(unsigned pin) const;
     safe::vector<unsigned>& getSameGridMC(unsigned layer);
     safe::vector<unsigned>& getadjHGridMC(unsigned layer);
     safe::vector<int>& getSameGridDemand(unsigned layer);
@@ -119,18 +61,13 @@ class MasterCellType {
                                     const MasterCellType& MCT);
 
    private:
-    std::string _MCName;
-    unsigned _Id;
-    int _layer;
-
+    unsigned _idx;
+    safe::vector<unsigned> _pin2Layer;
     safe::vector<int> _LayerDemand;
-    safe::vector<PinType> _Pins;
-    safe::vector<BlockageType> _Blkgs;
     safe::vector<safe::vector<unsigned>> _SameGridMC;
     safe::vector<safe::vector<int>> _SameGridDemand;
     safe::vector<safe::vector<unsigned>> _adjHGridMC;
     safe::vector<safe::vector<int>> _adjHGridDemand;
-    safe::unordered_map<std::string, unsigned> _PinName2Idx;
 };
 
-std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT);
+std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT); //to be updated

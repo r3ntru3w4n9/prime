@@ -50,80 +50,82 @@ class Layer {
     // FIXME why does pointer of vector survie
    public:
     // constructor
-    Layer(const std::string name, int i, bool d, int supply, int area) noexcept;
-    Layer(const Layer& l) noexcept;
+    Layer(unsigned idx, bool d, int supply, unsigned area);
+    Layer(const Layer& l) = delete;
+    Layer(Layer&& l);
 
-    // destructor
-    ~Layer();
+    // Assignment
+    Layer& operator=(const Layer& l) = delete;
+    Layer& operator=(Layer&& l);
 
     // modifier
 
     // accesser
-    const std::string& getLayerName() const;
-    int getLayerIdx() const;
+    unsigned getLayerIdx() const;
     bool getDirection() const; // 0 for H(column), 1 for V(row)
-    Grid& getGrid(int i);
+    Grid& getGrid(unsigned idx);
 
    private:
-    const std::string _LayerName;
-    const int _idx;
+    unsigned _idx;
     bool _direction;  // 0 for H(column), 1 for V(row)
-    safe::vector<std::shared_ptr<Grid>> _grids;
+    safe::vector<Grid> _grids;
 };
 
 class Coordinate {
    public:
     // constructor
-    Coordinate(int x, int y, int layer);
-    Coordinate(const Coordinate& c) noexcept;
+    Coordinate(unsigned x, unsigned y, unsigned idx);
+    Coordinate(const Coordinate& c) = delete;
+    Coordinate(Coordinate&& c);
+
+    // Assignment
+    Coordinate& operator=(const Coordinate& c) = delete;
+    Coordinate& operator=(Coordinate&& c);
 
     // modifier
-    void addAdjH(std::shared_ptr<Coordinate> c1, std::shared_ptr<Coordinate> c2);  // you don't need this
-    void addGrid(std::shared_ptr<Grid> g);                         // you don't need this
-    bool CanAddCell(Cell& cell) const;  // to see if you can add this cell
-    void addCell(Cell& cell);
-    void moveCell(Cell& cell);
+    void addAdjH(int c1, int c2);  // you don't need this
+    bool CanAddCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) const;  // to see if you can add this cell
+    void addCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers);
+    void moveCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers);
 
     // accesser
-    Grid& getGrid(size_t i);
     int getRow() const;
     int getColumn() const;
 
    private:
-    int _row;
-    int _column;
-    std::shared_ptr<Coordinate> _c1;
-    std::shared_ptr<Coordinate> _c2;
-    safe::vector<std::shared_ptr<Grid>> _grids;
+    unsigned _row;
+    unsigned _column;
+    unsigned _idx;
+    int _c1;
+    int _c2;
     safe::unordered_map<unsigned, unsigned> _MCT2Num;
 };
 
 class Grid {
    public:
     // constructors
-    Grid(int supply, Layer& layer);
-    Grid(Grid& a);
+    Grid(int supply);
+    Grid(const Grid& g) = delete;
+    Grid(Grid&& g);
+
+    // Assignment
+    Grid& operator=(const Grid& g) = delete;
+    Grid& operator=(Grid&& g);
 
     // modifier
-    void assignCoordinate(std::shared_ptr<Coordinate> c);
     void incSupply(int d);
     void decSupply(int d);
     void addNet(GridNet& net);
-    GridNet& getNet(unsigned i);
+    GridNet& getNet(unsigned i, std::vector<GridNet>& nets);
     void rmNet(GridNet& net);
     void rmNet(unsigned i);
 
     // accesser
-    int getRow() const;
-    int getColumn() const;
     int getSupply() const;
-    int getLayer() const;
     bool canGetNet(const GridNet& net) const;
     bool canGetNet(unsigned i) const;
 
    private:
     int _supply;
-    Layer& _layer;
-    std::shared_ptr<Coordinate> _coordinate;
-    safe::unordered_map<unsigned, std::shared_ptr<GridNet>> _nets;
+    safe::unordered_set<unsigned> _nets;
 };

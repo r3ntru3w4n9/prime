@@ -28,33 +28,35 @@
 ////////////////////////////////////////////////////////////////////////
 
 // Layer
-Layer::Layer(const std::string name,
-             int i,
+Layer::Layer(unsigned idx,
              bool d,
              int supply,
-             int area) noexcept
-    : _LayerName(name), _idx(i), _direction(d) {
+             unsigned area)
+    : _idx(idx), _direction(d) {
     _grids.reserve(area);
     for (int i = 0; i < area; ++i) {
-        std::shared_ptr<Grid> g(new Grid(supply, *this));
-        _grids.push_back(g);
+        _grids.push_back(std::move(Grid(supply)));
     }
 }
 
-Layer::Layer(const Layer& l) noexcept
-    : _LayerName(l._LayerName),
-      _idx(l._idx),
+// Layer::Layer(const Layer& l)
+//     : _idx(l._idx),
+//       _direction(l._direction),
+//       _grids(l._grids) {}
+
+Layer::Layer(Layer&& l)
+    : _idx(l._idx),
       _direction(l._direction),
-      _grids(l._grids) {}
+      _grids(std::move(l._grids)) {}
 
-Layer::~Layer() {
+Layer& Layer::operator=(Layer&& l){
+    _idx = l._idx;
+    _direction = l._direction;
+    _grids = std::move(l._grids);
+    return *this;
 }
 
-const std::string& Layer::getLayerName() const {
-    return _LayerName;
-}
-
-int Layer::getLayerIdx() const {
+unsigned Layer::getLayerIdx() const {
     return _idx;
 }
 
@@ -62,26 +64,33 @@ bool Layer::getDirection() const {
     return _direction;
 }
 
-Grid& Layer::getGrid(int i) {
-    return *_grids[i];
+Grid& Layer::getGrid(unsigned idx) {
+    return _grids[idx];
 }
 
 // Coordinate
-Coordinate::Coordinate(int x, int y, int layer) : _row(x), _column(y) {
-    _grids.reserve(layer);
+Coordinate::Coordinate(unsigned x, unsigned y, unsigned idx) : _row(x), _column(y), _idx(idx) {}
+
+// Coordinate::Coordinate(const Coordinate& c) : _row(c._row), _column(c._column), _idx(c._idx) {}
+
+Coordinate::Coordinate(Coordinate&& c) : _row(c._row), _column(c._column), _idx(c._idx), _c1(c._c1), _c2(c._c2), _MCT2Num(std::move(c._MCT2Num)) {}
+
+Coordinate& Coordinate::operator=(Coordinate&& c){
+    _row = c._row;
+    _column = c._column;
+    _idx = c._idx;
+    _c1 = c._c1;
+    _c2 = c._c2;
+    _MCT2Num = std::move(c._MCT2Num);
+    return *this;
 }
 
-void Coordinate::addAdjH(std::shared_ptr<Coordinate> c1, std::shared_ptr<Coordinate> c2) {
+void Coordinate::addAdjH(int c1, int c2) {
     _c1 = c1;
     _c2 = c2;
 }
 
-void Coordinate::addGrid(std::shared_ptr<Grid> g) {
-    _grids.push_back(g);
-}
-
-bool Coordinate::CanAddCell(Cell& cell) const {
-    // TODO verify fixed
+bool Coordinate::CanAddCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) const {
     unsigned id = cell.getMasterCellId();
     unsigned n;
     if (_MCT2Num.contains(id)) {
@@ -90,7 +99,8 @@ bool Coordinate::CanAddCell(Cell& cell) const {
     } else {
         n = 1;
     }
-    for (int i = 0, m = _grids.size(); i < m; ++i) {
+    for (int i = 0; i < layers.size(); ++i) {
+        Layer& layer = layers[i];
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
         safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
@@ -107,20 +117,22 @@ bool Coordinate::CanAddCell(Cell& cell) const {
         }
         for (int j = 0, o = adjHGridMC.size(); j < o; ++j) {
             int k = adjHGridDemand[j];
-            if (_c1) {
-                if (_c1->_MCT2Num.contains(adjHGridMC[j])) {
-                    if (n <= _c1->_MCT2Num.find(adjHGridMC[j])->second) {
-                        if (_c1->_grids[i]->getSupply() < k) {
+            if (_c1 >= 0) {
+                Coordinate& c_1 = coordinates[_c1];
+                if (c_1._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= c_1._MCT2Num.find(adjHGridMC[j])->second) {
+                        if (layer.getGrid(c_1._idx).getSupply() < k) {
                             return false;
                         }
                         d += k;
                     }
                 }
             }
-            if (_c2) {
-                if (_c2->_MCT2Num.contains(adjHGridMC[j])) {
-                    if (n <= _c2->_MCT2Num.find(adjHGridMC[j])->second) {
-                        if (_c2->_grids[i]->getSupply() < k) {
+            if (_c2 >= 0) {
+                Coordinate& c_2 = coordinates[_c2];
+                if (c_2._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= c_2._MCT2Num.find(adjHGridMC[j])->second) {
+                        if (layer.getGrid(c_2._idx).getSupply() < k) {
                             return false;
                         }
                         d += k;
@@ -128,14 +140,14 @@ bool Coordinate::CanAddCell(Cell& cell) const {
                 }
             }
         }
-        if (_grids[i]->getSupply() < d) {
+        if (layer.getGrid(_idx).getSupply() < d) {
             return false;
         }
     }
     return true;
 }
 
-void Coordinate::addCell(Cell& cell) {
+void Coordinate::addCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) {
     unsigned id = cell.getMasterCellId();
     unsigned n;
     if (_MCT2Num.contains(id)) {
@@ -145,7 +157,8 @@ void Coordinate::addCell(Cell& cell) {
         n = 1;
         _MCT2Num[id] = 1;
     }
-    for (int i = 0, m = _grids.size(); i < m; ++i) {
+    for (int i = 0, m = layers.size(); i < m; ++i) {
+        Layer& layer = layers[i];
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
         safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
@@ -162,35 +175,38 @@ void Coordinate::addCell(Cell& cell) {
         }
         for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
             int k = adjHGridDemand[j];
-            if (_c1) {
-                if (_c1->_MCT2Num.contains(adjHGridMC[j])) {
-                    if (n <= _c1->_MCT2Num[adjHGridMC[j]]) {
+            if (_c1 >= 0) {
+                Coordinate& c_1 = coordinates[_c1];
+                if (c_1._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= c_1._MCT2Num[adjHGridMC[j]]) {
                         d += k;
-                        _c1->_grids[i]->decSupply(k);
+                        layer.getGrid(c_1._idx).decSupply(k);
                     }
                 }
             }
-            if (_c2) {
-                if (_c2->_MCT2Num.contains(adjHGridMC[j])) {
-                    if (n <= _c2->_MCT2Num[adjHGridMC[j]]) {
+            if (_c2 >= 0) {
+                Coordinate& c_2 = coordinates[_c2];
+                if (c_2._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= c_2._MCT2Num[adjHGridMC[j]]) {
                         d += k;
-                        _c2->_grids[i]->decSupply(k);
+                        layer.getGrid(c_2._idx).decSupply(k);
                     }
                 }
             }
         }
-        _grids[i]->decSupply(d);
+        layer.getGrid(_idx).decSupply(d);
     }
 }
 
-void Coordinate::moveCell(Cell& cell) {
+void Coordinate::moveCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) {
     unsigned id = cell.getMasterCellId();
     assert(_MCT2Num.contains(id));
     unsigned n = --_MCT2Num[id];
     if (n == 0) {
         _MCT2Num.erase(id);
     }
-    for (int i = 0, m = _grids.size(); i < m; ++i) {
+    for (int i = 0, m = layers.size(); i < m; ++i) {
+        Layer& layer = layers[i];
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
         safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
@@ -207,29 +223,27 @@ void Coordinate::moveCell(Cell& cell) {
         }
         for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
             int k = adjHGridDemand[j];
-            if (_c1) {
-                if (_c1->_MCT2Num.contains(adjHGridMC[j])) {
-                    if (n < _c1->_MCT2Num[adjHGridMC[j]]) {
+            if (_c1 >= 0) {
+                Coordinate& c_1 = coordinates[_c1];
+                if (c_1._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n < c_1._MCT2Num[adjHGridMC[j]]) {
                         d += k;
-                        _c1->_grids[i]->incSupply(k);
+                        layer.getGrid(c_1._idx).incSupply(k);
                     }
                 }
             }
-            if (_c2) {
-                if (_c2->_MCT2Num.contains(adjHGridMC[j])) {
-                    if (n < _c2->_MCT2Num[adjHGridMC[j]]) {
+            if (_c2 >= 0) {
+                Coordinate& c_2 = coordinates[_c2];
+                if (c_2._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n < c_2._MCT2Num[adjHGridMC[j]]) {
                         d += k;
-                        _c2->_grids[i]->incSupply(k);
+                        layer.getGrid(c_2._idx).incSupply(k);
                     }
                 }
             }
         }
-        _grids[i]->incSupply(d);
+        layer.getGrid(_idx).incSupply(d);
     }
-}
-
-Grid& Coordinate::getGrid(size_t i) {
-    return *_grids[i];
 }
 
 int Coordinate::getRow() const {
@@ -241,17 +255,21 @@ int Coordinate::getColumn() const {
 }
 
 // Grid
-Grid::Grid(int supply, Layer& layer)
-    : _supply(supply), _layer(layer), _coordinate(nullptr) {}
+Grid::Grid(int supply)
+    : _supply(supply) {}
 
-Grid::Grid(Grid& a)
-    : _supply(a._supply),
-      _layer(a._layer),
-      _coordinate(a._coordinate),
-      _nets(safe::unordered_map<unsigned, std::shared_ptr<GridNet>>()) {}
+// Grid::Grid(const Grid& g)
+//     : _supply(g._supply),
+//       _nets(g._nets) {}
 
-void Grid::assignCoordinate(std::shared_ptr<Coordinate> c) {
-    _coordinate = c;
+Grid::Grid(Grid&& g)
+    : _supply(g._supply),
+      _nets(std::move(g._nets)) {}
+
+Grid& Grid::operator=(Grid&& g){
+    _supply = g._supply;
+    _nets = std::move(g._nets);
+    return *this;
 }
 
 void Grid::incSupply(int d) {
@@ -264,30 +282,21 @@ void Grid::decSupply(int d) {
 
 void Grid::addNet(GridNet& net) {
     // if (_nets.find(net.getId()) == _nets.end()) {
-    if (!_nets.contains(net.getId())) {
-        _nets[net.getId()] = std::shared_ptr<GridNet>(&net);
+    if (!_nets.contains(net.getIdx())) {
+        _nets.insert(net.getIdx());
         _supply -= 1;
     }
 }
 
-bool Grid::canGetNet(const GridNet& net) const {
-    // return _nets.find(net.getId()) != _nets.end();
-    return _nets.contains(net.getId());
-}
-
-bool Grid::canGetNet(unsigned i) const {
-    return _nets.contains(i);
-}
-
-GridNet& Grid::getNet(unsigned i) {
+GridNet& Grid::getNet(unsigned i, std::vector<GridNet>& nets) {
     // if (_nets.find(i) == _nets.end()) {
     assert(_nets.contains(i));
-    return *_nets[i];
+    return nets[i];
 }
 
 void Grid::rmNet(GridNet& net) {
-    assert(_nets.contains(net.getId()));
-    _nets.erase(net.getId());
+    assert(_nets.contains(net.getIdx()));
+    _nets.erase(net.getIdx());
 }
 
 void Grid::rmNet(unsigned i) {
@@ -295,18 +304,16 @@ void Grid::rmNet(unsigned i) {
     _nets.erase(i);
 }
 
-int Grid::getRow() const {
-    return _coordinate->getRow();
-}
-
-int Grid::getColumn() const {
-    return _coordinate->getColumn();
-}
-
 int Grid::getSupply() const {
     return _supply;
 }
 
-int Grid::getLayer() const {
-    return _layer.getLayerIdx();
+
+bool Grid::canGetNet(const GridNet& net) const {
+    // return _nets.find(net.getId()) != _nets.end();
+    return _nets.contains(net.getIdx());
+}
+
+bool Grid::canGetNet(unsigned i) const {
+    return _nets.contains(i);
 }

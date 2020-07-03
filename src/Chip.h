@@ -18,7 +18,7 @@
 
 #include "Cell.h"
 #include "Grid.h"
-// #include "QuadTree.h"
+//#include "QuadTree.h"
 // #include "TreeNet.h"
 
 ////////////////////////////////////////////////////////////////////////
@@ -48,17 +48,6 @@
  *    2 constraints when searching for the Grids: 1) Routing direction
  *    constraint and 2) Min Routing layer constraint
  *
- * 3. Do the following steps when you move a cell :
- *    a. Use Cell::movable(Chip::limited()) to check if you can move
- *       the cell.
- *    b. Get the Coordinate of the position into which you want to move
- *       the cell and use Coordinate::CanAddCell() to check if it's
- *       legal.
- *    c. Get the Coordinate of the original position and use
- *       Coordinate::moveCell().
- *    d. Get the new Coordinate and use Coordinate::addCell().
- *    e. Call Chip::moveCell().
- *
  * Q&A : (If you have any question, please directly add the question in
  *        this Q&A and make a sign in the commit message. Then I'll
  *        answer it ASAP.)
@@ -87,7 +76,7 @@ class Chip {
     int getUp(int row, int column) const;
 
     // modifier
-    void moveCell(Cell& cell);
+    bool moveCell(Cell& cell, unsigned origin, unsigned target);
     void decNumMoved();  // trigger it if you want to move a cell back to its
                          // original position
 
@@ -95,8 +84,6 @@ class Chip {
     size_t getNumLayers() const;
     size_t getNumColumns() const;
     size_t getNumRows() const;
-    size_t getRowBase() const;
-    size_t getColumnBase() const;
     size_t getArea() const;
     size_t getVolume() const;
     size_t getNumNets() const;
@@ -105,9 +92,12 @@ class Chip {
     Layer& getLayer(int layer);
     Coordinate& getCoordinate(unsigned idx);
     Cell& getCell(unsigned idx);
+    const Pin& getPin(GridNet& net, unsigned idx);
+    unsigned getPinRow(Pin& pin);
+    unsigned getPinColumn(Pin& pin);
     GridNet& getNet(unsigned idx);
-    Grid& getGrid(int layer, unsigned idx);
-    Grid& getGrid(int layer, int row, int column);
+    Grid& getGrid(unsigned layer, unsigned idx);
+    Grid& getGrid(unsigned layer, unsigned row, unsigned column);
     MasterCellType& getMasterCell(unsigned idx);
     bool limited() const;
     void log() const;
@@ -117,25 +107,21 @@ class Chip {
 
    private:
     unsigned _maxMove;
-    int _rowBase;
-    int _columnBase;
-    int _rowRange;
-    int _columnRange;
-    int _area;
-    int _layer;
-    safe::unordered_map<std::string, int> _Layer2Idx;
-    safe::unordered_map<std::string, int> _MasterCell2Idx;
-    safe::unordered_map<std::string, unsigned> _Cell2Idx;
-    safe::unordered_map<std::string, unsigned> _Net2Idx;
-    safe::vector<std::unique_ptr<Layer>> _layers;
-    safe::vector<std::shared_ptr<Coordinate>> _coordinates;
+    unsigned _rowBase;
+    unsigned _columnBase;
+    unsigned _rowRange;
+    unsigned _columnRange;
+    unsigned _area;
+    unsigned _layer;
+    safe::vector<Layer> _layers;
+    safe::vector<Coordinate> _coordinates;
     safe::vector<MasterCellType> _MasterCells;
-    safe::vector<std::unique_ptr<Cell>> _cells;
+    safe::vector<Cell> _cells;
 
     // !
     safe::vector<GridNet> _grid_nets;
-    // FIXME this should not be placed here:
-    // safe::vector<QuadTree> _quad_tree_nets;
+    // TODO:
+    //safe::vector<QuadTree> _quad_tree_nets;
 
     // ! substituted
     // safe::vector<TreeNet> _tree_nets;
@@ -146,7 +132,6 @@ class Chip {
     void readFile(std::fstream& input);
     void constructCoordinate();
     void constructGrid(int layer);
-    void connectCoordinateGrid();
     void assignRoute(int srow,
                      int scol,
                      int slay,
@@ -157,3 +142,5 @@ class Chip {
     // void outputRoute(std::fstream& output);
     void maxNetDegree() const;
 };
+
+unsigned str2Idx(std::string title, std::string& str);

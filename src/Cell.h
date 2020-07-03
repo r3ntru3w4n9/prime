@@ -30,8 +30,9 @@
  * Pin :
  *      It is the class that describes a pin. It contains the information
  *  about its pin type, the cell it belongs to, and the net it belongs to.
- *  You don't need to update the position of a pin because you can get
- *  its position with the cell and the net it belongs to.
+ *  You don't need to update the position of a pin but if you want the
+ *  of a pin, you need to get the idx of the cell to which it belongs
+ *  first and get the position from the cell.
  *
  * Net :
  *      The structure of a GridNet is not yet determined. However, the
@@ -46,80 +47,83 @@
 class GridNet;
 class Cell;
 
-// * using pointers instead of references may seem like a downgrad
-// * but move semantics are needed
 class Pin {
    public:
     // constructor
-    Pin(PinType& PT, Cell& cell);
-    Pin(Pin&& p);
+    Pin(unsigned idx, unsigned layer, Cell& cell);
+    Pin(const Pin& pin) = delete;
+    Pin(Pin&& pin);
 
-    // assignment
-    Pin& operator=(Pin&& p);
+    // Assignment
+    Pin& operator=(const Pin& pin) = delete;
+    Pin& operator=(Pin&& pin);
 
     // modifier
-    void setNet(std::shared_ptr<GridNet> net);
+    void setNet(GridNet& net);
 
     // accesser
-    PinType& getPinType() const;
-    GridNet& get_net() const;
-    Cell& get_cell() const;
+    unsigned getIdx() const;
+    unsigned get_net_idx() const;
+    unsigned get_cell_idx() const;
+    unsigned getLayer() const;
 
-    unsigned getRow() const;
-    unsigned getColumn() const;
-    int getLayer() const;
+    //
 
    private:
-    std::shared_ptr<PinType> _PT;
-    std::shared_ptr<Cell> _cell;
-    std::shared_ptr<GridNet> _net;
+    unsigned _idx;
+    unsigned _layer;
+    unsigned _cell;
+    unsigned _net;
 };
 
 class GridNet {
    public:
     // Constructors(no copy constructor)
-    GridNet(const std::string NetName,
-            unsigned id,
+    GridNet(unsigned idx,
             unsigned PinNum,
-            unsigned layer) noexcept;
-    GridNet(const GridNet& g) noexcept;
+            unsigned minLayer);
+    GridNet(const GridNet& g) = delete;
+    GridNet(GridNet&& g);
+
+    // Assignment
+    GridNet& operator=(const GridNet& net) = delete;
+    GridNet& operator=(GridNet&& net);
 
     // modifier
-    void addPin(std::shared_ptr<Pin> pin);  // you don't need this
-    void addSegment(int srow, int scol, int slay, int erow, int ecol, int elay);
+    void addPin(Pin& pin);  // you don't need this
+    // void addSegment(int srow, int scol, int slay, int erow, int ecol, int
+    // elay);
 
     // accesser
-    const std::string& getName() const;
-    unsigned getId() const;
+    unsigned getIdx() const;
     unsigned getMinlayer() const;  // min routing layer constraint
     size_t getNumPin() const;
-    Pin& getPin(unsigned i);
-    std::shared_ptr<Pin> getPinPtr(unsigned i);
-    size_t getNumSegments() const;
-    safe::vector<unsigned>& getSegments();
+    Pin& getPin(unsigned i, safe::vector<Cell>& cells);
+    // size_t getNumSegments() const;
+    // safe::vector<unsigned>& getSegments();
 
    private:
-    const std::string _NetName;
-    const unsigned _Id;
-    const unsigned _minLayer;
+    unsigned _idx;
+    unsigned _minLayer;
+    safe::vector<std::pair<unsigned, unsigned>> _pins;
 
-    safe::vector<std::shared_ptr<Pin>> _pins;
-
-    // TODO: this is preserved for constructing QuadForest
-    safe::vector<unsigned> _segments;  // srow, scol, slay, erow, ecol, elay
+    // ! TODO deprecate this
+    // safe::vector<unsigned> _segments;  // srow, scol, slay, erow, ecol, elay
 };
 
 class Cell {
    public:
     // Constructors(no copy constructor)
-    Cell(const std::string CellName,
-         MasterCellType& MCT,
+    Cell(MasterCellType& MCT,
+         unsigned idx,
          bool movable,
-         unsigned id) noexcept;
-    Cell(Cell&& c) noexcept;
+         unsigned layers);
+    Cell(const Cell& c) = delete;
+    Cell(Cell&& c);
 
-    // operator=
-    Cell& operator=(Cell&& c) noexcept;
+    // Assignment
+    Cell& operator=(const Cell& c) = delete;
+    Cell& operator=(Cell&& c);
 
     // modifier
     void setRow(unsigned x);
@@ -129,12 +133,10 @@ class Cell {
 
     // accesser
     const std::string& getCellName() const;
-    unsigned getId() const;
-
+    unsigned getIdx() const;
     const MasterCellType& getMasterCell() const;
     MasterCellType& getMasterCell();
-
-    int getMasterCellId() const;
+    unsigned getMasterCellId() const;
 
     bool moved() const;
     // constraint means the limit of movable number
@@ -143,10 +145,9 @@ class Cell {
     unsigned getRow() const;
     unsigned getColumn() const;
 
-    Pin& getPin(size_t i);
-    Pin& getPin(std::string& str);
+    Pin& getPin(unsigned i);
 
-    int getLayerDemand(int layer) const;
+    int getLayerDemand(unsigned layer) const;
     safe::vector<unsigned>& getSameGridMC(unsigned layer);
     safe::vector<unsigned>& getadjHGridMC(unsigned layer);
     safe::vector<int>& getSameGridDemand(unsigned layer);
@@ -154,24 +155,20 @@ class Cell {
 
     size_t getNumPins() const;
 
-    const safe::vector<std::shared_ptr<Pin>>& getPinLayer(int i) const;
-    safe::vector<std::shared_ptr<Pin>>& getPinLayer(int i);
+    const safe::vector<unsigned>& getPinLayer(unsigned i) const;
 
     // friend
     friend std::ostream& operator<<(std::ostream& os, const Cell& cell);
 
    private:
-    std::string _CellName;
     MasterCellType& _MCT;
-
-    unsigned _Id;
+    unsigned _idx;
     bool _movable;
     bool _moved;
     unsigned _row;
     unsigned _column;
-
     safe::vector<Pin> _pins;
-    safe::vector<safe::vector<std::shared_ptr<Pin>>> _Layer2pin;
+    safe::vector<safe::vector<unsigned>> _Layer2pin;
 };
 
-std::ostream& operator<<(std::ostream& os, const Cell& cell);
+std::ostream& operator<<(std::ostream& os, const Cell& cell);// to be updated
