@@ -13,7 +13,7 @@
 ///                          INCLUDES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "../include/MasterCell.h"
+#include "MasterCell.h"
 
 #include <assert.h>
 
@@ -87,15 +87,11 @@ void MasterCellType::AddBlkg(unsigned layer,
 void MasterCellType::reservePin(size_t s)
 {
     _pin2Layer.reserve(s);
-    for (unsigned i = 0; i < s; ++i)
-    {
-        _pin2Layer.push_back(0);
-    }
 }
 
-void MasterCellType::AddPin(unsigned idx, unsigned layer)
+void MasterCellType::AddPin(unsigned layer)
 {
-    _pin2Layer[idx] = layer;
+    _pin2Layer.push_back(layer);
 }
 
 void MasterCellType::AddExtraSame(unsigned MC, int demand, unsigned layer)

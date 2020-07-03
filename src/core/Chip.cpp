@@ -12,7 +12,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "../include/Chip.h"
+#include "Chip.h"
 
 #include <assert.h>
 
@@ -112,11 +112,12 @@ void Chip::readFile(std::fstream& input) {
         MasterCellType mct = MasterCellType(i, _layer);
         int pin, blockage;
         input >> pin >> blockage;  // <pinCount> <blockageCount>
+        mct.reservePin(pin);
         for (int j = 0; j < pin; ++j) {
             input >> str;  // Pin
             assert(str == "Pin");
             input >> str >> buf;  // <pinName> <pinLayer>
-            mct.AddPin(j, str2Idx("M",buf));
+            mct.AddPin(str2Idx("M",buf));
         }
         for (int j = 0; j < blockage; ++j) {
             input >> str;  // Blkg
@@ -251,6 +252,7 @@ void Chip::readFile(std::fstream& input) {
             // TODO: add pin to quad tree
             //_quad_tree_nets[i].add_pin(&pin);
         }
+        return;
     }
 
     // safe::unordered_map<std::string, std::vector<Segment>> segments;

@@ -13,7 +13,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "../include/Grid.h"
+#include "Grid.h"
 
 #include <assert.h>
 

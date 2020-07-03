@@ -12,7 +12,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "../include/Cell.h"
+#include "Cell.h"
 
 #include <assert.h>
 
@@ -72,10 +72,10 @@ GridNet::GridNet(unsigned idx,
 //       _minLayer(g._minLayer),
 //       _pins(g._pins) {}
 
-// GridNet::GridNet(const GridNet& g)
-//     : _idx(std::move(g._idx)),
-//       _minLayer(std::move(g._minLayer)),
-//       _pins(std::move(g._pins)) {}
+ GridNet::GridNet(GridNet&& g)
+     : _idx(std::move(g._idx)),
+       _minLayer(std::move(g._minLayer)),
+       _pins(std::move(g._pins)) {}
 
 GridNet& GridNet::operator=(GridNet&& net){
     _idx = net._idx;
