@@ -5,7 +5,10 @@ The file is to define the cost functions
 
 #include "router3d.h"
 
-#define max_diff(a, b) ((a) > (b) ? (a - b) : (b - a))
+template <typename T>
+T max_diff(T a, T b) {
+    return a > b ? a - b : b - a;
+}
 
 int Router3D::get_cost(unsigned a, unsigned b) {
     switch (_CostType) {

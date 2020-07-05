@@ -18,10 +18,10 @@ class Tree {
    public:
     // constructor
 
-    Tree() noexcept;
-    Tree(size_t size) noexcept;
-    Tree(safe::vector<TreeNode>&& nodes) noexcept;
-    Tree(Tree&& tn) noexcept;
+    explicit Tree() noexcept;
+    explicit Tree(size_t size) noexcept;
+    explicit Tree(safe::vector<TreeNode>&& nodes) noexcept;
+    explicit Tree(Tree&& tn) noexcept;
 
     // operator=
 

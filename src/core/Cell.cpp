@@ -26,7 +26,7 @@
 
 // Pin
 Pin::Pin(unsigned idx, unsigned layer, Cell& cell)
-    : _idx(idx), _layer(layer), _cell(cell.getIdx()) {}
+    : _idx(idx), _layer(layer), _cell(cell.getIdx()), _net(-1) {}
 
 // Pin::Pin(const Pin& pin) : _idx(pin._idx), _layer(pin._layer),
 // _cell(pin._cell), _net(pin._net) {}
