@@ -4,10 +4,9 @@
 
 #include "Tree.h"
 
-Tree::Tree(void) noexcept : nodes(std::move(safe::vector<TreeNode>())) {}
+Tree::Tree(void) noexcept : nodes(safe::vector<TreeNode>()) {}
 
-Tree::Tree(size_t size) noexcept
-    : nodes(std::move(safe::vector<TreeNode>(size))) {}
+Tree::Tree(size_t size) noexcept : nodes(safe::vector<TreeNode>(size)) {}
 
 Tree::Tree(safe::vector<TreeNode>&& nodes) noexcept : nodes(std::move(nodes)) {}
 

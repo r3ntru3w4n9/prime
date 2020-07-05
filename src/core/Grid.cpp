@@ -32,7 +32,7 @@ Layer::Layer(unsigned idx, bool d, int supply, unsigned area)
     : _idx(idx), _direction(d) {
     _grids.reserve(area);
     for (unsigned i = 0; i < area; ++i) {
-        _grids.push_back(std::move(Grid(supply)));
+        _grids.push_back(Grid(supply));
     }
 }
 

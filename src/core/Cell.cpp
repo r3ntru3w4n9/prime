@@ -25,13 +25,16 @@
 ////////////////////////////////////////////////////////////////////////
 
 // Pin
-Pin::Pin(unsigned idx, unsigned layer, Cell& cell) : _idx(idx), _layer(layer) ,_cell(cell.getIdx()) {}
+Pin::Pin(unsigned idx, unsigned layer, Cell& cell)
+    : _idx(idx), _layer(layer), _cell(cell.getIdx()) {}
 
-// Pin::Pin(const Pin& pin) : _idx(pin._idx), _layer(pin._layer), _cell(pin._cell), _net(pin._net) {}
+// Pin::Pin(const Pin& pin) : _idx(pin._idx), _layer(pin._layer),
+// _cell(pin._cell), _net(pin._net) {}
 
-Pin::Pin(Pin&& pin) : _idx(pin._idx), _layer(pin._layer), _cell(pin._cell), _net(pin._net) {}
+Pin::Pin(Pin&& pin)
+    : _idx(pin._idx), _layer(pin._layer), _cell(pin._cell), _net(pin._net) {}
 
-Pin& Pin::operator=(Pin&& pin){
+Pin& Pin::operator=(Pin&& pin) {
     _idx = pin._idx;
     _layer = pin._layer;
     _cell = pin._cell;
@@ -47,11 +50,11 @@ unsigned Pin::getIdx() const {
     return _idx;
 }
 
-unsigned Pin::get_net_idx() const{
+unsigned Pin::get_net_idx() const {
     return _net;
 }
 
-unsigned Pin::get_cell_idx() const{
+unsigned Pin::get_cell_idx() const {
     return _cell;
 }
 
@@ -60,9 +63,7 @@ unsigned Pin::getLayer() const {
 }
 
 // Net
-GridNet::GridNet(unsigned idx,
-                 unsigned PinNum,
-                 unsigned minLayer)
+GridNet::GridNet(unsigned idx, unsigned PinNum, unsigned minLayer)
     : _idx(idx), _minLayer(minLayer) {
     _pins.reserve(PinNum);
 }
@@ -72,12 +73,12 @@ GridNet::GridNet(unsigned idx,
 //       _minLayer(g._minLayer),
 //       _pins(g._pins) {}
 
- GridNet::GridNet(GridNet&& g)
-     : _idx(std::move(g._idx)),
-       _minLayer(std::move(g._minLayer)),
-       _pins(std::move(g._pins)) {}
+GridNet::GridNet(GridNet&& g)
+    : _idx(std::move(g._idx)),
+      _minLayer(std::move(g._minLayer)),
+      _pins(std::move(g._pins)) {}
 
-GridNet& GridNet::operator=(GridNet&& net){
+GridNet& GridNet::operator=(GridNet&& net) {
     _idx = net._idx;
     _minLayer = net._minLayer;
     _pins = std::move(net._pins);
@@ -85,7 +86,7 @@ GridNet& GridNet::operator=(GridNet&& net){
 }
 
 void GridNet::addPin(Pin& pin) {
-    _pins.push_back(CellPinPair(pin.get_cell_idx(),pin.getIdx()));
+    _pins.push_back(CellPinPair(pin.get_cell_idx(), pin.getIdx()));
 }
 
 void GridNet::addSegment(int srow,
@@ -131,14 +132,8 @@ safe::vector<unsigned>& GridNet::getSegments() {
 }
 
 // Cell
-Cell::Cell(MasterCellType& MCT,
-         unsigned idx,
-         bool movable,
-         unsigned layers)
-    : _MCT(MCT),
-      _idx(idx),
-      _movable(movable),
-      _moved(false) {
+Cell::Cell(MasterCellType& MCT, unsigned idx, bool movable, unsigned layers)
+    : _MCT(MCT), _idx(idx), _movable(movable), _moved(false) {
     size_t p = getMasterCell().getNumPins();
     _pins.reserve(p);
     _Layer2pin.reserve(layers);
@@ -147,7 +142,7 @@ Cell::Cell(MasterCellType& MCT,
         _Layer2pin.push_back(std::move(v));
     }
     for (size_t i = 0; i < p; ++i) {
-        _pins.push_back(std::move(Pin(i,getMasterCell().getPinLayer(i), *this)));
+        _pins.push_back(Pin(i, getMasterCell().getPinLayer(i), *this));
         assert(_pins[i].getIdx() == i);
         _Layer2pin[_pins[i].getLayer()].push_back(i);
     }

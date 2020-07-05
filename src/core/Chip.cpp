@@ -78,7 +78,7 @@ void Chip::readFile(std::fstream& input) {
         // }
         int supply;
         input >> supply;  //<defaultSupplyOfOneGGrid>
-        _layers.push_back(std::move(Layer(idx - 1, direction, supply, _area)));
+        _layers.push_back(Layer(idx - 1, direction, supply, _area));
     }
 
     /*NumNonDefaultSupplyGGrid <nonDefaultSupplyGGridCount>
@@ -193,7 +193,7 @@ void Chip::readFile(std::fstream& input) {
         // } else {
         //     assert(buf == "Fixed" || buf == "Movable");
         // }
-        _cells.push_back(std::move(Cell(MCT, i, movable, _layer)));
+        _cells.push_back(Cell(MCT, i, movable, _layer));
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
         Cell& cell = _cells[i];
         cell.setCoordinate(rIdx, cIdx);
@@ -221,7 +221,7 @@ void Chip::readFile(std::fstream& input) {
             minLay = str2Idx("M", buf);
         }
 
-        _grid_nets.push_back(std::move(GridNet(i, numPins, minLay)));
+        _grid_nets.push_back(GridNet(i, numPins, minLay));
         // ! substituted
         // TreeNet tree_net = TreeNet(std::move(str), i, numPins, minLay);
         // _tree_nets.push_back(std::move(tree_net));
@@ -459,8 +459,8 @@ void Chip::constructCoordinate() {
     _coordinates.reserve(_area);
     for (unsigned i = 0; i < _columnRange; ++i) {
         for (unsigned j = 0; j < _rowRange; ++j) {
-            _coordinates.push_back(std::move(
-                Coordinate(j, i, getIdx(j, i), getLeft(j, i), getRight(j, i))));
+            _coordinates.push_back(
+                Coordinate(j, i, getIdx(j, i), getLeft(j, i), getRight(j, i)));
         }
     }
 }

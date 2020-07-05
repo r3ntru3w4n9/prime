@@ -1,6 +1,6 @@
 
-CXX = g++
-CXXFLAGS = -std=c++11 -Wall -Wextra -Werror -flto -g -Iinclude
+CXXC = g++
+CXXCFLAGS = -std=c++11 -Wall -Wextra -Werror -flto -g -Iinclude
 TARGETS = src/main.o \
 		  src/core/Cell.o src/core/Grid.o src/core/MasterCell.o src/core/Chip.o \
 		  src/grad/Gradient.o \
@@ -18,10 +18,10 @@ all:
 	$(MAKE) $(BINARY) -j
 
 $(BINARY): $(TARGETS)
-	$(CXX) $(CXXFLAGS) $? -o $(BINARY) $(FLAGS)
+	$(CXXC) $(CXXCFLAGS) $? -o $(BINARY) $(FLAGS)
 
 %.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $< -o $@ $(FLAGS)
+	$(CXXC) -c $(CXXCFLAGS) $< -o $@ $(FLAGS)
 
 clean:
 	rm -f $(BINARY) $(TARGETS)

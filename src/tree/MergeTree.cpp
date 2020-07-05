@@ -22,8 +22,8 @@ void MergeTree::merge_tree(
     ranks.reserve(num_pins);
     mtree.reserve(num_mtree);
     for (unsigned i = 0; i < num_pins; ++i) {
-        mtree.push_back(std::move(TreeNode(i)));
-        pins.push_back(std::move(TreeNode(i)));
+        mtree.push_back(TreeNode(i));
+        pins.push_back(TreeNode(i));
         ranks.push_back(0U);
     }
 
