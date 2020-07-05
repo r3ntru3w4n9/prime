@@ -13,7 +13,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "../include/Grid.h"
+#include "Grid.h"
 
 #include <assert.h>
 
@@ -28,10 +28,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 // Layer
-Layer::Layer(unsigned idx,
-             bool d,
-             int supply,
-             unsigned area)
+Layer::Layer(unsigned idx, bool d, int supply, unsigned area)
     : _idx(idx), _direction(d) {
     _grids.reserve(area);
     for (unsigned i = 0; i < area; ++i) {
@@ -45,11 +42,9 @@ Layer::Layer(unsigned idx,
 //       _grids(l._grids) {}
 
 Layer::Layer(Layer&& l)
-    : _idx(l._idx),
-      _direction(l._direction),
-      _grids(std::move(l._grids)) {}
+    : _idx(l._idx), _direction(l._direction), _grids(std::move(l._grids)) {}
 
-Layer& Layer::operator=(Layer&& l){
+Layer& Layer::operator=(Layer&& l) {
     _idx = l._idx;
     _direction = l._direction;
     _grids = std::move(l._grids);
@@ -69,13 +64,25 @@ Grid& Layer::getGrid(unsigned idx) {
 }
 
 // Coordinate
-Coordinate::Coordinate(unsigned x, unsigned y, unsigned idx, int left, int right) : _row(x), _column(y), _idx(idx), _c1(left), _c2(right){}
+Coordinate::Coordinate(unsigned x,
+                       unsigned y,
+                       unsigned idx,
+                       int left,
+                       int right)
+    : _row(x), _column(y), _idx(idx), _c1(left), _c2(right) {}
 
-// Coordinate::Coordinate(const Coordinate& c) : _row(c._row), _column(c._column), _idx(c._idx) {}
+// Coordinate::Coordinate(const Coordinate& c) : _row(c._row),
+// _column(c._column), _idx(c._idx) {}
 
-Coordinate::Coordinate(Coordinate&& c) : _row(c._row), _column(c._column), _idx(c._idx), _c1(c._c1), _c2(c._c2), _MCT2Num(std::move(c._MCT2Num)) {}
+Coordinate::Coordinate(Coordinate&& c)
+    : _row(c._row),
+      _column(c._column),
+      _idx(c._idx),
+      _c1(c._c1),
+      _c2(c._c2),
+      _MCT2Num(std::move(c._MCT2Num)) {}
 
-Coordinate& Coordinate::operator=(Coordinate&& c){
+Coordinate& Coordinate::operator=(Coordinate&& c) {
     _row = c._row;
     _column = c._column;
     _idx = c._idx;
@@ -85,7 +92,9 @@ Coordinate& Coordinate::operator=(Coordinate&& c){
     return *this;
 }
 
-bool Coordinate::CanAddCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) const {
+bool Coordinate::CanAddCell(Cell& cell,
+                            safe::vector<Coordinate>& coordinates,
+                            safe::vector<Layer>& layers) const {
     unsigned id = cell.getMasterCellId();
     unsigned n;
     if (_MCT2Num.contains(id)) {
@@ -94,7 +103,7 @@ bool Coordinate::CanAddCell(Cell& cell, safe::vector<Coordinate>& coordinates, s
     } else {
         n = 1;
     }
-    for(unsigned i = 0; i < layers.size(); ++i) {
+    for (unsigned i = 0; i < layers.size(); ++i) {
         Layer& layer = layers[i];
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
@@ -142,7 +151,9 @@ bool Coordinate::CanAddCell(Cell& cell, safe::vector<Coordinate>& coordinates, s
     return true;
 }
 
-void Coordinate::addCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) {
+void Coordinate::addCell(Cell& cell,
+                         safe::vector<Coordinate>& coordinates,
+                         safe::vector<Layer>& layers) {
     unsigned id = cell.getMasterCellId();
     unsigned n;
     if (_MCT2Num.contains(id)) {
@@ -193,7 +204,9 @@ void Coordinate::addCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe
     }
 }
 
-void Coordinate::moveCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) {
+void Coordinate::moveCell(Cell& cell,
+                          safe::vector<Coordinate>& coordinates,
+                          safe::vector<Layer>& layers) {
     unsigned id = cell.getMasterCellId();
     assert(_MCT2Num.contains(id));
     unsigned n = --_MCT2Num[id];
@@ -250,18 +263,15 @@ int Coordinate::getColumn() const {
 }
 
 // Grid
-Grid::Grid(int supply)
-    : _supply(supply) {}
+Grid::Grid(int supply) : _supply(supply) {}
 
 // Grid::Grid(const Grid& g)
 //     : _supply(g._supply),
 //       _nets(g._nets) {}
 
-Grid::Grid(Grid&& g)
-    : _supply(g._supply),
-      _nets(std::move(g._nets)) {}
+Grid::Grid(Grid&& g) : _supply(g._supply), _nets(std::move(g._nets)) {}
 
-Grid& Grid::operator=(Grid&& g){
+Grid& Grid::operator=(Grid&& g) {
     _supply = g._supply;
     _nets = std::move(g._nets);
     return *this;
@@ -302,7 +312,6 @@ void Grid::rmNet(unsigned i) {
 int Grid::getSupply() const {
     return _supply;
 }
-
 
 bool Grid::canGetNet(const GridNet& net) const {
     // return _nets.find(net.getId()) != _nets.end();

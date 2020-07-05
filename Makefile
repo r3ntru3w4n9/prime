@@ -1,6 +1,6 @@
 
 CXX = g++-9
-CXXFLAGS = -rdynamic -std=c++11 -Wall -Wextra -Werror -flto -g
+CXXFLAGS = -std=c++11 -Wall -Wextra -Werror -flto -g -Iinclude
 TARGETS = src/main.o \
 		  src/core/Cell.o src/core/Grid.o src/core/MasterCell.o src/core/Chip.o \
 		  src/Node.o src/Tree.o src/MergeTree.o src/union_find.o \

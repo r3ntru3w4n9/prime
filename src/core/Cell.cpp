@@ -12,7 +12,7 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "../include/Cell.h"
+#include "Cell.h"
 
 #include <assert.h>
 

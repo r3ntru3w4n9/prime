@@ -2,7 +2,7 @@
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
-#include "include/Tree.h"
+#include "Tree.h"
 
 Tree::Tree(void) noexcept : nodes(std::move(safe::vector<TreeNode>())) {}
 

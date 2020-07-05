@@ -2,7 +2,8 @@
 The file is to define the cost functions
 */
 #include <iostream>
-#include "../include/router3d.h"
+
+#include "router3d.h"
 
 #define max_diff(a, b) ((a) > (b) ? (a - b) : (b - a))
 
