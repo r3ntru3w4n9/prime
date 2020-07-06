@@ -13,48 +13,78 @@
 typedef safe::vector<SimplePin>::const_iterator citer;
 
 enum class CmpType { Minimum, Maximum };
+enum class UseArg { Yes, No };
 
-template <CmpType t>
-unsigned get_(const safe::vector<SimplePin>& pins,
-              std::function<unsigned(citer)> get) {
+// if arg then return arg(min,max) else return (min,max)
+template <CmpType t, UseArg arg>
+static unsigned get_(const safe::vector<SimplePin>& pins,
+                     std::function<unsigned(citer)> get) {
     auto iter = pins.begin();
     unsigned val = get(iter);
-    for (++iter; iter != pins.end(); ++iter) {
+    unsigned idx = 0, idx_val = 0;
+    for (++iter, ++idx; iter != pins.end(); ++iter, ++idx) {
         unsigned cur = get(iter);
         switch (t) {
             case CmpType::Minimum:
                 if (cur < val) {
                     val = cur;
+                    idx_val = idx;
                 }
                 break;
             case CmpType::Maximum:
                 if (cur > val) {
                     val = cur;
+                    idx_val = idx;
                 }
                 break;
         }
     }
-    return val;
+    switch (arg) {
+        case UseArg::Yes:
+            return idx_val;
+        case UseArg::No:
+            return val;
+    }
+}
+
+template <UseArg arg>
+static unsigned left(const safe::vector<SimplePin>& pins) {
+    auto func = [=](citer c) { return c->get_row(); };
+    return get_<CmpType::Minimum, UseArg::No>(pins, func);
+}
+
+template <UseArg arg>
+static unsigned right(const safe::vector<SimplePin>& pins) {
+    auto func = [=](citer c) { return c->get_row(); };
+    return get_<CmpType::Maximum, UseArg::No>(pins, func);
+}
+
+template <UseArg arg>
+static unsigned bottom(const safe::vector<SimplePin>& pins) {
+    auto func = [=](citer c) { return c->get_col(); };
+    return get_<CmpType::Minimum, UseArg::No>(pins, func);
+}
+
+template <UseArg arg>
+static unsigned top(const safe::vector<SimplePin>& pins) {
+    auto func = [=](citer c) { return c->get_col(); };
+    return get_<CmpType::Maximum, UseArg::No>(pins, func);
 }
 
 unsigned QuadTree::get_left(void) const {
-    auto func = [=](citer c) { return c->get_row(); };
-    return get_<CmpType::Minimum>(pins, func);
+    return left<UseArg::No>(pins);
 }
 
 unsigned QuadTree::get_right(void) const {
-    auto func = [=](citer c) { return c->get_row(); };
-    return get_<CmpType::Maximum>(pins, func);
+    return right<UseArg::No>(pins);
 }
 
 unsigned QuadTree::get_bottom(void) const {
-    auto func = [=](citer c) { return c->get_col(); };
-    return get_<CmpType::Minimum>(pins, func);
+    return bottom<UseArg::No>(pins);
 }
 
 unsigned QuadTree::get_top(void) const {
-    auto func = [=](citer c) { return c->get_col(); };
-    return get_<CmpType::Maximum>(pins, func);
+    return top<UseArg::No>(pins);
 }
 
 std::pair<unsigned, unsigned> QuadTree::get_horiz_bound(void) const {
@@ -67,4 +97,9 @@ std::pair<unsigned, unsigned> QuadTree::get_verti_bound(void) const {
     unsigned bottom = get_bottom(), top = get_top();
     assert(bottom <= top);
     return std::make_pair(bottom, top);
+}
+
+unsigned QuadTree::get_hpwl(void) const {
+    auto horiz = get_horiz_bound(), verti = get_verti_bound();
+    return horiz.second - horiz.first + verti.second - verti.first;
 }

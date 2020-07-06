@@ -88,6 +88,7 @@ class QuadTree {
     unsigned get_top(void) const;
     std::pair<unsigned, unsigned> get_horiz_bound(void) const;
     std::pair<unsigned, unsigned> get_verti_bound(void) const;
+    unsigned get_hpwl(void) const;
 
    private:
     // const std::string                _NetName;

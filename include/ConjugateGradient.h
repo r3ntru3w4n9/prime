@@ -15,14 +15,21 @@ class ConjugateGradient {
     explicit ConjugateGradient(safe::vector<Gradient>&& grad) noexcept;
     explicit ConjugateGradient(safe::vector<Gradient>&& grad,
                                safe::vector<Gradient>&& prev_grads) noexcept;
-    explicit ConjugateGradient(const QuadForest& qf) noexcept;
+    explicit ConjugateGradient(QuadForest& qf) noexcept;
 
     size_t size(void) const;
     void zero_grad_(void);
 
+    // TODO: currently supports one kind of gradient calculations
+    double eval(void);
+    void backward(void);
+    double update_directions(safe::vector<Gradient>& gradients);
+
    private:
     void clear(void);
 
+    // FIXME: not ideal to have made CG a reference type
     safe::vector<Gradient> grads;
     safe::vector<Gradient> prev_grads;
+    QuadForest* qf;
 };
