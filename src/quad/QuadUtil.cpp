@@ -2,7 +2,7 @@
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
-#include "../include/QuadUtil.h"
+#include "QuadUtil.h"
 
 // NetSegment
 NetSegment::NetSegment() noexcept
@@ -96,6 +96,9 @@ CoordPair NetSegment::get_instersect(const NetSegment& ns) const {
     return CoordPair(-1, -1);
 }
 bool NetSegment::check_instersect(const NetSegment& ns) const { return get_instersect(ns) != CoordPair(-1, -1); }
+bool NetSegment::contains(const CoordPair& cp) const {
+    return x_start <= cp.first && x_end >= cp.first && y_start <= cp.second && y_end >= cp.second;
+}
 
 void NetSegment::merge_segment(NetSegment& ns) { // merge two parallel segments
     if(!check_overlap(ns)) return;
@@ -149,6 +152,19 @@ void SimpleUnionFind::merge(unsigned x, unsigned y) {
         if(rank[x] == rank[y]) ++rank[x];
         parent[y] = x;
     }
+}
+bool SimpleUnionFind::check_all_merged() {
+    for(size_t i = 1; i < parent.size(); ++i) {
+        if(!same(0, i)) return false;
+    }
+    return true;
+}
+unsigned SimpleUnionFind::first_not_merged() {
+    assert(!check_all_merged());
+    for(size_t i = 1; i < parent.size(); ++i) {
+        if(!same(0, i)) return i;
+    }
+    return 0;
 }
 void SimpleUnionFind::clear() { parent.clear(); rank.clear(); }
 void SimpleUnionFind::reset(size_t N) {

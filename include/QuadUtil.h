@@ -54,6 +54,7 @@ class NetSegment{
     CoordPair check_shared_point(const NetSegment& ns) const;
     CoordPair get_instersect(const NetSegment& ns) const;
     bool check_instersect(const NetSegment& ns) const;
+    bool contains(const CoordPair& cp) const;
 
     void merge_segment(NetSegment& ns);
     NetSegment split_segment(CoordPair& coord);
@@ -74,6 +75,8 @@ class SimpleUnionFind{
     inline unsigned find(unsigned x);
     bool same(unsigned x, unsigned y);
     void merge(unsigned x, unsigned y);
+    bool check_all_merged();
+    unsigned first_not_merged();
     void clear();
     void reset(size_t N);
     

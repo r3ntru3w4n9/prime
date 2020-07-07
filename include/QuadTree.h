@@ -123,13 +123,11 @@ class QuadTree {
 
     // Segment / Tree conversion functions
     void segment_to_tree();
-    inline bool dfs_tree_graph(safe::vector<VEPair> TreeGraph[],
-                               safe::vector<int>& selected_edges,
-                               const unsigned vNum,
-                               const unsigned pNum,
-                               const unsigned now,
-                               const unsigned parent,
-                               const unsigned edge_idx);
+    inline bool dfs_tree_graph(safe::vector<VEPair> TreeGraph[], 
+                               safe::vector<int>&  selected_edges, 
+                               const unsigned pNum, 
+                               const unsigned now, const int parent,
+                               const int edge_idx);
     inline unsigned dfs_tree_center(safe::vector<unsigned> SimpleTree[],
                                     safe::vector<double>& vertex_rank,
                                     const unsigned tree_size,

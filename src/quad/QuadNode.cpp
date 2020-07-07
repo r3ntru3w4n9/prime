@@ -125,7 +125,11 @@ std::ostream& operator<<(std::ostream& out, const QuadNode& qn) {
 SimpleEdge::SimpleEdge() noexcept 
     : v1(0), v2(0), weight(0) {}
 SimpleEdge::SimpleEdge(unsigned _v1, unsigned _v2, unsigned _w) noexcept 
-    : v1(_v1), v2(_v2), weight(_w) {}
+    : v1(_v1), v2(_v2), weight(_w) {
+    if(v1 > v2) {
+        std::swap(v1, v2);
+    }
+}
 
 bool SimpleEdge::operator<(const SimpleEdge& se) const {
     if(weight != se.weight) return weight < se.weight;

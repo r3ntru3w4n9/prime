@@ -2,7 +2,7 @@
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
-#include "../include/QuadTree.h"
+#include "QuadTree.h"
 
 QuadTree::QuadTree() noexcept
     : _NetId(-1), _baseRow(-1), _baseCol(-1), _minLayer(-1), _maxRows(0), _maxCols(0), root_idx(-1), flag(0) {
@@ -211,8 +211,10 @@ void QuadTree::segment_to_tree(){
             Vertices[pNum] = pinCoord;
             VertexLayer[pNum] = pins[i].get_layer();
             pins2NodeIdx.push_back(pNum);
+            // std::cerr << "Pin " << pNum << " : " << pinCoord.first << ", " << pinCoord.second << "\n";
             ++pNum;
         } else { // Different pins with same x, y coordinates but on different layers
+            // std::cerr << "Repeated pin " << i << " " << pinCoord.first << ", " << pinCoord.second << "\n";
             pins2NodeIdx.push_back(Coord2Vertices[pinCoord]);
         }
     } // Now we know the number of pins is pNum
@@ -220,47 +222,82 @@ void QuadTree::segment_to_tree(){
 
     // assert(segments.size() > 0);
     bool operation = true;
-    while(operation && segments.size() > 0){ // merge overlapping segments
-        operation = false;
-        for(size_t i = 0; i < segments.size() - 1; ++i){
-            for(size_t j = i + 1; j < segments.size(); ++j){
-                if(segments[i].check_overlap(segments[j])
-                   && !Coord2Vertices.contains(segments[i].get_start())
-                   && !Coord2Vertices.contains(segments[i].get_end())
-                   && !Coord2Vertices.contains(segments[j].get_start())
-                   && !Coord2Vertices.contains(segments[j].get_end())){
-                    // std::cout << "i = " << i << " j = " << j << std::endl;
-                    segments[i].merge_segment(segments[j]);
-                    segments[j] = segments[segments.size() - 1];
-                    segments.pop_back();
-                    --j;
-                    operation = true;
-                }
-            }
-        }
-        // if(operation) print_segments();
-    } operation = true;
+    // while(operation && segments.size() > 0){ // merge overlapping segments
+    //     operation = false;
+    //     for(size_t i = 0; i < segments.size() - 1; ++i){
+    //         for(size_t j = i + 1; j < segments.size(); ++j){
+    //             if(segments[i].check_overlap(segments[j])
+    //                && !Coord2Vertices.contains(segments[i].get_start())
+    //                && !Coord2Vertices.contains(segments[i].get_end())
+    //                && !Coord2Vertices.contains(segments[j].get_start())
+    //                && !Coord2Vertices.contains(segments[j].get_end())){
+    //                 std::cout << "i = " << i << " j = " << j << std::endl;
+    //                 std::cerr << segments[i] << " / " << segments[j] << std::endl;
+    //                 segments[i].merge_segment(segments[j]);
+    //                 std::cerr << segments[i] << std::endl;
+    //                 segments[j] = segments[segments.size() - 1];
+    //                 segments.pop_back();
+    //                 --j;
+    //                 operation = true;
+    //             }
+    //         }
+    //     }
+    // } operation = true;
     while(operation && segments.size() > 0){ // split intersected segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
             for(size_t j = i + 1; j < segments.size(); ++j){
                 CoordPair intersection = segments[i].get_instersect(segments[j]);
-                // std::cout << "i = " << i << " j = " << j << " intersection = " 
-                //           << intersection.first << ", " << intersection.second << std::endl;
-                if(intersection != CoordPair(-1, -1)){
+                if(intersection != CoordPair(-1, -1)
+                   && intersection != segments[i].get_start()){
+                    // std::cout << "i = " << i << " j = " << j << " intersection = " 
+                    //       << intersection.first << ", " << intersection.second << std::endl;
+                    // std::cerr << segments[i] << " / " << segments[j] << std::endl;
                     NetSegment splitted_1 = segments[i].split_segment(intersection);
                     NetSegment splitted_2 = segments[j].split_segment(intersection);
-                    if(splitted_1 != NetSegment()) segments.push_back(splitted_1);
-                    if(splitted_2 != NetSegment()) segments.push_back(splitted_2);
+                    // std::cerr << segments[i] << " / " << segments[j] << std::endl;
+                    // std::cerr << splitted_1 << " / " << splitted_2 << std::endl;
+                    if(splitted_1.get_length() > 0) segments.push_back(splitted_1);
+                    if(splitted_2.get_length() > 0) segments.push_back(splitted_2);
                     operation = true;
                 }
             }
         }
     }
     // print_segments();
-    
+
     // Construct graph by segments
     unsigned vNum = pNum;
+    std::vector<int> used_pins(pNum);
+    for(size_t i = 0; i < segments.size(); ++i){ // Check which pins are used
+        unsigned start_idx, end_idx;
+        CoordPair start_coord = segments[i].get_start();
+        CoordPair end_coord   = segments[i].get_end();
+        if(Coord2Vertices.contains(start_coord)){
+            start_idx = Coord2Vertices[start_coord];
+            if(start_idx < pNum){
+                used_pins[start_idx] = 1;
+            }
+        }
+        if(Coord2Vertices.contains(end_coord)){
+            end_idx = Coord2Vertices[end_coord];
+            if(end_idx < pNum){
+                used_pins[end_idx] = 1;
+            }
+        }
+    }
+    for(size_t i = 0; i < pNum; ++i){
+        if(used_pins[i] == 0){ // the pin must be on a segment
+            // std::cerr << "Unused pin : " << Vertices[i].first << " " << Vertices[i].second << "\n";
+            for(size_t j = 0; j < segments.size(); ++j){
+                if(segments[j].contains(Vertices[i])){
+                    NetSegment splitted = segments[j].split_segment(Vertices[i]);
+                    if(splitted.get_length() > 0) segments.push_back(splitted);
+                }
+            }
+        }
+    }
+    // std::cerr << segments.size() << "\n";
     for(size_t i = 0; i < segments.size(); ++i){ // Add segments to graph
         unsigned start_idx, end_idx;
         CoordPair start_coord = segments[i].get_start();
@@ -272,6 +309,7 @@ void QuadTree::segment_to_tree(){
             VertexLayer[vNum] = segments[i].get_layer();
             Coord2Vertices[start_coord] = vNum;
             start_idx = vNum++;
+            // std::cerr << "Pseudo pin " << vNum - 1 << " : " << start_coord.first << ", " << start_coord.second << "\n";
         }
         if(Coord2Vertices.contains(end_coord)){
             end_idx = Coord2Vertices[end_coord];
@@ -280,26 +318,48 @@ void QuadTree::segment_to_tree(){
             VertexLayer[vNum] = segments[i].get_layer();
             Coord2Vertices[end_coord] = vNum;
             end_idx = vNum++;
+            // std::cerr << "Pseudo pin " << vNum - 1 << " : " << end_coord.first << ", " << end_coord.second << "\n";
         }
+        assert(start_idx != end_idx);
         EdgeGraph.push_back(SimpleEdge(start_idx, end_idx, segments[i].get_length()));
     }
+    // std::cerr << EdgeGraph.size() << " " << vNum << std::endl;
     // Kruskal's MST algorithm O(ElogV + E)
     sort(EdgeGraph.begin(), EdgeGraph.end()); // sort by length of edges
     SimpleUnionFind union_find(vNum);
-    safe::vector<int> selected_edges(EdgeGraph.size());
+    safe::vector<int> selected_edges(EdgeGraph.size(), 0);
     safe::vector<VEPair> TreeGraph[vNum]; // adjacent list for storing MST (unweighted)
     for(size_t i = 0; i < EdgeGraph.size(); ++i){
         unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2();
         if(!union_find.same(v1, v2)){
+            // std::cerr << "-- Selected Edge : " << i << " ( " << v1 << ", " << v2 << " )\n";
             selected_edges[i] = 1;
             union_find.merge(v1, v2);
             TreeGraph[v1].push_back(VEPair(v2, i));
             TreeGraph[v2].push_back(VEPair(v1, i));
+        } else {
+            // std::cerr << "Not selected : " << i << std::endl;
+            // std::cerr << Vertices[v1].first << ", " << Vertices[v1].second << " / "
+            //           << Vertices[v2].first << ", " << Vertices[v2].second << std::endl;
         }
     }
+    if(!union_find.check_all_merged()){
+        unsigned idx = union_find.first_not_merged();
+        std::cerr << "First not merged: " << idx << " : " << Vertices[idx].first << ", " << Vertices[idx].second << std::endl;
+        assert(false);
+    }
+    
     union_find.clear();
     // Remove redundant edges O(E)
-    dfs_tree_graph(TreeGraph, selected_edges, vNum, pNum, 0, 0, 0);
+    if(vNum >= 2){
+        // for(size_t i = 0; i < vNum; ++i){
+        //     for(size_t j = 0; j < TreeGraph[i].size(); ++j){
+        //         std::cerr << "v1 : " << i << ", v2 : " << TreeGraph[i][j].first << "\n";
+        //     }
+        // }
+        // std::cerr << "pNum " << pNum << "\n";
+        dfs_tree_graph(TreeGraph, selected_edges, pNum, 0, -1, -1);
+    }
     // Reconstruct pruned tree O(E)
     for(size_t i = 0; i < vNum; ++i) TreeGraph[i].clear();
     safe::vector<unsigned> SimpleTree[vNum];
@@ -307,6 +367,7 @@ void QuadTree::segment_to_tree(){
     for(size_t i = 0; i < EdgeGraph.size(); ++i){
         // std::cout << selected_edges[i] << std::endl;
         if(selected_edges[i]){
+            // std::cerr << "Selected Edge : " << i << " ( " << EdgeGraph[i].get_v1() << ", " << EdgeGraph[i].get_v2() << " )\n";
             unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2();
             SimpleTree[v1].push_back(v2);
             SimpleTree[v2].push_back(v1);
@@ -361,26 +422,30 @@ void QuadTree::segment_to_tree(){
 inline bool QuadTree::dfs_tree_graph(
         safe::vector<VEPair> TreeGraph[], 
         safe::vector<int>& selected_edges, 
-        const unsigned vNum, 
         const unsigned pNum, 
         const unsigned now, 
-        const unsigned parent, 
-        const unsigned edge_idx){
+        const int parent, 
+        const int edge_idx){
     // Use DFS to remove redundant edges O(E)
     // If the end of a path is not a pin then some edges of this path are redundant.
+    // std::cerr << "dfs -- now : " << now << ", parent : " << parent << ", edge_idx : " << edge_idx << "\n";
     bool has_pin = false;
     for(size_t i = 0; i < TreeGraph[now].size(); ++i){
-        if(TreeGraph[now][i].first == parent) continue;
-        has_pin = has_pin || dfs_tree_graph(TreeGraph, selected_edges, 
-                                            vNum, pNum, 
+        if((int)TreeGraph[now][i].first == parent) continue;
+        // std::cerr << "now : " << now << ", child : " << TreeGraph[now][i].first << ", parent " << parent << "\n";
+        has_pin |= dfs_tree_graph(TreeGraph, selected_edges, 
+                                            pNum, 
                                             TreeGraph[now][i].first, now, 
                                             TreeGraph[now][i].second);
     }
-    if(now < pNum || has_pin) return true;
-    else {
-        selected_edges[edge_idx] = false;
+    has_pin |= now < pNum;
+    // std::cerr << now << " " << parent << " children : " << TreeGraph[now].size() << " edge : " << edge_idx << " has pin" << has_pin << "\n";
+    if(has_pin) return true;
+    else if(edge_idx >= 0){
+        selected_edges[edge_idx] = 0;
         return false;
     }
+    return false;
 }
 
 inline unsigned QuadTree::dfs_tree_center(
@@ -393,12 +458,13 @@ inline unsigned QuadTree::dfs_tree_center(
     safe::vector<unsigned> num_vertices;
     for(size_t i = 0; i < SimpleTree[now].size(); ++i){
         if(SimpleTree[now][i] != parent){
-            num_vertices.push_back(
-                dfs_tree_center(SimpleTree, vertex_rank, tree_size, SimpleTree[now][i], now)
-            );
+            unsigned num_branch_vertices = 
+                dfs_tree_center(SimpleTree, vertex_rank, tree_size, SimpleTree[now][i], now);
+            if(num_branch_vertices == 0) continue;
+            num_vertices.push_back(num_branch_vertices);
         }
     }
-    int num_branch = 0;
+    size_t num_branch = 0;
     if(now != parent){ // first DFS node will be now = parent = 0
         num_branch = 1 + num_vertices.size();
     } else {

@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     // Test QuadForest functionality
     QuadForest qf(Mgr);
-    // std::cout << qf.size() << std::endl;
+    std::cout << qf.size() << std::endl;
     // std::cout << qf << std::endl;
     qf.return_segments(Mgr);
 

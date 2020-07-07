@@ -2,7 +2,7 @@
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
-#include "../include/QuadForest.h"
+#include "QuadForest.h"
 
 QuadForest::QuadForest() noexcept {}
 QuadForest::QuadForest(Chip& chip) noexcept {
@@ -46,7 +46,7 @@ void QuadForest::construct_forest(Chip& chip) {
             pinIdx2Tree[pin_idx] = i;
             qt.add_pin(
                 SimplePin(pin_idx, pin_row, pin_col,
-                          pin_lay));  // TODO: pin: (index, layer, row, column)
+                          pin_lay));
         }
         // Get segments
         safe::vector<unsigned>& segments = net.getSegments();
