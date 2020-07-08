@@ -393,6 +393,10 @@ const Pin& Chip::getPin(GridNet& net, unsigned idx) {
     return net.getPin(idx, _cells);
 }
 
+const Pin& Chip::getPin(unsigned cell, unsigned idx) {
+    return _cells[cell].getPin(idx);
+}
+
 unsigned Chip::getPinRow(const Pin& pin) const {
     return _cells[pin.get_cell_idx()].getRow();
 }

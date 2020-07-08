@@ -100,6 +100,8 @@ class GridNet {
     unsigned getIdx() const;
     unsigned getMinlayer() const;  // min routing layer constraint
     size_t getNumPin() const;
+    unsigned getCellIdx(unsigned idx) const;
+    unsigned getPinIdx(unsigned idx) const;
     Pin& getPin(unsigned i, safe::vector<Cell>& cells);
     size_t getNumSegments() const;
     safe::vector<unsigned>& getSegments();

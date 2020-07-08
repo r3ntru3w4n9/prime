@@ -96,6 +96,7 @@ class Chip {
     Coordinate& getCoordinate(unsigned idx);
     Cell& getCell(unsigned idx);
     const Pin& getPin(GridNet& net, unsigned idx);
+    const Pin& getPin(unsigned cell, unsigned idx);
     unsigned getPinRow(const Pin& pin) const;
     unsigned getPinColumn(const Pin& pin) const;
     GridNet& getNet(unsigned idx);
