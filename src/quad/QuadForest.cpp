@@ -34,7 +34,7 @@ void QuadForest::construct_forest(Chip& chip) {
         unsigned net_minlayer = net.getMinlayer();
 
         QuadTree qt(net_id, net_minlayer, baseRowIdx, baseColIdx, maxRows,
-                    maxCols);
+                    maxCols, maxLayers);
         // Get pins
         size_t pin_num = net.getNumPin();
         for (size_t j = 0; j < pin_num; ++j) {

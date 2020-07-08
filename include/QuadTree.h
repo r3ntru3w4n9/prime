@@ -31,7 +31,8 @@ class QuadTree {
              int base_row,
              int base_col,
              int max_row,
-             int max_col) noexcept;
+             int max_col,
+             int max_layer) noexcept;
     // ~QuadTree() noexcept;
 
     // access to basic attributes
@@ -102,6 +103,7 @@ class QuadTree {
     const int _minLayer;
     const int _maxRows;
     const int _maxCols;
+    const int _maxLayers;
 
     int root_idx;
     unsigned flag;
@@ -133,13 +135,13 @@ class QuadTree {
                                const unsigned now,
                                const int parent,
                                const int edge_idx);
-    inline unsigned dfs_tree_center(safe::vector<unsigned> SimpleTree[],
+    inline unsigned dfs_tree_center(safe::vector<SimpleEdge> SimpleTree[],
                                     safe::vector<double>& vertex_rank,
                                     const unsigned tree_size,
                                     const unsigned now,
                                     const unsigned parent);
     inline void dfs_construct_tree(
-        safe::vector<unsigned> SimpleTree[],
+        safe::vector<SimpleEdge> SimpleTree[],
         safe::unordered_map<unsigned, CoordPair>& Vertices,
         safe::unordered_map<unsigned, int>& VertexLayer,
         safe::vector<int>& new_idx_mapping,

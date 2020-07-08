@@ -131,6 +131,74 @@ std::ostream& operator<<(std::ostream& out, const NetSegment& ns){
     return out;
 }
 
+std::tuple<NetSegment, NetSegment, NetSegment> 
+merge_segments(const NetSegment& ns1, const NetSegment& ns2, const unsigned importance) {
+    // Merge segments ns1 and ns2
+    // After merging, there might be three segments
+    int priority_layer = (importance) ? ns1.layer_start : ns2.layer_start;
+    if(ns1.get_direction() && ns2.get_direction() && ns1.y_start == ns2.y_start) { // Vertical
+        if(ns1.x_start <= ns2.x_start && ns2.x_end <= ns1.x_end) {
+            // Case 1 : ns1 contains the whole segment ns2
+            // 1: *---------*
+            // 2:    *----*
+            return std::make_tuple(
+                NetSegment(ns1.x_start, ns1.y_start, ns2.x_start, ns2.y_start, ns1.layer_start),
+                NetSegment(ns2.x_start, ns2.y_start, ns2.x_end, ns2.y_end, priority_layer),
+                NetSegment(ns2.x_end, ns2.y_end, ns1.x_end, ns1.y_end, ns1.layer_start)
+            );
+        }
+        else if(ns2.x_start <= ns1.x_start && ns1.x_end <= ns2.x_end) {
+            // Case 2 : ns2 contains the whole segment ns1
+            // 1:    *----*
+            // 2: *---------*
+            return merge_segments(ns2, ns1, importance ^ 1);
+        }
+        else if(ns1.x_start < ns2.x_start && ns2.x_start <= ns1.x_end && ns1.x_end < ns2.x_end) {
+            // Case 3 : ns1 has overlap with ns2
+            // 1: *---------*
+            // 2:    *-----------*
+            return std::make_tuple(
+                NetSegment(ns1.x_start, ns1.y_start, ns2.x_start, ns2.y_start, ns1.layer_start),
+                NetSegment(ns2.x_start, ns2.y_start, ns1.x_end, ns1.y_end, priority_layer),
+                NetSegment(ns1.x_end, ns1.y_end, ns2.x_end, ns2.y_end, ns2.layer_start)
+            );
+        }
+        else if(ns2.x_start < ns1.x_start && ns1.x_start <= ns2.x_end && ns2.x_end < ns1.x_end) {
+            // Case 4 : ns1 has overlap with ns2
+            // 1:      *---------*
+            // 2: *-----------*
+            return merge_segments(ns2, ns1, importance ^ 1);
+        }
+    }
+    else if(!ns1.get_direction() && !ns2.get_direction() && ns1.x_start == ns2.x_start) { // Horizontal
+        if(ns1.y_start <= ns2.y_start && ns2.y_end <= ns1.y_end) {
+            // Case 1 : ns1 contains the whole segment ns2
+            return std::make_tuple(
+                NetSegment(ns1.x_start, ns1.y_start, ns2.x_start, ns2.y_start, ns1.layer_start),
+                NetSegment(ns2.x_start, ns2.y_start, ns2.x_end, ns2.y_end, priority_layer),
+                NetSegment(ns2.x_end, ns2.y_end, ns1.x_end, ns1.y_end, ns1.layer_start)
+            );
+        }
+        else if(ns2.y_start <= ns1.y_start && ns1.y_end <= ns2.y_end) {
+            // Case 2 : ns2 contains the whole segment ns1
+            return merge_segments(ns2, ns1, importance ^ 1);
+        }
+        else if(ns1.y_start < ns2.y_start && ns2.y_start <= ns1.y_end && ns1.y_end < ns2.y_end) {
+            // Case 3 : ns1 has overlap with ns2
+            return std::make_tuple(
+                NetSegment(ns1.x_start, ns1.y_start, ns2.x_start, ns2.y_start, ns1.layer_start),
+                NetSegment(ns2.x_start, ns2.y_start, ns1.x_end, ns1.y_end, priority_layer),
+                NetSegment(ns1.x_end, ns1.y_end, ns2.x_end, ns2.y_end, ns2.layer_start)
+            );
+        }
+        else if(ns2.y_start < ns1.y_start && ns1.y_start <= ns2.y_end && ns2.y_end < ns1.y_end) {
+            // Case 4 : ns1 has overlap with ns2
+            return merge_segments(ns2, ns1, importance ^ 1);
+        }
+    }
+    return std::make_tuple(ns1, ns2, NetSegment());
+}
+
 // SimpleUnionFind
 SimpleUnionFind::SimpleUnionFind() noexcept {}
 SimpleUnionFind::SimpleUnionFind(size_t N) noexcept { reset(N); }

@@ -49,3 +49,4 @@ dbg/*
 *.txt*
 *.py
 python_files/*
+output/output*.txt

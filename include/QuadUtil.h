@@ -63,6 +63,8 @@ class NetSegment{
     int x_start, y_start, x_end, y_end, layer_start, layer_end;
 
     friend std::ostream& operator<<(std::ostream& out, const NetSegment& ns);
+    friend std::tuple<NetSegment, NetSegment, NetSegment>
+        merge_segments(const NetSegment& ns1, const NetSegment& ns2, const unsigned importance);
 };
 
 // SimpleUnionFind: a simple union find class for Kruskal's MST algorithm

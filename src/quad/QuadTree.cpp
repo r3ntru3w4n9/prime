@@ -5,12 +5,12 @@
 #include "QuadTree.h"
 
 QuadTree::QuadTree() noexcept
-    : _NetId(-1), _baseRow(-1), _baseCol(-1), _minLayer(-1), _maxRows(0), _maxCols(0), root_idx(-1), flag(0) {
+    : _NetId(-1), _baseRow(-1), _baseCol(-1), _minLayer(-1), _maxRows(0), _maxCols(0), _maxLayers(-1), root_idx(-1), flag(0) {
     segments.clear();
 }
 
-QuadTree::QuadTree(int n_id, int min_lay, int base_row, int base_col, int max_row, int max_col) noexcept
-    : _NetId(n_id), _baseRow(base_row), _baseCol(base_col), _minLayer(min_lay), _maxRows(max_row), _maxCols(max_col), root_idx(-1), flag(0) {
+QuadTree::QuadTree(int n_id, int min_lay, int base_row, int base_col, int max_row, int max_col, int max_layer) noexcept
+    : _NetId(n_id), _baseRow(base_row), _baseCol(base_col), _minLayer(min_lay), _maxRows(max_row), _maxCols(max_col), _maxLayers(max_layer), root_idx(-1), flag(0) {
     segments.clear();
 }
 
@@ -223,27 +223,43 @@ void QuadTree::segment_to_tree(){
 
     // assert(segments.size() > 0);
     bool operation = true;
-    // while(operation && segments.size() > 0){ // merge overlapping segments
-    //     operation = false;
-    //     for(size_t i = 0; i < segments.size() - 1; ++i){
-    //         for(size_t j = i + 1; j < segments.size(); ++j){
-    //             if(segments[i].check_overlap(segments[j])
-    //                && !Coord2Vertices.contains(segments[i].get_start())
-    //                && !Coord2Vertices.contains(segments[i].get_end())
-    //                && !Coord2Vertices.contains(segments[j].get_start())
-    //                && !Coord2Vertices.contains(segments[j].get_end())){
-    //                 std::cout << "i = " << i << " j = " << j << std::endl;
-    //                 std::cerr << segments[i] << " / " << segments[j] << std::endl;
-    //                 segments[i].merge_segment(segments[j]);
-    //                 std::cerr << segments[i] << std::endl;
-    //                 segments[j] = segments[segments.size() - 1];
-    //                 segments.pop_back();
-    //                 --j;
-    //                 operation = true;
-    //             }
-    //         }
-    //     }
-    // } operation = true;
+    while(operation && segments.size() > 0){ // merge overlapping segments
+        operation = false;
+        for(size_t i = 0; i < segments.size() - 1; ++i){
+            for(size_t j = i + 1; j < segments.size(); ++j){
+                if(segments[i].check_overlap(segments[j])){
+                    size_t importance_i = 0;
+                    size_t importance_j = 0;
+                    size_t original_total_length = segments[i].get_length() + segments[j].get_length();
+                    size_t new_total_length = 0;
+                    if(Coord2Vertices.contains(segments[i].get_start())) ++importance_i;
+                    if(Coord2Vertices.contains(segments[i].get_end())) ++importance_i;
+                    if(Coord2Vertices.contains(segments[j].get_start())) ++importance_j;
+                    if(Coord2Vertices.contains(segments[j].get_end())) ++importance_j;
+                    std::tuple<NetSegment, NetSegment, NetSegment>
+                        segment_tuple = merge_segments(segments[i], segments[j], importance_i > importance_j);
+                    new_total_length = std::get<0>(segment_tuple).get_length()
+                        + std::get<1>(segment_tuple).get_length()
+                        + std::get<2>(segment_tuple).get_length();
+                    if(new_total_length >= original_total_length) continue;
+                    if(std::get<0>(segment_tuple).get_length() > 0){
+                        segments.push_back(std::get<0>(segment_tuple));
+                    }
+                    if(std::get<1>(segment_tuple).get_length() > 0){
+                        segments.push_back(std::get<1>(segment_tuple));
+                    }
+                    if(std::get<2>(segment_tuple).get_length() > 0){
+                        segments.push_back(std::get<2>(segment_tuple));
+                    }
+                    segments[i] = segments[segments.size() - 1];
+                    segments.pop_back();
+                    segments[j] = segments[segments.size() - 1];
+                    segments.pop_back();
+                    operation = true;
+                }
+            }
+        }
+    } operation = true;
     while(operation && segments.size() > 0){ // split intersected segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
@@ -322,7 +338,7 @@ void QuadTree::segment_to_tree(){
             // std::cerr << "Pseudo pin " << vNum - 1 << " : " << end_coord.first << ", " << end_coord.second << "\n";
         }
         assert(start_idx != end_idx);
-        EdgeGraph.push_back(SimpleEdge(start_idx, end_idx, segments[i].get_length()));
+        EdgeGraph.push_back(SimpleEdge(start_idx, end_idx, segments[i].get_length(), segments[i].get_layer()));
     }
     // std::cerr << EdgeGraph.size() << " " << vNum << std::endl;
     // Kruskal's MST algorithm O(ElogV + E)
@@ -363,15 +379,15 @@ void QuadTree::segment_to_tree(){
     }
     // Reconstruct pruned tree O(E)
     for(size_t i = 0; i < vNum; ++i) TreeGraph[i].clear();
-    safe::vector<unsigned> SimpleTree[vNum];
+    safe::vector<SimpleEdge> SimpleTree[vNum];
     unsigned tree_size = 1; // tree size = # of vertices = # of edges + 1
     for(size_t i = 0; i < EdgeGraph.size(); ++i){
         // std::cout << selected_edges[i] << std::endl;
         if(selected_edges[i]){
             // std::cerr << "Selected Edge : " << i << " ( " << EdgeGraph[i].get_v1() << ", " << EdgeGraph[i].get_v2() << " )\n";
-            unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2();
-            SimpleTree[v1].push_back(v2);
-            SimpleTree[v2].push_back(v1);
+            unsigned v1 = EdgeGraph[i].get_v1(), v2 = EdgeGraph[i].get_v2(), layer = EdgeGraph[i].get_layer();
+            SimpleTree[v1].push_back(SimpleEdge(v2, DINF, 0, layer));
+            SimpleTree[v2].push_back(SimpleEdge(v1, DINF, 0, layer));
             ++tree_size;
         }
     }
@@ -450,7 +466,7 @@ inline bool QuadTree::dfs_tree_graph(
 }
 
 inline unsigned QuadTree::dfs_tree_center(
-        safe::vector<unsigned> SimpleTree[],
+        safe::vector<SimpleEdge> SimpleTree[],
         safe::vector<double>&  vertex_rank, 
         const unsigned tree_size,
         const unsigned now, 
@@ -458,9 +474,9 @@ inline unsigned QuadTree::dfs_tree_center(
     // Use DFS to find the center of the tree O(E)
     safe::vector<unsigned> num_vertices;
     for(size_t i = 0; i < SimpleTree[now].size(); ++i){
-        if(SimpleTree[now][i] != parent){
+        if(SimpleTree[now][i].get_v1() != parent){
             unsigned num_branch_vertices = 
-                dfs_tree_center(SimpleTree, vertex_rank, tree_size, SimpleTree[now][i], now);
+                dfs_tree_center(SimpleTree, vertex_rank, tree_size, SimpleTree[now][i].get_v1(), now);
             if(num_branch_vertices == 0) continue;
             num_vertices.push_back(num_branch_vertices);
         }
@@ -495,7 +511,7 @@ inline unsigned QuadTree::dfs_tree_center(
 }
 
 inline void QuadTree::dfs_construct_tree(
-        safe::vector<unsigned> SimpleTree[],
+        safe::vector<SimpleEdge> SimpleTree[],
         safe::unordered_map<unsigned, CoordPair>& Vertices,
         safe::unordered_map<unsigned, int>& VertexLayer,
         safe::vector<int>& new_idx_mapping,
@@ -506,22 +522,22 @@ inline void QuadTree::dfs_construct_tree(
     nodes[new_idx_mapping[now]].set_layer_self(VertexLayer[now]); // TODO: not sure if it makes sense
     nodes[new_idx_mapping[now]].reset_coord(Vertices[now]);
     for(size_t i = 0; i < SimpleTree[now].size(); ++i){
-        unsigned direction = check_direction(Vertices[now], Vertices[SimpleTree[now][i]]);
+        unsigned direction = check_direction(Vertices[now], Vertices[SimpleTree[now][i].get_v1()]);
         if(direction == 1){        // up
-            nodes[new_idx_mapping[now]].set_up(new_idx_mapping[SimpleTree[now][i]]);
-            nodes[new_idx_mapping[now]].set_layer_up(VertexLayer[SimpleTree[now][i]]);
+            nodes[new_idx_mapping[now]].set_up(new_idx_mapping[SimpleTree[now][i].get_v1()]);
+            nodes[new_idx_mapping[now]].set_layer_up(SimpleTree[now][i].get_layer());
         } else if(direction == 2){ // down
-            nodes[new_idx_mapping[now]].set_down(new_idx_mapping[SimpleTree[now][i]]);
-            nodes[new_idx_mapping[now]].set_layer_down(VertexLayer[SimpleTree[now][i]]);
+            nodes[new_idx_mapping[now]].set_down(new_idx_mapping[SimpleTree[now][i].get_v1()]);
+            nodes[new_idx_mapping[now]].set_layer_down(SimpleTree[now][i].get_layer());
         } else if(direction == 3){ // left
-            nodes[new_idx_mapping[now]].set_left(new_idx_mapping[SimpleTree[now][i]]);
-            nodes[new_idx_mapping[now]].set_layer_left(VertexLayer[SimpleTree[now][i]]);
+            nodes[new_idx_mapping[now]].set_left(new_idx_mapping[SimpleTree[now][i].get_v1()]);
+            nodes[new_idx_mapping[now]].set_layer_left(SimpleTree[now][i].get_layer());
         } else if(direction == 4){ // right
-            nodes[new_idx_mapping[now]].set_right(new_idx_mapping[SimpleTree[now][i]]);
-            nodes[new_idx_mapping[now]].set_layer_right(VertexLayer[SimpleTree[now][i]]);
+            nodes[new_idx_mapping[now]].set_right(new_idx_mapping[SimpleTree[now][i].get_v1()]);
+            nodes[new_idx_mapping[now]].set_layer_right(SimpleTree[now][i].get_layer());
         }
-        if((int)SimpleTree[now][i] != parent){
-            dfs_construct_tree(SimpleTree, Vertices, VertexLayer, new_idx_mapping, SimpleTree[now][i], now);
+        if((int)SimpleTree[now][i].get_v1() != parent){
+            dfs_construct_tree(SimpleTree, Vertices, VertexLayer, new_idx_mapping, SimpleTree[now][i].get_v1(), now);
         }
     }
 }
@@ -548,6 +564,17 @@ void QuadTree::tree_to_segment() {
                 NetSegment(nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
                            nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
                            nodes[pins2NodeIdx[i]].get_layer_self(), pins[i].get_layer()));
+        }
+    }
+    if(segments.size() == 0){
+        for(size_t i = 0; i < pins.size(); ++i){
+            // std::cerr << nodes[pins2NodeIdx[i]].get_layer_self() << " " << pins[i].get_layer() << "\n";
+            unsigned layer = pins[i].get_layer();
+            // unsigned adjacent_layer = (layer == 0) ? layer + 1 : layer - 1;
+            segments.push_back(
+                NetSegment(nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
+                        nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
+                        layer, _maxLayers - 1));
         }
     }
 }

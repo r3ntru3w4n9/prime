@@ -100,14 +100,15 @@ class QuadNode {
 class SimpleEdge {
    public:
     SimpleEdge() noexcept;
-    SimpleEdge(unsigned _v1, unsigned _v2, unsigned _w) noexcept;
+    SimpleEdge(unsigned _v1, unsigned _v2, unsigned _w, unsigned _l) noexcept;
 
     bool operator<(const SimpleEdge& se) const;
 
     unsigned get_v1() const;
     unsigned get_v2() const;
     unsigned get_weight() const;
+    unsigned get_layer() const;
 
    private:
-    unsigned v1, v2, weight;
+    unsigned v1, v2, weight, layer;
 };

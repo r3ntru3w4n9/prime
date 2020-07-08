@@ -267,7 +267,6 @@ void Chip::readFile(std::fstream& input) {
         // assert(_Net2Idx.contains(str));
         assert(slay >= 1 && elay >= 1);
 
-        // TODO: change to tree-based net data structure
         GridNet& net = _grid_nets[str2Idx("N", str)];
         assignRoute(srow - _rowBase, scol - _columnBase, slay - 1,
                     erow - _rowBase, ecol - _columnBase, elay - 1, net);
