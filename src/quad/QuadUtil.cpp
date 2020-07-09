@@ -52,7 +52,7 @@ int NetSegment::get_ys() const { return y_start; }
 int NetSegment::get_xe() const { return   x_end; }
 int NetSegment::get_ye() const { return   y_end; }
 int NetSegment::get_layer() const { return layer_start; }
-int NetSegment::get_layer_end() const { return layer_end; }
+int NetSegment::get_layer_end() const { return (layer_end < 0) ? layer_start : layer_end; }
 CoordPair NetSegment::get_start() const { return CoordPair(x_start, y_start); }
 CoordPair NetSegment::get_end()   const { return CoordPair(x_end,   y_end);   }
 bool NetSegment::get_direction() const { return (x_start < x_end) ? true : false; }

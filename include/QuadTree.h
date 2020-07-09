@@ -17,7 +17,7 @@
 
 // vertex index v.s. edge index pair
 typedef std::pair<unsigned, unsigned> VEPair;
-const double DINF = 1e9;
+const double DINF = 1000000000;
 const double EPS = 1e-8;
 const unsigned DEFAULT_OPT = 1;
 class NetSegment;
@@ -114,6 +114,7 @@ class QuadTree {
 
     // Temporary members for constructing the tree
     safe::vector<NetSegment> segments;
+    safe::vector<NetSegment> vias;
 
     // Private functions
     // Basic operations

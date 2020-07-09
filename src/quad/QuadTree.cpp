@@ -90,8 +90,11 @@ int QuadTree::move_horizontal(unsigned idx, int delta_y){
 void QuadTree::add_pin(SimplePin p) { pins.push_back(p); }
 void QuadTree::add_segment(int srow, int scol, int slay, 
                            int erow, int ecol, int elay){
-    if(slay != elay) return; // ignore via
-    segments.push_back(NetSegment(srow, scol, erow, ecol, slay));
+    if(slay == elay){
+        segments.push_back(NetSegment(srow, scol, erow, ecol, slay));
+    } else {
+        vias.push_back(NetSegment(srow, scol, erow, ecol, slay));
+    }   
 }
 void QuadTree::construct_tree(){
     segment_to_tree();
@@ -199,6 +202,7 @@ void QuadTree::segment_to_tree(){
     // print_segments();
     safe::unordered_map<unsigned, CoordPair> Vertices;
     safe::map<CoordPair, unsigned> Coord2Vertices;
+    safe::map<CoordPair, bool> HasVia;
     safe::vector<SimpleEdge> EdgeGraph;
     safe::unordered_map<unsigned, int> VertexLayer;
     // Construct vertices from pins
@@ -221,23 +225,36 @@ void QuadTree::segment_to_tree(){
     } // Now we know the number of pins is pNum
     // assert(pins.size() == pins2NodeIdx.size());
 
-    // assert(segments.size() > 0);
+    for(size_t i = 0; i < vias.size(); ++i) {
+        if(!HasVia.contains(vias[i].get_start())){
+            HasVia[vias[i].get_start()] = true;
+        }
+    }
+    
     bool operation = true;
     while(operation && segments.size() > 0){ // merge overlapping segments
         operation = false;
         for(size_t i = 0; i < segments.size() - 1; ++i){
             for(size_t j = i + 1; j < segments.size(); ++j){
                 if(segments[i].check_overlap(segments[j])){
-                    size_t importance_i = 0;
-                    size_t importance_j = 0;
+                    int importance_i = 0;
+                    int importance_j = 0;
                     size_t original_total_length = segments[i].get_length() + segments[j].get_length();
                     size_t new_total_length = 0;
-                    if(Coord2Vertices.contains(segments[i].get_start())) ++importance_i;
-                    if(Coord2Vertices.contains(segments[i].get_end())) ++importance_i;
-                    if(Coord2Vertices.contains(segments[j].get_start())) ++importance_j;
-                    if(Coord2Vertices.contains(segments[j].get_end())) ++importance_j;
+                    if(Coord2Vertices.contains(segments[i].get_start()) 
+                        && segments[i].get_layer() == VertexLayer[Coord2Vertices[segments[i].get_start()]]) ++importance_i;
+                    if(Coord2Vertices.contains(segments[i].get_end()) 
+                        && segments[i].get_layer() == VertexLayer[Coord2Vertices[segments[i].get_end()]]) ++importance_i;
+                    if(Coord2Vertices.contains(segments[j].get_start()) 
+                        && segments[j].get_layer() == VertexLayer[Coord2Vertices[segments[j].get_start()]]) ++importance_j;
+                    if(Coord2Vertices.contains(segments[j].get_end()) 
+                        && segments[j].get_layer() == VertexLayer[Coord2Vertices[segments[j].get_end()]]) ++importance_j;
+                    // if(HasVia.contains(segments[i].get_start())) ++importance_i;
+                    // if(HasVia.contains(segments[i].get_end())) ++importance_i;
+                    // if(HasVia.contains(segments[j].get_start())) ++importance_j;
+                    // if(HasVia.contains(segments[j].get_end())) ++importance_j;
                     std::tuple<NetSegment, NetSegment, NetSegment>
-                        segment_tuple = merge_segments(segments[i], segments[j], importance_i > importance_j);
+                        segment_tuple = merge_segments(segments[i], segments[j], importance_i >= importance_j);
                     new_total_length = std::get<0>(segment_tuple).get_length()
                         + std::get<1>(segment_tuple).get_length()
                         + std::get<2>(segment_tuple).get_length();
@@ -434,6 +451,7 @@ void QuadTree::segment_to_tree(){
     // std::cout << "tree size: " << nodes.size() << ", num pins: " << pins.size() << std::endl;
 
     segments.clear();
+    vias.clear();
 }
 
 inline bool QuadTree::dfs_tree_graph(
@@ -567,14 +585,23 @@ void QuadTree::tree_to_segment() {
         }
     }
     if(segments.size() == 0){
+        // TODO: choose the pin closest to the minLayer
+        size_t closest = 0;
+        int min_dist = DINF;
+        // std::cerr << "minLayer : " << _minLayer << "\n";
         for(size_t i = 0; i < pins.size(); ++i){
             // std::cerr << nodes[pins2NodeIdx[i]].get_layer_self() << " " << pins[i].get_layer() << "\n";
-            unsigned layer = pins[i].get_layer();
-            // unsigned adjacent_layer = (layer == 0) ? layer + 1 : layer - 1;
+            int dist = _minLayer - (int)pins[i].get_layer();
+            if(dist >= 0 && dist < min_dist){
+                closest = i;
+                min_dist = dist;
+            }
+        }
+        if(min_dist > 0 && min_dist < DINF){
             segments.push_back(
-                NetSegment(nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
-                        nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
-                        layer, _maxLayers - 1));
+                NetSegment(nodes[pins2NodeIdx[closest]].get_coord_x(), nodes[pins2NodeIdx[closest]].get_coord_y(),
+                        nodes[pins2NodeIdx[closest]].get_coord_x(), nodes[pins2NodeIdx[closest]].get_coord_y(),
+                        pins[closest].get_layer(), _minLayer));
         }
     }
 }
