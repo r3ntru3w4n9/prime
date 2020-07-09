@@ -50,25 +50,25 @@ static unsigned get_(const safe::vector<SimplePin>& pins,
 template <UseArg arg>
 static unsigned left(const safe::vector<SimplePin>& pins) {
     auto func = [=](citer c) { return c->get_row(); };
-    return get_<CmpType::Minimum, UseArg::No>(pins, func);
+    return get_<CmpType::Minimum, arg>(pins, func);
 }
 
 template <UseArg arg>
 static unsigned right(const safe::vector<SimplePin>& pins) {
     auto func = [=](citer c) { return c->get_row(); };
-    return get_<CmpType::Maximum, UseArg::No>(pins, func);
+    return get_<CmpType::Maximum, arg>(pins, func);
 }
 
 template <UseArg arg>
 static unsigned bottom(const safe::vector<SimplePin>& pins) {
     auto func = [=](citer c) { return c->get_col(); };
-    return get_<CmpType::Minimum, UseArg::No>(pins, func);
+    return get_<CmpType::Minimum, arg>(pins, func);
 }
 
 template <UseArg arg>
 static unsigned top(const safe::vector<SimplePin>& pins) {
     auto func = [=](citer c) { return c->get_col(); };
-    return get_<CmpType::Maximum, UseArg::No>(pins, func);
+    return get_<CmpType::Maximum, arg>(pins, func);
 }
 
 unsigned QuadTree::get_left(void) const {

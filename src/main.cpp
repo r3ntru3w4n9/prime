@@ -12,8 +12,10 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "Chip.h"
 #include "QuadForest.h"
+#include "MyUsage.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -24,6 +26,10 @@
 ////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
+    // std::ios::sync_with_stdio(false);
+    // std::cin.tie(0);
+    MyUsage usage;
+
     // start
     if (argc != 3) {
         std::cout << "Usage: ./cell_move_router <input.txt> <output.txt>"
@@ -49,12 +55,20 @@ int main(int argc, char* argv[]) {
 
     Mgr.log();
 
+    std::cout << "Finished reading input file\n";
+    usage.report(true, true);
+    usage.reset();
+
     // Test QuadForest functionality
     QuadForest qf(Mgr);
-    std::cout << qf.size() << std::endl;
-    // std::cout << qf << std::endl;
-    qf.return_segments(Mgr);
+    std::cout << "Number of nets : " << qf.size() << "\n";
+    usage.report(true, true);
+    usage.reset();
 
+    qf.return_segments(Mgr);
     Mgr.output(outputfile);
+    std::cout << "Finished output to file\n";
+    usage.report(true, true);
+
     return 0;
 }
