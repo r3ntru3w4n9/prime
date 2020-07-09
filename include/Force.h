@@ -28,6 +28,8 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
+typedef safe::vector<std::pair<unsigned, unsigned>> argList; // arg, val
+
 class Force {
    public:
     // constructor
@@ -54,8 +56,10 @@ class Force {
     safe::vector<unsigned> _columnSum; // by net
     safe::vector<unsigned> _rowNew;
     safe::vector<unsigned> _columnNew;
+    safe::vector<bool> _movable;
 
     // private function
+    void balance_first();
     void NetSum(unsigned idx);
     void UpdateCell(unsigned idx);
 };

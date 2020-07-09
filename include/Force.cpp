@@ -35,22 +35,34 @@ Force::Force(Chip& chip) : _chip(chip) {
     _columnNew.reserve(_chip.getNumCells());
     _rowSum.reserve(_chip.getNumNets());
     _columnSum.reserve(_chip.getNumNets());
+    _movable.reserve(_chip.getNumCells());
 
     for (unsigned i = 0; i < _chip.getNumCells(); ++i) {
         _row.push_back(_chip.getCell(i).getRow());
         _column.push_back(_chip.getCell(i).getColumn());
         _rowNew.push_back(0);
         _columnNew.push_back(0);
+        _movable.push_back(true);
     }
 }
 
 void Force::balance() {
+    balance_first();
+}
+
+void Force::balance_first() {
     for (unsigned i = 0; i < _chip.getNumNets(); ++i) {
         NetSum(i);
     }
     for (unsigned i = 0; i < _chip.getNumCells(); ++i) {
-        UpdateCell(i);
+        if (!_chip.getCell(i).movable(_chip.limited())) {
+            _rowNew[i] = _row[i];
+            _columnNew[i] = _column[i];
+        } else {
+            UpdateCell(i);
+        }
     }
+    
 }
 
 void Force::NetSum(unsigned idx) {
