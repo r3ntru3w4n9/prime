@@ -239,8 +239,8 @@ void Chip::readFile(std::fstream& input) {
             masterPin = str.substr(pos, str.size() - pos);
             // assert(_Cell2Idx.count(inst) == 1);
             // assert(_Cell2Idx.contains(inst));
-            Pin& pin =
-                _pins[_cells[str2Idx("C", inst)].getPinIdx(str2Idx("P", masterPin))];
+            Pin& pin = _pins[_cells[str2Idx("C", inst)].getPinIdx(
+                str2Idx("P", masterPin))];
             // Cell& cell_ = pin.get_cell();
             // std::cout << &cell << " " << &cell_ << std::endl;
             _grid_nets[i].addPin(pin);

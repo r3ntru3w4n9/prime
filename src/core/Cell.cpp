@@ -136,7 +136,12 @@ safe::vector<unsigned>& GridNet::getSegments() {
 }
 
 // Cell
-Cell::Cell(MasterCellType& MCT, unsigned idx, bool movable, unsigned layers, unsigned& pinIdx, safe::vector<Pin>& pins)
+Cell::Cell(MasterCellType& MCT,
+           unsigned idx,
+           bool movable,
+           unsigned layers,
+           unsigned& pinIdx,
+           safe::vector<Pin>& pins)
     : _MCT(MCT), _idx(idx), _movable(movable), _moved(false) {
     size_t p = getMasterCell().getNumPins();
     _pins.reserve(p);
@@ -150,7 +155,7 @@ Cell::Cell(MasterCellType& MCT, unsigned idx, bool movable, unsigned layers, uns
         assert(_pins[i] == pinIdx);
         unsigned layer = _MCT.getPinLayer(i);
         _Layer2pin[layer].push_back(pinIdx);
-        pins.push_back(std::move(Pin(pinIdx,layer,*this)));
+        pins.push_back(Pin(pinIdx, layer, *this));
         pinIdx++;
     }
 }

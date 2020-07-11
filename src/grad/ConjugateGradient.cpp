@@ -5,45 +5,103 @@
 #include "ConjugateGradient.h"
 
 #include <assert.h>
+#include <math.h>
 
 #include <algorithm>
 #include <memory>
 
-ConjugateGradient::ConjugateGradient(Chip& chip, QuadForest& qf) noexcept
-    : chip(chip), qf(qf) {
+Scheduler::Scheduler(double c, double r) noexcept : current(c), rate(r) {}
+
+Scheduler::Scheduler(Scheduler&& sch) noexcept
+    : current(sch.current), rate(sch.rate) {}
+
+double Scheduler::next(void) {
+    double c = current;
+    current *= rate;
+    return c;
+}
+
+// ! reference:
+// ! https://en.wikipedia.org/wiki/Nonlinear_conjugate_gradient_method
+
+ConjGrad::ConjGrad(Chip& chip,
+                   QuadForest& qf,
+                   GradType gt,
+                   Scheduler&& sch) noexcept
+    : chip(chip), qf(qf), gt(gt), best_step(0.), sch(std::move(sch)) {
     size_t size = dim();
     grads = safe::vector<double>(size, 0.);
     prev_grads = safe::vector<double>(size, 0.);
-}
 
-size_t ConjugateGradient::dim(void) const {
-    size_t size = 2 * chip.getNumCells();
-    return size;
-}
-
-void ConjugateGradient::zero_grad_(void) {
-    std::fill(grads.begin(), grads.end(), 0.);
-}
-
-double ConjugateGradient::eval(GradientType gt) {
-    switch (gt) {
-        case GradientType::Plain:
-            // todo: collect values
-            break;
-    }
-    return 0.;
-}
-void ConjugateGradient::backward(GradientType gt) {
-    switch (gt) {
-        case GradientType::Plain:
-            // todo: collect gradients
-            break;
+    pos.reserve(2 * chip.getNumCells());
+    for (unsigned i = 0; i < chip.getNumCells(); ++i) {
+        const Cell& cell = chip.getCell(i);
+        pos.push_back((double)cell.getColumn());
+        pos.push_back((double)cell.getRow());
     }
 }
 
-void ConjugateGradient::move(void) {
+size_t ConjGrad::dim(void) const {
+    return 2 * chip.getNumCells();
+}
+
+safe::vector<double>& ConjGrad::positions(void) {
+    return pos;
+}
+
+const safe::vector<double>& ConjGrad::positions(void) const {
+    return pos;
+}
+
+void ConjGrad::apply(void) {
+    auto iter = pos.begin();
+    for (size_t i = 0; i < chip.getNumCells(); ++i) {
+        Cell& cell = chip.getCell(i);
+        cell.setColumn((unsigned)round(*(iter++)));
+        cell.setRow((unsigned)round(*(iter++)));
+    }
+
+    assert(pos.size() == dim());
+    assert(iter == pos.end());
+}
+
+void ConjGrad::mv(void) {
     prev_grads = std::move(grads);
     grads = safe::vector<double>(dim(), 0.);
+}
+
+void ConjGrad::update_directions(void) {
+    assert(grads.size() == dim());
+    assert(prev_grads.size() == dim());
+
+    auto grad_iter = grads.begin();
+    auto prev_iter = prev_grads.begin();
+
+    double b = beta();
+
+    for (; grad_iter != grads.end(); ++grad_iter, ++prev_iter) {
+        *grad_iter = (*grad_iter) + b * (*prev_iter);
+    }
+
+    assert(grad_iter == grads.end());
+    assert(prev_iter == prev_grads.end());
+}
+
+void ConjGrad::update_positions(void) {
+    assert(grads.size() == dim());
+    assert(pos.size() == dim());
+
+    double step_size = sch.next();
+
+    auto giter = grads.begin();
+    auto piter = pos.begin();
+
+    for (; giter != grads.end(); ++giter, ++piter) {
+        *piter += step_size * (*giter);
+    }
+
+    assert(giter == grads.end());
+    assert(piter == pos.end());
 }
 
 static double dot(const safe::vector<double>& left,
@@ -59,7 +117,7 @@ static double dot(const safe::vector<double>& left,
     return sum;
 }
 
-double ConjugateGradient::beta(void) const {
+double ConjGrad::beta(void) const {
     safe::vector<double> buffer(grads);
     auto niter = buffer.begin();
     auto piter = prev_grads.begin();
@@ -75,4 +133,22 @@ double ConjugateGradient::beta(void) const {
     } else {
         return numerator / dot(prev_grads, prev_grads);
     }
+}
+
+double ConjGrad::value(void) const {
+    switch (gt) {
+        case GradType::Plain:
+            // TODO calculate final value
+            return 0.;
+    }
+    return ILLEGAL;
+}
+
+double ConjGrad::value_and_grad(void) {
+    switch (gt) {
+        case GradType::Plain:
+            // TODO calculate gradient
+            return value();
+    }
+    return ILLEGAL;
 }

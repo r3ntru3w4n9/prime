@@ -14,8 +14,9 @@
 
 #include <iostream>
 #include "Chip.h"
-#include "QuadForest.h"
+#include "ConjugateGradient.h"
 #include "MyUsage.h"
+#include "QuadForest.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -51,22 +52,28 @@ int main(int argc, char* argv[]) {
     }
 
     // call solver
-    Chip Mgr(inputfile);
+    Chip chp(inputfile);
 
-    Mgr.log();
+    chp.log();
 
     std::cout << "Finished reading input file\n";
     usage.report(true, true);
     usage.reset();
 
     // Test QuadForest functionality
-    QuadForest qf(Mgr);
+    QuadForest qf(chp);
     std::cout << "Number of nets : " << qf.size() << "\n";
     usage.report(true, true);
     usage.reset();
 
-    qf.return_segments(Mgr);
-    Mgr.output(outputfile);
+    // TODO: tune variable
+    constexpr double init = 1., rate = .5;
+    GradType gt = GradType::Plain;
+    Scheduler sch(init, rate);
+    ConjGrad conj_grad(chp, qf, gt, std::move(sch));
+
+    qf.return_segments(chp);
+    chp.output(outputfile);
     std::cout << "Finished output to file\n";
     usage.report(true, true);
 
