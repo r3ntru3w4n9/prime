@@ -17,6 +17,7 @@
 #include "ConjugateGradient.h"
 #include "MyUsage.h"
 #include "QuadForest.h"
+#include "mmapstream.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -33,13 +34,13 @@ int main(int argc, char* argv[]) {
 
     // start
     if (argc != 3) {
-        std::cout << "Usage: ./cell_move_router <input.txt> <output.txt>"
+        std::cout << "Usage: ./prime <input.txt> <output.txt>"
                   << std::endl;
         return 0;
     }
 
     // open files
-    std::fstream inputfile(argv[1]);
+    mstream inputfile(argv[1]);
     if (!inputfile.is_open()) {
         std::cout << "No such file or directory: " << argv[1] << std::endl;
         return 0;

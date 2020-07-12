@@ -18,6 +18,9 @@
 
 #include "Cell.h"
 #include "Grid.h"
+
+#include "mmapstream.h"
+
 //#include "QuadTree.h"
 // #include "TreeNet.h"
 
@@ -64,7 +67,7 @@
 class Chip {
    public:
     // Constructor
-    Chip(std::fstream& input);
+    Chip(mstream& input);
     // destructor
     ~Chip();
 
@@ -104,7 +107,7 @@ class Chip {
     Grid& getGrid(unsigned layer, unsigned row, unsigned column);
     MasterCellType& getMasterCell(unsigned idx);
     unsigned getMaxMove() const;
-    unsigned Chip::getNumMoved() const;
+    unsigned getNumMoved() const;
     bool limited() const;
     void log() const;
 
@@ -136,7 +139,7 @@ class Chip {
     safe::vector<unsigned> _movedCells;
 
     // private function
-    void readFile(std::fstream& input);
+    void readFile(mstream& input);
     void constructCoordinate();
     void constructGrid(int layer);
     void assignRoute(int srow,

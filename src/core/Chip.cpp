@@ -26,11 +26,11 @@
 ///                          FUNCTIONS                               ///
 ////////////////////////////////////////////////////////////////////////
 
-Chip::Chip(std::fstream& input) {
+Chip::Chip(mstream& input) {
     readFile(input);
 }
 
-void Chip::readFile(std::fstream& input) {
+void Chip::readFile(mstream& input) {
     std::string str;
     std::string buf;
 
