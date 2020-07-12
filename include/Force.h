@@ -42,7 +42,7 @@ class Force {
     Force& operator=(Force&& f) = delete;
 
     // calculation
-    void balance();
+    void balance(unsigned ite); //number of iterations
 
     // estimation
     unsigned HPWL() const;
@@ -56,10 +56,13 @@ class Force {
     safe::vector<unsigned> _columnSum; // by net
     safe::vector<unsigned> _rowNew;
     safe::vector<unsigned> _columnNew;
-    safe::vector<bool> _movable;
+    safe::vector<unsigned> _movable; // movable cells
 
     // private function
-    void balance_first();
+    void balance_init();
+    void balance_ite(unsigned ite);
     void NetSum(unsigned idx);
     void UpdateCell(unsigned idx);
 };
+
+bool myfunc(std::pair<unsigned, unsigned> a, std::pair<unsigned, unsigned> b);

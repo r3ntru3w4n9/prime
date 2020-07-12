@@ -103,6 +103,8 @@ class Chip {
     Grid& getGrid(unsigned layer, unsigned idx);
     Grid& getGrid(unsigned layer, unsigned row, unsigned column);
     MasterCellType& getMasterCell(unsigned idx);
+    unsigned getMaxMove() const;
+    unsigned Chip::getNumMoved() const;
     bool limited() const;
     void log() const;
 

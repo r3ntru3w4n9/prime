@@ -23,4 +23,4 @@ $(BINARY): $(TARGETS)
 	$(CXXC) -c $(CXXCFLAGS) $< -o $@ $(FLAGS)
 
 clean:
-	rm -f $(BINARY) $(TARGETS)
+	rm -f $(BINARY) $(TARGETS) *.o src/*.o

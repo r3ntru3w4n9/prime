@@ -422,6 +422,14 @@ MasterCellType& Chip::getMasterCell(unsigned idx) {
     return _MasterCells[idx];
 }
 
+unsigned Chip::getMaxMove() const {
+    return _maxMove;
+}
+
+unsigned Chip::getNumMoved() const {
+    return _movedCells.size();
+}
+
 bool Chip::limited() const {
     assert(_movedCells.size() <= _maxMove);
     return _movedCells.size() == _maxMove;
