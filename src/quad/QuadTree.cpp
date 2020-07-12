@@ -23,7 +23,7 @@ QuadTree::QuadTree(int n_id, int min_lay, int base_row, int base_col, int max_ro
 int QuadTree::get_net_id()       const { return    _NetId; }
 int QuadTree::get_min_layer()    const { return _minLayer; }
 int QuadTree::get_root_idx()     const { return  root_idx; }
-bool QuadTree::is_built()               const { return root_idx != -1; }
+bool QuadTree::is_built()        const { return root_idx != -1; }
 
 // get nodes / pins
 unsigned  QuadTree::size()              const { assert(is_built()); return nodes.size(); }
@@ -114,6 +114,7 @@ void QuadTree::reset_tree(){
 // Private functions
 void QuadTree::increment_flag(){ ++flag; }
 bool QuadTree::can_merge(QuadNode& n_1, QuadNode& n_2, const std::string dir) const {
+    // FIXME:
     // check whether n_1 can be merged to n_2 from dir (direction)
     unsigned direction = dir2Num(dir), opp_direction = opposite_dir(dir);
     assert(direction >= 1 && direction <= 4);
@@ -127,6 +128,7 @@ bool QuadTree::can_merge(QuadNode& n_1, QuadNode& n_2, const std::string dir) co
     }
 }
 void QuadTree::merge_nodes(QuadNode& n_1, QuadNode& n_2, const std::string dir){
+    // FIXME:
     // merge node n_1 to n_2 from dir (direction)
     assert(can_merge(n_1, n_2, dir));
     unsigned direction = dir2Num(dir), opp_direction = opposite_dir(dir);
@@ -147,6 +149,7 @@ void QuadTree::delete_node(){
     // TODO:
 }
 inline int QuadTree::move_pin(unsigned idx, int delta_x, int delta_y){
+    // FIXME:
     assert(is_built() && idx < size());
     assert(delta_x * delta_y == 0); // move in one direction at a time
     if(nodes[idx].get_flag() == flag) return 0;
@@ -207,7 +210,7 @@ void QuadTree::segment_to_tree(){
     safe::unordered_map<unsigned, int> VertexLayer;
     // Construct vertices from pins
     unsigned pNum = 0;
-    pins2NodeIdx = safe::vector<unsigned>(pins.size());
+    pinIdx2Node.clear();
     for(size_t i = 0; i < pins.size(); ++i){ // Add pins to Vertices
         CoordPair pinCoord(pins[i].get_row(), pins[i].get_col());
         // std::cerr << "pin " << i << " (" << pinCoord.first << ", " << pinCoord.second << ", " << pins[i].get_layer() << ")\n";
@@ -215,12 +218,12 @@ void QuadTree::segment_to_tree(){
             Coord2Vertices[pinCoord] = pNum;
             Vertices[pNum] = pinCoord;
             VertexLayer[pNum] = pins[i].get_layer();
-            pins2NodeIdx[i] = pNum;
+            pinIdx2Node[pins[i].get_idx()] = pNum;
             // std::cerr << "Pin " << pNum << " : " << pinCoord.first << ", " << pinCoord.second << "\n";
             ++pNum;
         } else { // Different pins with same x, y coordinates but on different layers
             // std::cerr << "Repeated pin " << i << " " << pinCoord.first << ", " << pinCoord.second << "\n";
-            pins2NodeIdx[i] = Coord2Vertices[pinCoord];
+            pinIdx2Node[pins[i].get_idx()] = Coord2Vertices[pinCoord];
         }
     } // Now we know the number of pins is pNum
     // assert(pins.size() == pins2NodeIdx.size());
@@ -440,10 +443,10 @@ void QuadTree::segment_to_tree(){
         nodes.push_back(QuadNode(i));
     }
     // Construct quad tree
-    dfs_construct_tree(SimpleTree, Vertices, VertexLayer, new_idx_mapping, 0, -1);
+    dfs_construct_tree(SimpleTree, Vertices, VertexLayer, new_idx_mapping, found_center, -1);
     
     // Final preperation
-    // root_idx = new_idx_mapping[found_center];
+    root_idx = new_idx_mapping[found_center];
     // assert(nodes[root_idx].get_parent() == -1);
     for(size_t i = 0; i < nodes.size(); ++i){ // set coordinate to node index mapping
         coord2Node[nodes[i].get_coord()] = i;
@@ -577,31 +580,33 @@ void QuadTree::tree_to_segment() {
     // Add via for those pins
     for(size_t i = 0; i < pins.size(); ++i){
         // std::cerr << nodes[pins2NodeIdx[i]].get_layer_self() << " " << pins[i].get_layer() << "\n";
-        if(nodes[pins2NodeIdx[i]].get_layer_self() != (int)pins[i].get_layer()){
+        size_t idx = pins[i].get_idx();
+        if(nodes[pinIdx2Node[idx]].get_layer_self() != (int)pins[i].get_layer()){
             segments.push_back(
-                NetSegment(nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
-                           nodes[pins2NodeIdx[i]].get_coord_x(), nodes[pins2NodeIdx[i]].get_coord_y(),
-                           nodes[pins2NodeIdx[i]].get_layer_self(), pins[i].get_layer()));
+                NetSegment(nodes[pinIdx2Node[idx]].get_coord_x(), nodes[pinIdx2Node[idx]].get_coord_y(),
+                           nodes[pinIdx2Node[idx]].get_coord_x(), nodes[pinIdx2Node[idx]].get_coord_y(),
+                           nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
         }
     }
     if(segments.size() == 0){
         // TODO: choose the pin closest to the minLayer
-        size_t closest = 0;
+        size_t closest = 0, closest_idx = 0;
         int min_dist = DINF;
         // std::cerr << "minLayer : " << _minLayer << "\n";
         for(size_t i = 0; i < pins.size(); ++i){
             // std::cerr << nodes[pins2NodeIdx[i]].get_layer_self() << " " << pins[i].get_layer() << "\n";
             int dist = _minLayer - (int)pins[i].get_layer();
             if(dist >= 0 && dist < min_dist){
-                closest = i;
+                closest = pins[i].get_idx();
+                closest_idx = i;
                 min_dist = dist;
             }
         }
         if(min_dist > 0 && min_dist < DINF){
             segments.push_back(
-                NetSegment(nodes[pins2NodeIdx[closest]].get_coord_x(), nodes[pins2NodeIdx[closest]].get_coord_y(),
-                        nodes[pins2NodeIdx[closest]].get_coord_x(), nodes[pins2NodeIdx[closest]].get_coord_y(),
-                        pins[closest].get_layer(), _minLayer));
+                NetSegment(nodes[pinIdx2Node[closest]].get_coord_x(), nodes[pinIdx2Node[closest]].get_coord_y(),
+                        nodes[pinIdx2Node[closest]].get_coord_x(), nodes[pinIdx2Node[closest]].get_coord_y(),
+                        pins[closest_idx].get_layer(), _minLayer));
         }
     }
 }

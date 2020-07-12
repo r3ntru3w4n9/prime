@@ -4,21 +4,34 @@
 
 #include "QuadForest.h"
 
-QuadForest::QuadForest() noexcept {}
-QuadForest::QuadForest(Chip& chip) noexcept {
-    construct_forest(chip);
+QuadForest::QuadForest(Chip& _chip) noexcept: 
+    chip(_chip) {
+    construct_forest();
 }
 // QuadForest::~QuadForest() noexcept {
 //     clear();
 // }
 
-void QuadForest::construct_forest(Chip& chip) {
+void QuadForest::construct_forest() {
     // Get basic information
     baseRowIdx = chip.getRowBase();
     baseColIdx = chip.getColumnBase();
     maxRows = chip.getNumRows();
     maxCols = chip.getNumColumns();
     maxLayers = chip.getNumLayers();
+
+    // Get cell to pin mapping
+    size_t numCells = chip.getNumCells();
+    cellIdx2Pin.clear();
+    for(size_t i = 0; i < numCells; ++i) {
+        Cell& cell = chip.getCell(i);
+        safe::vector<unsigned> pinIdxs;
+        for(size_t j = 0; j < cell.getNumPins(); ++j) {
+            pinIdxs.push_back(cell.getPinIdx(j));
+        }
+        cellIdx2Pin.push_back(pinIdxs);
+    }
+    assert(cellIdx2Pin.size() == numCells);
 
     size_t numPins = chip.getNumPins();
     pinIdx2Tree = safe::vector<unsigned>(numPins);
@@ -74,12 +87,13 @@ QuadTree& QuadForest::get_tree(size_t idx) {
 //     return qtrees[name2NetIdx.at(s)];
 // }
 QuadTree& QuadForest::operator[](size_t idx) {
-    assert(idx < qtrees.size());
     return qtrees[idx];
 }
 const QuadTree& QuadForest::operator[](size_t idx) const {
-    assert(idx < qtrees.size());
     return qtrees[idx];
+}
+QuadTree& QuadForest::get_tree_by_pin(size_t idx) {
+    return qtrees[pinIdx2Tree[idx]];
 }
 
 void QuadForest::push_back(const QuadTree& qt) {

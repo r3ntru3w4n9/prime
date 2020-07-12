@@ -110,14 +110,15 @@ class QuadTree {
     safe::vector<QuadNode> nodes;  // pins will be at the front of this vector
     safe::map<CoordPair, unsigned> coord2Node;
     safe::vector<SimplePin> pins;         // index of pins
-    safe::vector<unsigned> pins2NodeIdx;  // mapping from pins to index of nodes
-
+    safe::unordered_map<unsigned, unsigned> pinIdx2Node;  // mapping from pins to index of nodes
+    // TODO: nodeIdx2Pin
     // Temporary members for constructing the tree
     safe::vector<NetSegment> segments;
-    safe::vector<NetSegment> vias;
+    safe::vector<NetSegment> vias; // FIXME:
 
     // Private functions
     // Basic operations
+    // FIXME:
     void increment_flag();
     bool can_merge(QuadNode& n_1, QuadNode& n_2, const std::string dir) const;
     void merge_nodes(QuadNode& n_1, QuadNode& n_2, const std::string dir);
@@ -129,6 +130,7 @@ class QuadTree {
     // void self_optimize();
 
     // Segment / Tree conversion functions
+    // Don't move :
     void segment_to_tree();
     inline bool dfs_tree_graph(safe::vector<VEPair> TreeGraph[],
                                safe::vector<int>& selected_edges,

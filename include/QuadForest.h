@@ -13,11 +13,11 @@
 // Manage all nets
 class QuadForest{
    public:
-    QuadForest() noexcept;
+    QuadForest() = delete;
     QuadForest(Chip& chip) noexcept;
     // ~QuadForest() noexcept;
 
-    void construct_forest(Chip& chip);
+    void construct_forest();
 
     size_t size() const;
     QuadTree& get_tree(size_t idx);
@@ -33,6 +33,7 @@ class QuadForest{
     void return_segments(Chip& chip);
 
    private:
+    Chip&                         chip; // TODO:
     int                     baseRowIdx;
     int                     baseColIdx;
     int                        maxRows;
@@ -43,6 +44,7 @@ class QuadForest{
 
     // safe::vector<CellPinPair>     pins;
     safe::vector<unsigned> pinIdx2Tree;
+    safe::vector<safe::vector<unsigned>> cellIdx2Pin;
 
     // friend
     friend std::ostream& operator<<(std::ostream& out, QuadForest& qf);
