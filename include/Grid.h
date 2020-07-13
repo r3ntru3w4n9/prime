@@ -62,7 +62,7 @@ class Layer {
 
     // accesser
     unsigned getLayerIdx() const;
-    bool getDirection() const; // 0 for H(column), 1 for V(row)
+    bool getDirection() const;  // 0 for H(column), 1 for V(row)
     Grid& getGrid(unsigned idx);
 
    private:
@@ -83,9 +83,16 @@ class Coordinate {
     Coordinate& operator=(Coordinate&& c);
 
     // modifier
-    bool CanAddCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers) const;  // to see if you can add this cell
-    void addCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers);
-    void moveCell(Cell& cell, safe::vector<Coordinate>& coordinates, safe::vector<Layer>& layers);
+    bool CanAddCell(
+        Cell& cell,
+        safe::vector<Coordinate>& coordinates,
+        safe::vector<Layer>& layers) const;  // to see if you can add this cell
+    void addCell(Cell& cell,
+                 safe::vector<Coordinate>& coordinates,
+                 safe::vector<Layer>& layers);
+    void moveCell(Cell& cell,
+                  safe::vector<Coordinate>& coordinates,
+                  safe::vector<Layer>& layers);
 
     // accesser
     int getRow() const;
@@ -116,6 +123,8 @@ class Grid {
     void decSupply(int d);
     void addNet(GridNet& net);
     GridNet& getNet(unsigned i, std::vector<GridNet>& nets);
+
+    // TODO: Grid only stores capacity instead of net number
     void rmNet(GridNet& net);
     void rmNet(unsigned i);
 

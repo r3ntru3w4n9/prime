@@ -25,8 +25,9 @@ class NetSegment;
 class QuadTree {
    public:
     // constructor
-    QuadTree() noexcept;
-    QuadTree(int n_id,
+    QuadTree() noexcept = delete;
+    QuadTree(Chip& chip,
+             int n_id,
              int min_lay,
              int base_row,
              int base_col,
@@ -34,6 +35,10 @@ class QuadTree {
              int max_col,
              int max_layer) noexcept;
     // ~QuadTree() noexcept;
+
+    // TODO: ripup and putdown
+    void ripup(void);
+    void putdown(void);
 
     // access to basic attributes
     // std::string    get_name() const;
@@ -97,6 +102,10 @@ class QuadTree {
     // TODO: use union find to create a tree
 
    private:
+    Chip& chip;
+    // net is ripped from the chip
+    bool in_the_air;
+
     // const std::string                _NetName;
     const int _NetId;
     const int _baseRow;

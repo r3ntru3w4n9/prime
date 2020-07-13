@@ -6,27 +6,30 @@
 
 #include <functional>
 
-QuadTree::QuadTree() noexcept
-    : _NetId(-1),
-      _baseRow(-1),
-      _baseCol(-1),
-      _minLayer(-1),
-      _maxRows(0),
-      _maxCols(0),
-      _maxLayers(-1),
-      root_idx(-1),
-      flag(0) {
-    segments.clear();
-}
+// QuadTree::QuadTree() noexcept
+//     : _NetId(-1),
+//       _baseRow(-1),
+//       _baseCol(-1),
+//       _minLayer(-1),
+//       _maxRows(0),
+//       _maxCols(0),
+//       _maxLayers(-1),
+//       root_idx(-1),
+//       flag(0) {
+//     segments.clear();
+// }
 
-QuadTree::QuadTree(int n_id,
+QuadTree::QuadTree(Chip& chip,
+                   int n_id,
                    int min_lay,
                    int base_row,
                    int base_col,
                    int max_row,
                    int max_col,
                    int max_layer) noexcept
-    : _NetId(n_id),
+    : chip(chip),
+      in_the_air(false),
+      _NetId(n_id),
       _baseRow(base_row),
       _baseCol(base_col),
       _minLayer(min_lay),
@@ -41,6 +44,98 @@ QuadTree::QuadTree(int n_id,
 // QuadTree::~QuadTree() noexcept {
 //     reset_tree();
 // }
+
+enum class Direction { Up, Down, Left, Right };
+
+// TODO: update cap within the same cell
+template <bool ripup>
+static inline void modify_self_capacity(Chip& chip, QuadNode& qn) {
+    int min_lay = -1, max_lay = -1;
+
+    assert(max_lay >= 0);
+    assert(min_lay >= 0);
+    int span = max_lay - min_lay;
+
+    // TODO: update the nets
+    int positions[4] = {};
+}
+
+// TODO: update cap in between cells
+template <bool ripup, Direction dir>
+static inline void modify_edge_capacity(Chip& chip,
+                                        QuadTree& qt,
+                                        QuadNode& qn) {
+    QuadNode other;
+    int dist;
+
+    // TODO: in the for loop update the cost
+    switch (dir) {
+        case Direction::Up:
+            other = qt.get_pin_list()[qn.get_up()];
+            dist = other.coord_y() - qn.coord_y();
+            for (int i = 0; i < dist; ++i) {
+            }
+            break;
+        case Direction::Down:
+            other = qt.get_pin_list()[qn.get_down()];
+            dist = qn.coord_y() - other.coord_y();
+            for (int i = 0; i < dist; ++i) {
+            }
+            break;
+        case Direction::Left:
+            other = qt.get_pin_list()[qn.get_left()];
+            dist = qn.coord_x() - other.coord_x();
+            for (int i = 0; i < dist; ++i) {
+            }
+            break;
+        case Direction::Right:
+            other = qt.get_pin_list()[qn.get_right()];
+            dist = other.coord_x() - qn.coord_x();
+            for (int i = 0; i < dist; ++i) {
+            }
+            break;
+    }
+    assert(dist >= 0);
+}
+
+template <bool ripup>
+void dfs_rip_or_put(Chip& chip, QuadTree& qt, QuadNode& qn, Direction indir) {
+    // TODO: handle rip up and put down
+
+    modify_self_capacity<ripup>(chip, qn);
+
+    if (indir != Direction::Down && qn.has_up()) {
+        modify_edge_capacity<ripup, Direction::Up>(chip, qt, qn);
+        dfs_rip_or_put<ripup>(chip, nodes[qn.get_up()], Direction::Up);
+    }
+
+    if (indir != Direction::Up && qn.has_down()) {
+        modify_edge_capacity<ripup, Direction::Down>(chip, qt, qn);
+        dfs_rip_or_put<ripup>(chip, nodes[qn.get_down()], Direction::Down);
+    }
+
+    if (indir != Direction::Right && qn.has_left()) {
+        modify_edge_capacity<ripup, Direction::Left>(chip, qt, qn);
+        dfs_rip_or_put<ripup>(chip, nodes[qn.get_left()], Direction::Left);
+    }
+
+    if (indir != Direction::Left qn.has_right()) {
+        modify_edge_capacity<ripup, Direction::Right>(chip, qt, qn);
+        dfs_rip_or_put<ripup>(chip, nodes[qn.get_right()], Direction::Right);
+    }
+}
+
+void QuadTree::ripup(void) {
+    assert(!in_the_air);
+
+    in_the_air = true;
+}
+
+void QuadTree::putdown(void) {
+    assert(in_the_air);
+
+    in_the_air = false;
+}
 
 // access to basic attributes
 // std::string QuadTree::get_name() const { return  _NetName; }
