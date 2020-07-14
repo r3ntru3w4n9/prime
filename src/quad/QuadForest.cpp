@@ -4,8 +4,7 @@
 
 #include "QuadForest.h"
 
-QuadForest::QuadForest(Chip& _chip) noexcept: 
-    chip(_chip) {
+QuadForest::QuadForest(Chip& _chip) noexcept : chip(_chip) {
     construct_forest();
 }
 // QuadForest::~QuadForest() noexcept {
@@ -23,10 +22,10 @@ void QuadForest::construct_forest() {
     // Get cell to pin mapping
     size_t numCells = chip.getNumCells();
     cellIdx2Pin.clear();
-    for(size_t i = 0; i < numCells; ++i) {
+    for (size_t i = 0; i < numCells; ++i) {
         Cell& cell = chip.getCell(i);
         safe::vector<unsigned> pinIdxs;
-        for(size_t j = 0; j < cell.getNumPins(); ++j) {
+        for (size_t j = 0; j < cell.getNumPins(); ++j) {
             pinIdxs.push_back(cell.getPinIdx(j));
         }
         cellIdx2Pin.push_back(pinIdxs);
@@ -46,7 +45,7 @@ void QuadForest::construct_forest() {
         unsigned net_id = net.getIdx();
         unsigned net_minlayer = net.getMinlayer();
 
-        QuadTree qt(net_id, net_minlayer, baseRowIdx, baseColIdx, maxRows,
+        QuadTree qt(chip, net_id, net_minlayer, baseRowIdx, baseColIdx, maxRows,
                     maxCols, maxLayers);
         // Get pins
         size_t pin_num = net.getNumPin();
@@ -57,9 +56,7 @@ void QuadForest::construct_forest() {
             unsigned pin_col = chip.getPinColumn(pin);
             unsigned pin_lay = pin.getLayer();
             pinIdx2Tree[pin_idx] = i;
-            qt.add_pin(
-                SimplePin(pin_idx, pin_row, pin_col,
-                          pin_lay));
+            qt.add_pin(SimplePin(pin_idx, pin_row, pin_col, pin_lay));
         }
         // Get segments
         safe::vector<unsigned>& segments = net.getSegments();

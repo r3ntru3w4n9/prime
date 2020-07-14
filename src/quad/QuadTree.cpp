@@ -106,22 +106,22 @@ void dfs_rip_or_put(Chip& chip, QuadTree& qt, QuadNode& qn, Direction indir) {
 
     if (indir != Direction::Down && qn.has_up()) {
         modify_edge_capacity<ripup, Direction::Up>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, nodes[qn.get_up()], Direction::Up);
+        dfs_rip_or_put<ripup>(chip, qt.nodes[qn.get_up()], Direction::Up);
     }
 
     if (indir != Direction::Up && qn.has_down()) {
         modify_edge_capacity<ripup, Direction::Down>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, nodes[qn.get_down()], Direction::Down);
+        dfs_rip_or_put<ripup>(chip, qt.nodes[qn.get_down()], Direction::Down);
     }
 
     if (indir != Direction::Right && qn.has_left()) {
         modify_edge_capacity<ripup, Direction::Left>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, nodes[qn.get_left()], Direction::Left);
+        dfs_rip_or_put<ripup>(chip, qt.nodes[qn.get_left()], Direction::Left);
     }
 
-    if (indir != Direction::Left qn.has_right()) {
+    if (indir != Direction::Left && qn.has_right()) {
         modify_edge_capacity<ripup, Direction::Right>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, nodes[qn.get_right()], Direction::Right);
+        dfs_rip_or_put<ripup>(chip, qt.nodes[qn.get_right()], Direction::Right);
     }
 }
 
