@@ -89,7 +89,18 @@ inline void Force::balance_init() {
 }
 
 inline void balance_ite(unsigned ite){
+    for (unsigned i = 0; i < ite; ++i) {
+        balance_in();
+    }
+}
 
+inline void Force::balance_in() {
+    for (unsigned i = 0; i < _chip.getNumNets(); ++i) {
+        NetSum(i);
+    }
+    for (unsigned i = 0; i < _movable.size(); ++i) {
+        UpdateCell(i);
+    }
 }
 
 inline void Force::NetSum(unsigned idx) {
@@ -108,9 +119,9 @@ inline void Force::UpdateCell(unsigned idx) {
     Cell& cell = _chip.getCell(idx);
     unsigned rowNew = 0, columnNew = 0;
     for (unsigned i = 0; i < cell.getNumPins(); ++i) {
-        const Pin& pin = _chip.getPin(cell.getPinIdx(i));
-        rowNew += _rowSum[pin.get_net_idx()];
-        columnNew += _columnSum[pin.get_net_idx()];
+        unsigned net = _chip.getPin(cell.getPinIdx(i)).get_net_idx();
+        rowNew += _rowSum[net];
+        columnNew += _columnSum[net];
     }
     _rowNew[idx] = unsigned(double(rowNew)/cell.getNumPins() - _row[idx] + 0.5);
     _columnNew[idx] = unsigned(double(columnNew)/cell.getNumPins() - _column[idx] + 0.5);
