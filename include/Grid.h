@@ -87,12 +87,17 @@ class Coordinate {
         Cell& cell,
         safe::vector<Coordinate>& coordinates,
         safe::vector<Layer>& layers) const;  // to see if you can add this cell
-    void addCell(Cell& cell,
+    void initCell(Cell& cell,
                  safe::vector<Coordinate>& coordinates,
                  safe::vector<Layer>& layers);
-    void moveCell(Cell& cell,
-                  safe::vector<Coordinate>& coordinates,
-                  safe::vector<Layer>& layers);
+    void addCell(Cell& cell,
+                 safe::vector<Coordinate>& coordinates,
+                 safe::vector<Layer>& layers,
+                 safe::vector<Pin>& pins);
+    void rmCell(Cell& cell,
+                safe::vector<Coordinate>& coordinates,
+                safe::vector<Layer>& layers,
+                safe::vector<Pin>& pins);
 
     // accesser
     int getRow() const;
@@ -121,12 +126,17 @@ class Grid {
     // modifier
     void incSupply(int d);
     void decSupply(int d);
+    void addPin(Pin& pin);
+    void addPin(unsigned i);
+    void addPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins);
+    void rmPin(Pin& pin);
+    void rmPin(unsigned i);
+    void rmPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins);
     void addNet(GridNet& net);
-    GridNet& getNet(unsigned i, std::vector<GridNet>& nets);
-
-    // TODO: Grid only stores capacity instead of net number
+    void addNet(unsigned i);
     void rmNet(GridNet& net);
     void rmNet(unsigned i);
+    GridNet& getNet(unsigned i, std::vector<GridNet>& nets);
 
     // accesser
     int getSupply() const;
@@ -135,5 +145,6 @@ class Grid {
 
    private:
     int _supply;
+    safe::unordered_map<unsigned, unsigned> _pins;
     safe::unordered_set<unsigned> _nets;
 };

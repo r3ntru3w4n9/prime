@@ -198,7 +198,7 @@ void Chip::readFile(mstream& input) {
         int rIdx = row - _rowBase, cIdx = column - _columnBase;
         Cell& cell = _cells[i];
         cell.setCoordinate(rIdx, cIdx);
-        _coordinates[getIdx(rIdx, cIdx)].addCell(cell, _coordinates, _layers);
+        _coordinates[getIdx(rIdx, cIdx)].initCell(cell, _coordinates, _layers);
     }
 
     /*NumNets <netCount>
@@ -247,7 +247,7 @@ void Chip::readFile(mstream& input) {
             pin.setNet(_grid_nets[i]);
             Grid& g = _layers[pin.getLayer()].getGrid(
                 getIdx(getPinRow(pin), getPinColumn(pin)));
-            g.addNet(_grid_nets[i]);
+            g.addPin(i);
         }
         // return;
     }
@@ -278,14 +278,14 @@ void Chip::readFile(mstream& input) {
 
 Chip::~Chip() {
     // debug
-    /*std::fstream out("out.txt", std::ios::out);
+    std::fstream out("out.txt", std::ios::out);
     for (Layer& ptr : _layers) {
         for (unsigned i = 0; i < _rowRange; ++i) {
             for (unsigned j = 0; j < _columnRange; ++j) {
                 out << ptr.getGrid(getIdx(i, j)).getSupply() << std::endl;
             }
         }
-    }*/
+    }
     // debug
 }
 
@@ -322,8 +322,8 @@ bool Chip::moveCell(Cell& cell, unsigned origin, unsigned target) {
         _movedCells.push_back(cell.getIdx());
     }
     Coordinate& c_origin = _coordinates[origin];
-    c_origin.moveCell(cell, _coordinates, _layers);
-    c_target.addCell(cell, _coordinates, _layers);
+    c_origin.rmCell(cell, _coordinates, _layers, _pins);
+    c_target.addCell(cell, _coordinates, _layers, _pins);
     _movedCells.push_back(cell.getIdx());
     return true;
 }

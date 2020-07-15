@@ -151,7 +151,7 @@ bool Coordinate::CanAddCell(Cell& cell,
     return true;
 }
 
-void Coordinate::addCell(Cell& cell,
+void Coordinate::initCell(Cell& cell,
                          safe::vector<Coordinate>& coordinates,
                          safe::vector<Layer>& layers) {
     unsigned id = cell.getMasterCellId();
@@ -204,16 +204,73 @@ void Coordinate::addCell(Cell& cell,
     }
 }
 
-void Coordinate::moveCell(Cell& cell,
-                          safe::vector<Coordinate>& coordinates,
-                          safe::vector<Layer>& layers) {
+void Coordinate::addCell(Cell& cell,
+                         safe::vector<Coordinate>& coordinates,
+                         safe::vector<Layer>& layers,
+                         safe::vector<Pin>& pins) {
+    unsigned id = cell.getMasterCellId();
+    unsigned n;
+    if (_MCT2Num.contains(id)) {
+        assert(_MCT2Num[id] >= 1);
+        n = ++_MCT2Num[id];
+    } else {
+        n = 1;
+        _MCT2Num[id] = 1;
+    }
+    for (unsigned i = 0, m = layers.size(); i < m; ++i) {
+        Layer& layer = layers[i];
+        int d = cell.getLayerDemand(i);
+        safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
+        safe::vector<int>& sameGridDemand = cell.getSameGridDemand(i);
+        safe::vector<unsigned>& adjHGridMC = cell.getadjHGridMC(i);
+        safe::vector<int>& adjHGridDemand = cell.getadjHGridDemand(i);
+        assert(sameGridMC.size() == sameGridDemand.size());
+        assert(adjHGridMC.size() == adjHGridDemand.size());
+        for (int j = 0, p = sameGridMC.size(); j < p; ++j) {
+            if (_MCT2Num.contains(sameGridMC[j])) {
+                if (n <= _MCT2Num[sameGridMC[j]]) {
+                    d += sameGridDemand[j];
+                }
+            }
+        }
+        for (int j = 0, p = adjHGridMC.size(); j < p; ++j) {
+            int k = adjHGridDemand[j];
+            if (_c1 >= 0) {
+                Coordinate& c_1 = coordinates[_c1];
+                if (c_1._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= c_1._MCT2Num[adjHGridMC[j]]) {
+                        d += k;
+                        layer.getGrid(c_1._idx).decSupply(k);
+                    }
+                }
+            }
+            if (_c2 >= 0) {
+                Coordinate& c_2 = coordinates[_c2];
+                if (c_2._MCT2Num.contains(adjHGridMC[j])) {
+                    if (n <= c_2._MCT2Num[adjHGridMC[j]]) {
+                        d += k;
+                        layer.getGrid(c_2._idx).decSupply(k);
+                    }
+                }
+            }
+        }
+        Grid& grid = layer.getGrid(_idx);
+        grid.decSupply(d);
+        grid.addPin(cell.getPinLayer(i),pins);
+    }
+}
+
+void Coordinate::rmCell(Cell& cell,
+                        safe::vector<Coordinate>& coordinates,
+                        safe::vector<Layer>& layers,
+                        safe::vector<Pin>& pins) {
     unsigned id = cell.getMasterCellId();
     assert(_MCT2Num.contains(id));
     unsigned n = --_MCT2Num[id];
     if (n == 0) {
         _MCT2Num.erase(id);
     }
-    for (int i = 0, m = layers.size(); i < m; ++i) {
+    for (unsigned i = 0, m = layers.size(); i < m; ++i) {
         Layer& layer = layers[i];
         int d = cell.getLayerDemand(i);
         safe::vector<unsigned>& sameGridMC = cell.getSameGridMC(i);
@@ -250,7 +307,9 @@ void Coordinate::moveCell(Cell& cell,
                 }
             }
         }
-        layer.getGrid(_idx).incSupply(d);
+        Grid& grid = layer.getGrid(_idx);
+        grid.incSupply(d);
+        grid.rmPin(cell.getPinLayer(i),pins);
     }
 }
 
@@ -285,11 +344,74 @@ void Grid::decSupply(int d) {
     _supply -= d;
 }
 
+void Grid::addPin(Pin& pin) {
+    if (!_pins.contains(pin.get_net_idx())) {
+        _pins[pin.get_net_idx()] = 1;
+        _supply -= 1;
+    } else {
+        _pins[pin.get_net_idx()] += 1;
+    }
+}
+
+void Grid::addPin(unsigned i) {
+    if (!_pins.contains(i)) {
+        _pins[i] = 1;
+        _supply -= 1;
+    } else {
+        _pins[i] += 1;
+    }
+}
+
+void Grid::addPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins) {
+    for (unsigned i = 0; i < idx.size(); ++i) {
+        addPin(pins[idx[i]]);
+    }
+}
+
+void Grid::rmPin(Pin& pin) {
+    assert(_pins.contains(pin.get_net_idx()));
+    _pins[pin.get_net_idx()] -= 1;
+    if (_pins[pin.get_net_idx()] == 0) {
+        _pins.erase(pin.get_net_idx());
+        if (!_nets.contains(pin.get_net_idx())) {
+            _supply += 1;
+        }
+    }
+}
+
+void Grid::rmPin(unsigned i) {
+    assert(_pins.contains(i));
+    _pins[i] -= 1;
+    if (_pins[i] == 0) {
+        _pins.erase(i);
+        if (!_nets.contains(i)) {
+            _supply += 1;
+        }
+    }
+}
+
+void Grid::rmPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins) {
+    for (unsigned i = 0; i < idx.size(); ++i) {
+        rmPin(pins[idx[i]]);
+    }
+}
+
 void Grid::addNet(GridNet& net) {
     // if (_nets.find(net.getId()) == _nets.end()) {
     if (!_nets.contains(net.getIdx())) {
         _nets.insert(net.getIdx());
-        _supply -= 1;
+        if (!_pins.contains(net.getIdx())) {
+            _supply -= 1;
+        }
+    }
+}
+
+void Grid::addNet(unsigned i) {
+    if (!_nets.contains(i)) {
+        _nets.insert(i);
+        if (!_pins.contains(i)) {
+            _supply -= 1;
+        }
     }
 }
 
