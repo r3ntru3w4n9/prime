@@ -345,6 +345,10 @@ void Grid::decSupply(int d) {
 }
 
 void Grid::addPin(Pin& pin) {
+    if (pin.get_net_idx() == -1) {
+        return;
+    }
+    assert(pin.get_net_idx() >= 0);
     if (!_pins.contains(pin.get_net_idx())) {
         _pins[pin.get_net_idx()] = 1;
         _supply -= 1;
@@ -353,7 +357,11 @@ void Grid::addPin(Pin& pin) {
     }
 }
 
-void Grid::addPin(unsigned i) {
+void Grid::addPin(int i) {
+    if (i == -1) {
+        return;
+    }
+    assert(i >= 0);
     if (!_pins.contains(i)) {
         _pins[i] = 1;
         _supply -= 1;
@@ -369,6 +377,10 @@ void Grid::addPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins) {
 }
 
 void Grid::rmPin(Pin& pin) {
+    if (pin.get_net_idx() == -1) {
+        return;
+    }
+    assert(pin.get_net_idx() >= 0);
     assert(_pins.contains(pin.get_net_idx()));
     _pins[pin.get_net_idx()] -= 1;
     if (_pins[pin.get_net_idx()] == 0) {
@@ -379,7 +391,11 @@ void Grid::rmPin(Pin& pin) {
     }
 }
 
-void Grid::rmPin(unsigned i) {
+void Grid::rmPin(int i) {
+    if (i == -1) {
+        return;
+    }
+    assert(i >= 0);
     assert(_pins.contains(i));
     _pins[i] -= 1;
     if (_pins[i] == 0) {

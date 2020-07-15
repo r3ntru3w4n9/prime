@@ -50,7 +50,7 @@ unsigned Pin::getIdx() const {
     return _idx;
 }
 
-unsigned Pin::get_net_idx() const {
+int Pin::get_net_idx() const {
     return _net;
 }
 

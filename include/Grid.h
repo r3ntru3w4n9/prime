@@ -127,10 +127,10 @@ class Grid {
     void incSupply(int d);
     void decSupply(int d);
     void addPin(Pin& pin);
-    void addPin(unsigned i);
+    void addPin(int i);
     void addPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins);
     void rmPin(Pin& pin);
-    void rmPin(unsigned i);
+    void rmPin(int i);
     void rmPin(const safe::vector<unsigned>& idx, safe::vector<Pin>& pins);
     void addNet(GridNet& net);
     void addNet(unsigned i);

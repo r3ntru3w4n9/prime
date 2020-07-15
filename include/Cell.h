@@ -64,7 +64,7 @@ class Pin {
 
     // accesser
     unsigned getIdx() const;
-    unsigned get_net_idx() const;
+    int get_net_idx() const;
     unsigned get_cell_idx() const;
     unsigned getLayer() const;
 
@@ -74,7 +74,7 @@ class Pin {
     unsigned _idx;
     unsigned _layer;
     unsigned _cell;
-    unsigned _net;
+    int _net;
 };
 
 class GridNet {
