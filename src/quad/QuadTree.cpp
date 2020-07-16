@@ -58,6 +58,8 @@ static inline void modify_self_capacity(Chip& chip, QuadNode& qn) {
 
     // TODO: update the nets
     int positions[4] = {};
+    Grid& grid = chip.getGrid(qn.get_layer_self(), qn.get_coord_x(), qn.get_coord_y());
+
 }
 
 // TODO: update cap in between cells
@@ -247,9 +249,10 @@ void QuadTree::add_segment(int srow,
                            int elay) {
     if (slay == elay) {
         segments.push_back(NetSegment(srow, scol, erow, ecol, slay));
-    } else {
-        vias.push_back(NetSegment(srow, scol, erow, ecol, slay));
     }
+    // } else {
+    //     vias.push_back(NetSegment(srow, scol, erow, ecol, slay));
+    // }
 }
 void QuadTree::construct_tree() {
     segment_to_tree();
@@ -372,12 +375,13 @@ void QuadTree::segment_to_tree() {
     // print_segments();
     safe::unordered_map<unsigned, CoordPair> Vertices;
     safe::map<CoordPair, unsigned> Coord2Vertices;
-    safe::map<CoordPair, bool> HasVia;
+    // safe::map<CoordPair, bool> HasVia;
     safe::vector<SimpleEdge> EdgeGraph;
     safe::unordered_map<unsigned, int> VertexLayer;
     // Construct vertices from pins
     unsigned pNum = 0;
     pinIdx2Node.clear();
+    nodeIdx2Pin.clear();
     for (size_t i = 0; i < pins.size(); ++i) {  // Add pins to Vertices
         CoordPair pinCoord(pins[i].get_row(), pins[i].get_col());
         // std::cerr << "pin " << i << " (" << pinCoord.first << ", " <<
@@ -388,6 +392,7 @@ void QuadTree::segment_to_tree() {
             Vertices[pNum] = pinCoord;
             VertexLayer[pNum] = pins[i].get_layer();
             pinIdx2Node[pins[i].get_idx()] = pNum;
+            nodeIdx2Pin[pNum] = pins[i].get_idx();
             // std::cerr << "Pin " << pNum << " : " << pinCoord.first << ", " <<
             // pinCoord.second << "\n";
             ++pNum;
@@ -396,15 +401,16 @@ void QuadTree::segment_to_tree() {
             // std::cerr << "Repeated pin " << i << " " << pinCoord.first << ",
             // " << pinCoord.second << "\n";
             pinIdx2Node[pins[i].get_idx()] = Coord2Vertices[pinCoord];
+            nodeIdx2Pin[Coord2Vertices[pinCoord]] = pins[i].get_idx();
         }
     }  // Now we know the number of pins is pNum
     // assert(pins.size() == pins2NodeIdx.size());
 
-    for (size_t i = 0; i < vias.size(); ++i) {
-        if (!HasVia.contains(vias[i].get_start())) {
-            HasVia[vias[i].get_start()] = true;
-        }
-    }
+    // for (size_t i = 0; i < vias.size(); ++i) {
+    //     if (!HasVia.contains(vias[i].get_start())) {
+    //         HasVia[vias[i].get_start()] = true;
+    //     }
+    // }
 
     bool operation = true;
     while (operation && segments.size() > 0) {  // merge overlapping segments
@@ -673,7 +679,7 @@ void QuadTree::segment_to_tree() {
     // pins.size() << std::endl;
 
     segments.clear();
-    vias.clear();
+    // vias.clear();
 }
 
 inline bool QuadTree::dfs_tree_graph(safe::vector<VEPair> TreeGraph[],
@@ -817,7 +823,15 @@ unsigned QuadTree::check_direction(const CoordPair c_1,
 
 void QuadTree::tree_to_segment() {
     segments.clear();
-    dfs_extract_segments(0, -1);
+    // TODO: vias may be piecewise!!!!!
+    safe::vector<unsigned> vias[nodes.size()];
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        vias[i] = safe::vector<unsigned>(_maxLayers + 1);
+    }
+    // for (size_t i = 0; i < nodes.size(); ++i) {
+    //     vias.push_back(LayerInterval(nodes[i].get_layer_self(), nodes[i].get_layer_self()));
+    // }
+    dfs_extract_segments(0, -1, vias);
     // Fix problems of different pins with same coordinates but different
     // layers. Add via for those pins
     for (size_t i = 0; i < pins.size(); ++i) {
@@ -826,13 +840,40 @@ void QuadTree::tree_to_segment() {
         size_t idx = pins[i].get_idx();
         if (nodes[pinIdx2Node[idx]].get_layer_self() !=
             (int)pins[i].get_layer()) {
-            segments.push_back(NetSegment(
-                nodes[pinIdx2Node[idx]].get_coord_x(),
-                nodes[pinIdx2Node[idx]].get_coord_y(),
-                nodes[pinIdx2Node[idx]].get_coord_x(),
-                nodes[pinIdx2Node[idx]].get_coord_y(),
-                nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
+            add_via_segment(vias[pinIdx2Node[idx]], nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer());
+            // vias[pinIdx2Node[idx]].first = MIN(vias[pinIdx2Node[idx]].first, MIN(nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
+            // vias[pinIdx2Node[idx]].second = MAX(vias[pinIdx2Node[idx]].second, MAX(nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
+            // segments.push_back(NetSegment(
+            //     nodes[pinIdx2Node[idx]].get_coord_x(),
+            //     nodes[pinIdx2Node[idx]].get_coord_y(),
+            //     nodes[pinIdx2Node[idx]].get_coord_x(),
+            //     nodes[pinIdx2Node[idx]].get_coord_y(),
+            //     nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
         }
+    }
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        for (size_t j = 0; j < vias[i].size(); ++j) {
+            if (vias[i][j] == 0) continue;
+            size_t begin = j;
+            while (j < vias[i].size() && vias[i][j] == 1) {
+                ++j;
+            }
+            --j;
+            segments.push_back(NetSegment(
+                nodes[i].get_coord_x(),
+                nodes[i].get_coord_y(),
+                nodes[i].get_coord_x(),
+                nodes[i].get_coord_y(),
+                begin, j));
+        }
+        // if (vias[i].first != vias[i].second) {
+        //     segments.push_back(NetSegment(
+        //         nodes[i].get_coord_x(),
+        //         nodes[i].get_coord_y(),
+        //         nodes[i].get_coord_x(),
+        //         nodes[i].get_coord_y(),
+        //         vias[i].first, vias[i].second));
+        // }
     }
     if (segments.size() == 0) {
         // TODO: choose the pin closest to the minLayer
@@ -861,7 +902,8 @@ void QuadTree::tree_to_segment() {
 }
 
 inline void QuadTree::dfs_extract_segments(const unsigned now,
-                                           const int parent) {
+                                           const int parent,
+                                           safe::vector<unsigned>* vias) {
     if (nodes[now].has_up() && nodes[now].get_up() != parent) {
         int up = nodes[now].get_up();
         segments.push_back(
@@ -869,19 +911,12 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[up].get_coord_x(), nodes[up].get_coord_y(),
                        nodes[now].get_layer_up()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_up()) {
-            segments.push_back(
-                NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_layer_self(),
-                           nodes[now].get_layer_up()));  // via
+            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_up());
         }
         if (nodes[now].get_layer_up() != nodes[up].get_layer_self()) {
-            segments.push_back(NetSegment(
-                nodes[up].get_coord_x(), nodes[up].get_coord_y(),
-                nodes[up].get_coord_x(), nodes[up].get_coord_y(),
-                nodes[now].get_layer_up(), nodes[up].get_layer_self()));  // via
+            add_via_segment(vias[up], nodes[now].get_layer_up(), nodes[up].get_layer_self());
         }
-        dfs_extract_segments(up, now);
+        dfs_extract_segments(up, now, vias);
     }
     if (nodes[now].has_down() && nodes[now].get_down() != parent) {
         int down = nodes[now].get_down();
@@ -890,20 +925,12 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[down].get_coord_x(), nodes[down].get_coord_y(),
                        nodes[now].get_layer_down()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_down()) {
-            segments.push_back(
-                NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_layer_self(),
-                           nodes[now].get_layer_down()));  // via
+            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_down());
         }
         if (nodes[now].get_layer_down() != nodes[down].get_layer_self()) {
-            segments.push_back(
-                NetSegment(nodes[down].get_coord_x(), nodes[down].get_coord_y(),
-                           nodes[down].get_coord_x(), nodes[down].get_coord_y(),
-                           nodes[now].get_layer_down(),
-                           nodes[down].get_layer_self()));  // via
+            add_via_segment(vias[down], nodes[now].get_layer_down(), nodes[down].get_layer_self());
         }
-        dfs_extract_segments(down, now);
+        dfs_extract_segments(down, now, vias);
     }
     if (nodes[now].has_left() && nodes[now].get_left() != parent) {
         int left = nodes[now].get_left();
@@ -912,20 +939,12 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[left].get_coord_x(), nodes[left].get_coord_y(),
                        nodes[now].get_layer_left()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_left()) {
-            segments.push_back(
-                NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_layer_self(),
-                           nodes[now].get_layer_left()));  // via
+            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_left());
         }
         if (nodes[now].get_layer_left() != nodes[left].get_layer_self()) {
-            segments.push_back(
-                NetSegment(nodes[left].get_coord_x(), nodes[left].get_coord_y(),
-                           nodes[left].get_coord_x(), nodes[left].get_coord_y(),
-                           nodes[now].get_layer_left(),
-                           nodes[left].get_layer_self()));  // via
+            add_via_segment(vias[left], nodes[now].get_layer_left(), nodes[left].get_layer_self());
         }
-        dfs_extract_segments(left, now);
+        dfs_extract_segments(left, now, vias);
     }
     if (nodes[now].has_right() && nodes[now].get_right() != parent) {
         int right = nodes[now].get_right();
@@ -934,20 +953,23 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[right].get_coord_x(), nodes[right].get_coord_y(),
                        nodes[now].get_layer_right()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_right()) {
-            segments.push_back(
-                NetSegment(nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_coord_x(), nodes[now].get_coord_y(),
-                           nodes[now].get_layer_self(),
-                           nodes[now].get_layer_right()));  // via
+            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_right());
         }
         if (nodes[now].get_layer_right() != nodes[right].get_layer_self()) {
-            segments.push_back(NetSegment(
-                nodes[right].get_coord_x(), nodes[right].get_coord_y(),
-                nodes[right].get_coord_x(), nodes[right].get_coord_y(),
-                nodes[now].get_layer_right(),
-                nodes[right].get_layer_self()));  // via
+            add_via_segment(vias[right], nodes[now].get_layer_right(), nodes[right].get_layer_self());
         }
-        dfs_extract_segments(right, now);
+        dfs_extract_segments(right, now, vias);
+    }
+}
+
+inline void QuadTree::add_via_segment(
+        safe::vector<unsigned>& via_now,
+        size_t bound_1,
+        size_t bound_2) {
+    size_t lowerbound = MIN(bound_1, bound_2);
+    size_t upperbound = MAX(bound_1, bound_2);
+    for (size_t i = lowerbound; i <= upperbound; ++i) {
+        via_now[i] = 1;
     }
 }
 

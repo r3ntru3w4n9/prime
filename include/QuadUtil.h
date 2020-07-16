@@ -14,7 +14,8 @@
 #include "Cell.h"
 #include "safe.h"
 
-typedef std::pair<int, int> CoordPair;  // Coordinate of points
+typedef std::pair<int, int> CoordPair; // Coordinate of points
+typedef std::pair<unsigned, unsigned> LayerInterval;
 
 // NetSegment: the class for storing the segments of nets from the input
 class NetSegment {

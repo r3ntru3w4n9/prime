@@ -125,9 +125,10 @@ class QuadTree {
     // mapping from pins to index of nodes
     safe::unordered_map<unsigned, unsigned> pinIdx2Node;
     // TODO: nodeIdx2Pin
+    safe::unordered_map<unsigned, unsigned> nodeIdx2Pin;
     // Temporary members for constructing the tree
     safe::vector<NetSegment> segments;
-    safe::vector<NetSegment> vias;  // FIXME:
+    // safe::vector<NetSegment> vias;  // FIXME:
 
     // Private functions
     // Basic operations
@@ -166,8 +167,14 @@ class QuadTree {
     unsigned check_direction(const CoordPair c_1, const CoordPair c_2) const;
 
     void tree_to_segment();
-    inline void dfs_extract_segments(const unsigned now, const int parent);
-
+    inline void dfs_extract_segments(
+        const unsigned now, 
+        const int parent, 
+        safe::vector<unsigned>* vias);
+    inline void add_via_segment(
+        safe::vector<unsigned>& via_now,
+        size_t bound_1,
+        size_t bound_2);
     // Debug functions
     void print_segments();
 
