@@ -18,7 +18,6 @@
 #include "MyUsage.h"
 #include "QuadForest.h"
 #include "mmapstream.h"
-#include "Force.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          PARAMETERS                              ///
@@ -62,13 +61,13 @@ int main(int argc, char* argv[]) {
     usage.report(true, true);
     usage.reset();
 
-    Force frc(chp);
-    std::cout << "HPWL before : " << frc.HPWL() << '\n';
-    frc.balance(3);
-    std::cout << "HPWL after : " << frc.HPWL() << '\n';
-    std::cout << "Finished placement\n";
-    usage.report(true, true);
-    usage.reset();
+    // Force frc(chp);
+    // std::cout << "HPWL before : " << frc.HPWL() << '\n';
+    // frc.balance(3);
+    // std::cout << "HPWL after : " << frc.HPWL() << '\n';
+    // std::cout << "Finished placement\n";
+    // usage.report(true, true);
+    // usage.reset();
 
     // Test QuadForest functionality
     QuadForest qf(chp);

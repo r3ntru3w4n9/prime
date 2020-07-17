@@ -14,15 +14,15 @@
 class Bounds {
    public:
     // an empty bound
-    explicit constexpr Bounds(void) noexcept;
+    constexpr Bounds(void) noexcept;
     // create a bound
-    explicit Bounds(unsigned t, unsigned b, unsigned l, unsigned r) noexcept;
-    explicit Bounds(const Bounds& bounds) noexcept;
+    Bounds(unsigned t, unsigned b, unsigned l, unsigned r) noexcept;
+    Bounds(const Bounds& bounds) noexcept;
     // replace another bound
-    explicit Bounds(Bounds&& bounds) noexcept;
+    Bounds(Bounds&& bounds) noexcept;
 
     // construct bounds based on child
-    explicit Bounds(const Bounds& a, const Bounds& b) noexcept;
+    Bounds(const Bounds& a, const Bounds& b) noexcept;
 
     // operators
     Bounds& operator=(const Bounds& b) noexcept;
