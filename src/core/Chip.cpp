@@ -312,7 +312,7 @@ int Chip::getUp(unsigned row, unsigned column) const {
     return (row == _rowRange - 1) ? -1 : getIdx(row + 1, column);
 }
 
-bool Chip::moveCell(Cell& cell, unsigned origin, unsigned target) {
+bool Chip::moveCellLegal(Cell& cell, unsigned origin, unsigned target) {
     if (!cell.movable(limited())) {
         return false;
     }
@@ -322,12 +322,29 @@ bool Chip::moveCell(Cell& cell, unsigned origin, unsigned target) {
     }
     if (!cell.moved()) {
         _movedCells.push_back(cell.getIdx());
+    } else {
+        cell.move();
     }
     Coordinate& c_origin = _coordinates[origin];
     c_origin.rmCell(cell, _coordinates, _layers, _pins);
     c_target.addCell(cell, _coordinates, _layers, _pins);
     _movedCells.push_back(cell.getIdx());
     return true;
+}
+
+void Chip::moveCell(Cell& cell, unsigned origin, unsigned target) {
+    Coordinate& c_target = _coordinates[target];
+    if (!cell.moved()) {
+        assert(_movedCells.size() < _maxMove);
+        _movedCells.push_back(cell.getIdx());
+    } else {
+        cell.move();
+    }
+    Coordinate& c_origin = _coordinates[origin];
+    c_origin.rmCell(cell, _coordinates, _layers, _pins);
+    c_target.addCell(cell, _coordinates, _layers, _pins);
+    _movedCells.push_back(cell.getIdx());
+    return;
 }
 
 void Chip::decNumMoved() {

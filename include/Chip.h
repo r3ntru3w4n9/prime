@@ -79,7 +79,8 @@ class Chip {
     int getUp(unsigned row, unsigned column) const;
 
     // modifier
-    bool moveCell(Cell& cell, unsigned origin, unsigned target);
+    bool moveCellLegal(Cell& cell, unsigned origin, unsigned target);
+    void moveCell(Cell& cell, unsigned origin, unsigned target);
     void decNumMoved();  // trigger it if you want to move a cell back to its
                          // original position
 
