@@ -3,6 +3,7 @@
 // * Proprietary and confidential
 
 #include "ConjugateGradient.h"
+#include "analytical.h"
 
 #include <assert.h>
 #include <math.h>
@@ -204,6 +205,7 @@ double ConjGrad::value(void) const {
     switch (gt) {
         case GradType::Plain:
             // TODO calculate final value
+            Cost cst(chip);
             return 0.;
     }
     return ILLEGAL;
