@@ -202,7 +202,7 @@ double ConjGrad::beta(void) const {
     }
 }
 
-double ConjGrad::value(void) const {
+double ConjGrad::value(void) {
     double ret;
     switch (gt) {
         case GradType::Plain:

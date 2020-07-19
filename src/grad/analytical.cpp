@@ -154,3 +154,38 @@ double Cost::Density(const safe::vector<double>& x) {
     double ret = 0;
     return ret;
 }
+
+unsigned Cost::HPWL(const safe::vector<double>& x) const {
+    unsigned ret = 0;
+    for (unsigned i = 0; i < _chip.getNumNets(); ++i) {
+        ret += HPWL_NET(i, x);
+    }
+    return ret;
+}
+
+inline unsigned Cost::HPWL_NET(unsigned idx,
+                               const safe::vector<double>& x) const {
+    GridNet& net = _chip.getNet(idx);
+    unsigned maxRow = 0, minRow = _chip.getNumRows(), maxColumn = 0,
+             minColumn = _chip.getNumColumns();
+    for (unsigned i = 0; i < net.getNumPin(); ++i) {
+        unsigned cell = _chip.getPin(net.getPinIdx(i)).get_cell_idx();
+        unsigned row = x[2 * cell], column = x[2 * cell + 1];
+        assert(row < _chip.getNumRows());
+        assert(column < _chip.getNumColumns());
+        if (row > maxRow) {
+            maxRow = row;
+        }
+        if (row < minRow) {
+            minRow = row;
+        }
+        if (column > maxColumn) {
+            maxColumn = column;
+        }
+        if (column < minColumn) {
+            minColumn = column;
+        }
+    }
+    assert(maxRow >= minRow && maxColumn >= minColumn);
+    return maxRow - minRow + maxColumn - minColumn;
+}

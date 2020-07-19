@@ -94,7 +94,7 @@ class ConjGrad {
     void update_directions(void);
     void update_positions(void);
 
-    double value(void) const;
+    double value(void);
     double value_and_grad(void);
 
     Chip& chip;
