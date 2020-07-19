@@ -321,6 +321,7 @@ bool Chip::moveCellLegal(Cell& cell, unsigned origin, unsigned target) {
         return false;
     }
     if (!cell.moved()) {
+        assert(_movedCells.size() < _maxMove);
         _movedCells.push_back(cell.getIdx());
     } else {
         cell.move();
