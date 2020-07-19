@@ -1,10 +1,11 @@
-// * Copyright (C) Ren-Chu Wang - All Rights Reserved
+// * Copyright (C) Ren-Chu Wang, Yang Chien-Yi - All Rights Reserved
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
 #pragma once
 
 #include "Chip.h"
+#include "analytical.h"
 #include "QuadForest.h"
 #include "safe.h"
 
@@ -107,4 +108,5 @@ class ConjGrad {
     GradType gt;
     double best_step;
     Scheduler sch;
+    Cost cst;
 };

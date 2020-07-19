@@ -1,9 +1,8 @@
-// * Copyright (C) Ren-Chu Wang - All Rights Reserved
+// * Copyright (C) Ren-Chu Wang, Yang Chien-Yi - All Rights Reserved
 // * Unauthorized copying of this file, via any medium is strictly prohibited
 // * Proprietary and confidential
 
 #include "ConjugateGradient.h"
-#include "analytical.h"
 
 #include <assert.h>
 #include <math.h>
@@ -36,7 +35,8 @@ ConjGrad::ConjGrad(Chip& chip,
       current_best(-1.),
       gt(gt),
       best_step(0.),
-      sch(std::move(sch)) {
+      sch(std::move(sch)), 
+      cst(chip){
     size_t size = dim();
     grads = safe::vector<double>(size, 0.);
     prev_grads = safe::vector<double>(size, 0.);
@@ -61,7 +61,8 @@ ConjGrad::ConjGrad(Chip& chip,
       current_best(-1.),
       gt(gt),
       best_step(0.),
-      sch(Scheduler(init)) {
+      sch(Scheduler(init)), 
+      cst(chip) {
     size_t size = dim();
     grads = safe::vector<double>(size, 0.);
     prev_grads = safe::vector<double>(size, 0.);
@@ -202,20 +203,23 @@ double ConjGrad::beta(void) const {
 }
 
 double ConjGrad::value(void) const {
+    double ret;
     switch (gt) {
         case GradType::Plain:
             // TODO calculate final value
-            Cost cst(chip);
-            return 0.;
+            cst.evaluateF(pos, ret);
+            return ret;
     }
     return ILLEGAL;
 }
 
 double ConjGrad::value_and_grad(void) {
+    double ret;
     switch (gt) {
         case GradType::Plain:
             // TODO calculate gradient
-            return value();
+            cst.evaluateFG(pos, ret, grads);
+            return ret;
     }
     return ILLEGAL;
 }
