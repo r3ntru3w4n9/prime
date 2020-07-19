@@ -5,10 +5,16 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "safe.h"
 
 // TODO: finish tree implementation
+
+using EndPoints =
+    std::pair<std::pair<unsigned, unsigned>, std::pair<unsigned, unsigned>>;
+
+enum class Corner { TL, TR, BL, BR, None };
 
 // A bound is an HPWL. As simple as that.
 class Bounds {
@@ -31,18 +37,25 @@ class Bounds {
 
     bool is_initialized(void) const;
 
-    unsigned get_top(void) const;
-    unsigned get_bottom(void) const;
-    unsigned get_left(void) const;
-    unsigned get_right(void) const;
+    unsigned top(void) const;
+    unsigned bottom(void) const;
+    unsigned left(void) const;
+    unsigned right(void) const;
 
-    void set_top(unsigned val);
-    void set_bottom(unsigned val);
-    void set_left(unsigned val);
-    void set_right(unsigned val);
+    void top(unsigned val);
+    void bottom(unsigned val);
+    void left(unsigned val);
+    void right(unsigned val);
+
+    bool in_box(unsigned x, unsigned y) const;
+
+    std::pair<Corner, Corner> overlap_with(const Bounds& other) const;
+
+    Corner contains_point(const Bounds& other) const;
+    std::pair<unsigned, unsigned> corner(Corner cor) const;
 
    private:
-    int top, bottom, left, right;
+    int t, b, l, r;
 };
 
 class BoundsNode {
@@ -65,21 +78,23 @@ class BoundsNode {
     void right(std::shared_ptr<BoundsNode> rgt);
     void parent(std::shared_ptr<BoundsNode> par);
 
-    std::weak_ptr<BoundsNode> left(void);
-    const std::weak_ptr<BoundsNode> left(void) const;
-    std::weak_ptr<BoundsNode> right(void);
-    const std::weak_ptr<BoundsNode> right(void) const;
+    std::shared_ptr<BoundsNode> left(void);
+    const std::shared_ptr<BoundsNode> left(void) const;
+    std::shared_ptr<BoundsNode> right(void);
+    const std::shared_ptr<BoundsNode> right(void) const;
 
-    std::weak_ptr<BoundsNode> parent(void);
-    const std::weak_ptr<BoundsNode> parent(void) const;
+    std::shared_ptr<BoundsNode> parent(void);
+    const std::shared_ptr<BoundsNode> parent(void) const;
 
     Bounds data(void) const;
     void data(Bounds b);
 
+    safe::list<EndPoints> top_down(void) const;
+
    private:
     Bounds d;
     std::shared_ptr<BoundsNode> l, r;
-    std::weak_ptr<BoundsNode> p;
+    std::shared_ptr<BoundsNode> p;
 };
 
 class BoundsTree {
@@ -97,8 +112,13 @@ class BoundsTree {
 
     void flatten(safe::vector<Bounds>& bounds) const;
 
+    void validate(void) const;
+
+    safe::list<EndPoints> top_down(void) const;
+
    private:
     void size_check(void) const;
+    void bounds_check(void) const;
 
     std::shared_ptr<BoundsNode> root;
     size_t sz;
