@@ -70,8 +70,8 @@ ConjGrad::ConjGrad(Chip& chip,
     pos.reserve(2 * chip.getNumCells());
     for (unsigned i = 0; i < chip.getNumCells(); ++i) {
         const Cell& cell = chip.getCell(i);
-        pos.push_back((double)cell.getColumn());
         pos.push_back((double)cell.getRow());
+        pos.push_back((double)cell.getColumn());
     }
 }
 
