@@ -17,7 +17,7 @@ Scheduler::Scheduler(Scheduler&& sch) noexcept
 
 double Scheduler::next(void) {
     ++times;
-    return init;// / (double)times;
+    return init;  // / (double)times;
 }
 
 // ! reference:
@@ -35,8 +35,8 @@ ConjGrad::ConjGrad(Chip& chip,
       current_best(-1.),
       gt(gt),
       best_step(0.),
-      sch(std::move(sch)), 
-      cst(chip){
+      sch(std::move(sch)),
+      cst(chip) {
     size_t size = dim();
     grads = safe::vector<double>(size, 0.);
     prev_grads = safe::vector<double>(size, 0.);
@@ -61,7 +61,7 @@ ConjGrad::ConjGrad(Chip& chip,
       current_best(-1.),
       gt(gt),
       best_step(0.),
-      sch(Scheduler(init,times)), 
+      sch(Scheduler(init, times)),
       cst(chip) {
     size_t size = dim();
     grads = safe::vector<double>(size, 0.);
@@ -156,6 +156,7 @@ void ConjGrad::all(void) {
             coeff = !coeff;
         }
     }
+    update_chip();
 }
 
 bool ConjGrad::all_once(void) {
@@ -230,18 +231,28 @@ double ConjGrad::value_and_grad(void) {
     return ILLEGAL;
 }
 
-
 void ConjGrad::clip(void) {
     for (unsigned i = 0; i < chip.getNumCells(); ++i) {
-        if (pos[2*i] < 0.) {
-            pos[2*i] = 0.;
-        } else if (pos[2*i] >= chip.getNumRows()){
-            pos[2*i] = double(chip.getNumRows()) - 1.;
+        if (pos[2 * i] < 0.) {
+            pos[2 * i] = 0.;
+        } else if (pos[2 * i] >= chip.getNumRows()) {
+            pos[2 * i] = double(chip.getNumRows()) - 1.;
         }
-        if (pos[2*i + 1] < 0.) {
-            pos[2*i + 1] = 0.;
-        } else if (pos[2*i + 1] >= chip.getNumColumns()) {
-            pos[2*i + 1] = double(chip.getNumColumns()) - 1.;
+        if (pos[2 * i + 1] < 0.) {
+            pos[2 * i + 1] = 0.;
+        } else if (pos[2 * i + 1] >= chip.getNumColumns()) {
+            pos[2 * i + 1] = double(chip.getNumColumns()) - 1.;
+        }
+    }
+}
+
+void ConjGrad::update_chip(void) {
+    for (unsigned i = 0; i < chip.getNumCells(); ++i) {
+        Cell& cell = chip.getCell(i);
+        if (unsigned(pos[2 * i]) != cell.getRow() ||
+            unsigned(pos[2 * i + 1]) != cell.getColumn()) {
+            chip.moveCell(cell, cell.getRow(), cell.getColumn(), pos[2 * i],
+                          pos[2 * i + 1]);
         }
     }
 }

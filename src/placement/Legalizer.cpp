@@ -73,7 +73,7 @@ void Legalizer::_legalize(Chip& chip, int pos_x, int pos_y, Cell& cell)
             int dy = pos_y + y;
             if(chip.isValidPosition(0, dx, dy) && _isLegal(chip, dx, dy))
             {
-                chip.moveCell(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.moveCell(cell, pos_x, pos_y, dx, dy);
                 int ms = _minSupply(chip, dx, dy);
                 if(ms > max)
                 {
@@ -81,14 +81,14 @@ void Legalizer::_legalize(Chip& chip, int pos_x, int pos_y, Cell& cell)
                     dest_x = dx;
                     dest_y = dy;
                 }
-                chip.revert(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.revert(cell, pos_x, pos_y, dx, dy);
             }
 
             dx = pos_x - x;
             dy = pos_y + y;
             if(chip.isValidPosition(0, dx, dy) && _isLegal(chip, dx, dy))
             {
-                chip.moveCell(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.moveCell(cell, pos_x, pos_y, dx, dy);
                 int ms = _minSupply(chip, dx, dy);
                 if(ms > max)
                 {
@@ -96,14 +96,14 @@ void Legalizer::_legalize(Chip& chip, int pos_x, int pos_y, Cell& cell)
                     dest_x = dx;
                     dest_y = dy;
                 }
-                chip.revert(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.revert(cell, pos_x, pos_y, dx, dy);
             }
 
             dx = pos_x + x;
             dy = pos_y - y;
             if(chip.isValidPosition(0, dx, dy) && _isLegal(chip, dx, dy))
             {
-                chip.moveCell(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.moveCell(cell, pos_x, pos_y, dx, dy);
                 int ms = _minSupply(chip, dx, dy);
                 if(ms > max)
                 {
@@ -111,14 +111,14 @@ void Legalizer::_legalize(Chip& chip, int pos_x, int pos_y, Cell& cell)
                     dest_x = dx;
                     dest_y = dy;
                 }
-                chip.revert(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.revert(cell, pos_x, pos_y, dx, dy);
             }
 
             dx = pos_x - x;
             dy = pos_y - y;
             if(chip.isValidPosition(0, dx, dy) && _isLegal(chip, dx, dy))
             {
-                chip.moveCell(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.moveCell(cell, pos_x, pos_y, dx, dy);
                 int ms = _minSupply(chip, dx, dy);
                 if(ms > max)
                 {
@@ -126,13 +126,13 @@ void Legalizer::_legalize(Chip& chip, int pos_x, int pos_y, Cell& cell)
                     dest_x = dx;
                     dest_y = dy;
                 }
-                chip.revert(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dx, dy));
+                chip.revert(cell, pos_x, pos_y, dx, dy);
             }
         }
 
         if(max != -1)
         {
-            chip.moveCellLegal(cell, chip.getIdx(pos_x, pos_y), chip.getIdx(dest_x, dest_y));
+            chip.moveCellLegal(cell, pos_x, pos_y, dest_x, dest_y);
         }
     }
 }

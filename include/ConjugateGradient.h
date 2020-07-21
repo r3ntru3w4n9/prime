@@ -101,6 +101,8 @@ class ConjGrad {
 
     void clip(void);
 
+    void update_chip(void);
+
     Chip& chip;
     QuadForest& qf;
     safe::vector<double> grads;

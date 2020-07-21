@@ -312,11 +312,15 @@ int Chip::getUp(unsigned row, unsigned column) const {
     return (row == _rowRange - 1) ? -1 : getIdx(row + 1, column);
 }
 
-bool Chip::moveCellLegal(Cell& cell, unsigned origin, unsigned target) {
+bool Chip::moveCellLegal(Cell& cell,
+                         unsigned sRow,
+                         unsigned sCol,
+                         unsigned eRow,
+                         unsigned eCol) {
     if (!cell.movable(limited())) {
         return false;
     }
-    Coordinate& c_target = _coordinates[target];
+    Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];
     if (!c_target.CanAddCell(cell, _coordinates, _layers)) {
         return false;
     }
@@ -326,36 +330,53 @@ bool Chip::moveCellLegal(Cell& cell, unsigned origin, unsigned target) {
     } else {
         cell.move();
     }
-    Coordinate& c_origin = _coordinates[origin];
+    cell.setCoordinate(eRow, eCol);
+    Coordinate& c_origin = _coordinates[getIdx(sRow, sCol)];
     c_origin.rmCell(cell, _coordinates, _layers, _pins);
     c_target.addCell(cell, _coordinates, _layers, _pins);
     return true;
 }
 
-void Chip::moveCell(Cell& cell, unsigned origin, unsigned target) {
-    Coordinate& c_target = _coordinates[target];
+void Chip::moveCell(Cell& cell,
+                    unsigned sRow,
+                    unsigned sCol,
+                    unsigned eRow,
+                    unsigned eCol) {
+    Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];
     if (!cell.moved()) {
         assert(_movedCells.size() < _maxMove);
         _movedCells.push_back(cell.getIdx());
     } else {
         cell.move();
     }
-    Coordinate& c_origin = _coordinates[origin];
+    cell.setCoordinate(eRow, eCol);
+    Coordinate& c_origin = _coordinates[getIdx(sRow, sCol)];
     c_origin.rmCell(cell, _coordinates, _layers, _pins);
     c_target.addCell(cell, _coordinates, _layers, _pins);
     return;
 }
 
-void Chip::moveCelltry(Cell& cell, unsigned origin, unsigned target) {
+bool Chip::moveCelltry(Cell& cell,
+                       unsigned sRow,
+                       unsigned sCol,
+                       unsigned eRow,
+                       unsigned eCol) {
     assert(cell.movable(limited()));
-    Coordinate& c_target = _coordinates[target];
-    Coordinate& c_origin = _coordinates[origin];
+    Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];
+    if (!c_target.CanAddCell(cell, _coordinates, _layers)) {
+        return false;
+    }
+    Coordinate& c_origin = _coordinates[getIdx(sRow, sCol)];
     c_origin.rmCell(cell, _coordinates, _layers, _pins);
     c_target.addCell(cell, _coordinates, _layers, _pins);
-    return;
+    return true;
 }
 
-void Chip::revert(Cell& cell, unsigned origin, unsigned target)
+void Chip::revert(Cell& cell,
+                  unsigned sRow,
+                  unsigned sCol,
+                  unsigned eRow,
+                  unsigned eCol)
 {
     // TODO
 }
@@ -471,11 +492,12 @@ void Chip::log() const {
     maxNetDegree();
 }
 
-bool Chip::isValidPosition(int layer, int row, int column)
-{
+bool Chip::isValidPosition(int layer, int row, int column) {
     bool a = (layer >= 0 && (unsigned)layer < _layer);
-    bool b = (row >= 0 && (unsigned)row >= _rowBase && (unsigned)row < _rowRange);
-    bool c = (column >= 0 && (unsigned)column >= _columnBase && (unsigned)column < _columnRange);
+    bool b =
+        (row >= 0 && (unsigned)row >= _rowBase && (unsigned)row < _rowRange);
+    bool c = (column >= 0 && (unsigned)column >= _columnBase &&
+              (unsigned)column < _columnRange);
     return a && b && c;
 }
 

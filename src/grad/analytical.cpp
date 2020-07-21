@@ -112,12 +112,12 @@ void Cost::evaluateFG(const safe::vector<double>& x,
     argList list;
     for (unsigned i = 0; i < _chip.getNumCells(); ++i) {
         if (_chip.getCell(i).movable(_chip.limited())) {
-            double rowDiff = abs(g[2 * i]), columnDiff = abs(g[2 * i + 1]);
+            double rowDiff = fabs(g[2 * i]), columnDiff = fabs(g[2 * i + 1]);
             list.push_back(std::make_pair(i, rowDiff + columnDiff));
         }
     }
     std::sort(list.begin(), list.end(), myfunc);
-    for (auto i = list.begin(); i != list.end(); ++i) {
+    for (auto i = list.begin() ,n = list.begin() + _chip.getMaxMove(); i != n ; ++i) {
         if (i->second == 0) {
             break;
         }
@@ -215,4 +215,8 @@ inline unsigned Cost::HPWL_NET(unsigned idx,
     }
     assert(maxRow >= minRow && maxColumn >= minColumn);
     return maxRow - minRow + maxColumn - minColumn;
+}
+
+bool myfunc(std::pair<unsigned, double> a, std::pair<unsigned, double> b) {
+    return a.second > b.second;
 }

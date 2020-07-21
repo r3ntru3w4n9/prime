@@ -18,7 +18,6 @@
 
 #include "Cell.h"
 #include "Grid.h"
-
 #include "mmapstream.h"
 
 //#include "QuadTree.h"
@@ -79,10 +78,26 @@ class Chip {
     int getUp(unsigned row, unsigned column) const;
 
     // modifier
-    bool moveCellLegal(Cell& cell, unsigned origin, unsigned target);
-    void moveCell(Cell& cell, unsigned origin, unsigned target);
-    void moveCelltry(Cell& cell, unsigned origin, unsigned target);
-    void revert(Cell& cell, unsigned origin, unsigned target);
+    bool moveCellLegal(Cell& cell,
+                       unsigned sRow,
+                       unsigned sCol,
+                       unsigned eRow,
+                       unsigned eCol);
+    void moveCell(Cell& cell,
+                  unsigned sRow,
+                  unsigned sCol,
+                  unsigned eRow,
+                  unsigned eCol);
+    bool moveCelltry(Cell& cell,
+                     unsigned sRow,
+                     unsigned sCol,
+                     unsigned eRow,
+                     unsigned eCol);
+    void revert(Cell& cell,
+                unsigned sRow,
+                unsigned sCol,
+                unsigned eRow,
+                unsigned eCol);
     void decNumMoved();  // trigger it if you want to move a cell back to its
                          // original position
 
@@ -136,7 +151,7 @@ class Chip {
     // !
     safe::vector<GridNet> _grid_nets;
     // TODO:
-    //safe::vector<QuadTree> _quad_tree_nets;
+    // safe::vector<QuadTree> _quad_tree_nets;
 
     // ! substituted
     // safe::vector<TreeNet> _tree_nets;
