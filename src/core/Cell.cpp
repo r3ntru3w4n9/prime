@@ -240,6 +240,10 @@ bool Cell::movable(bool constraint) const {
     }
 }
 
+bool Cell::movable() const {
+    return _movable;
+}
+
 unsigned Cell::getRow() const {
     return _row;
 }

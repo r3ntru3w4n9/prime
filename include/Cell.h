@@ -145,6 +145,7 @@ class Cell {
     bool moved() const;
     // constraint means the limit of movable number
     bool movable(bool constraint) const; // movable(Chip::limited());
+    bool movable() const; // only for init value check
 
     unsigned getRow() const;
     unsigned getColumn() const;

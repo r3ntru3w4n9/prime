@@ -63,7 +63,7 @@ void Cost::evaluateFG(const safe::vector<double>& x,
     {
         double x_max_val = 0, x_max_wei = 0, x_min_val = 0, x_min_wei = 0,
                y_max_val = 0, y_max_wei = 0, y_min_val = 0, y_min_wei = 0;
-        GridNet& net = _chip.getNet(i);
+        const GridNet& net = _chip.getNet(i);
         for (unsigned j = 0; j < net.getNumPin(); j++)  // for every pin, f
         {
             const Pin& pin = _chip.getPin(net.getPinIdx(j));
@@ -155,7 +155,7 @@ double Cost::Wirelength(const safe::vector<double>& x) {
     {
         double x_max_val = 0, x_max_wei = 0, x_min_val = 0, x_min_wei = 0,
                y_max_val = 0, y_max_wei = 0, y_min_val = 0, y_min_wei = 0;
-        GridNet& net = _chip.getNet(i);
+        const GridNet& net = _chip.getNet(i);
         for (int j = 0, n = net.getNumPin(); j < n; j++)  // for every pin
         {
             const Pin& pin = _chip.getPin(net.getPinIdx(j));
@@ -192,7 +192,7 @@ unsigned Cost::HPWL(const safe::vector<double>& x) const {
 
 inline unsigned Cost::HPWL_NET(unsigned idx,
                                const safe::vector<double>& x) const {
-    GridNet& net = _chip.getNet(idx);
+    const GridNet& net = _chip.getNet(idx);
     unsigned maxRow = 0, minRow = _chip.getNumRows(), maxColumn = 0,
              minColumn = _chip.getNumColumns();
     for (unsigned i = 0; i < net.getNumPin(); ++i) {

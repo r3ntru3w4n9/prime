@@ -102,6 +102,7 @@ class Chip {
                          // original position
 
     // accesser(use getIdx() to get the idx of Grid and Coordinate)
+    unsigned HPWL();
     size_t getNumLayers() const;
     size_t getColumnBase() const;
     size_t getRowBase() const;
@@ -116,8 +117,8 @@ class Chip {
     Layer& getLayer(int layer);
     Coordinate& getCoordinate(unsigned idx);
     Cell& getCell(unsigned idx);
-    const Pin& getPin(GridNet& net, unsigned idx);
-    const Pin& getPin(unsigned idx);
+    const Pin& getPin(const GridNet& net, unsigned idx) const;
+    const Pin& getPin(unsigned idx) const;
     unsigned getPinRow(const Pin& pin) const;
     unsigned getPinColumn(const Pin& pin) const;
     GridNet& getNet(unsigned idx);
@@ -171,6 +172,7 @@ class Chip {
                      GridNet& net);
     // void outputRoute(std::fstream& output);
     void maxNetDegree() const;
+    unsigned HPWL_NET(unsigned idx);
 };
 
 unsigned str2Idx(std::string title, std::string& str);

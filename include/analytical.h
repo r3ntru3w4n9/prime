@@ -29,7 +29,7 @@
 
 // #define iter 100
 #define StepSize 1000
-#define gamma 300
+#define gamma 100
 // #define lambda_ 3.
 #define WIRELENTH_WA
 

@@ -317,6 +317,7 @@ bool Chip::moveCellLegal(Cell& cell,
                          unsigned sCol,
                          unsigned eRow,
                          unsigned eCol) {
+    assert(cell.movable());
     if (!cell.movable(limited())) {
         return false;
     }
@@ -342,6 +343,7 @@ void Chip::moveCell(Cell& cell,
                     unsigned sCol,
                     unsigned eRow,
                     unsigned eCol) {
+    assert(cell.movable());
     Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];
     if (!cell.moved()) {
         assert(_movedCells.size() < _maxMove);
@@ -361,6 +363,7 @@ bool Chip::moveCelltry(Cell& cell,
                        unsigned sCol,
                        unsigned eRow,
                        unsigned eCol) {
+    assert(cell.movable());
     assert(cell.movable(limited()));
     Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];
     if (!c_target.CanAddCell(cell, _coordinates, _layers)) {
@@ -443,11 +446,11 @@ Cell& Chip::getCell(unsigned i) {
     return _cells[i];
 }
 
-const Pin& Chip::getPin(GridNet& net, unsigned idx) {
+const Pin& Chip::getPin(const GridNet& net, unsigned idx) const {
     return _pins[net.getPinIdx(idx)];
 }
 
-const Pin& Chip::getPin(unsigned idx) {
+const Pin& Chip::getPin(unsigned idx) const {
     return _pins[idx];
 }
 
@@ -606,4 +609,38 @@ unsigned str2Idx(std::string title, std::string& str) {
     size_t pos = str.find(title) + title.size();
     std::string inst = str.substr(pos, str.size() - pos);
     return std::stoul(inst) - 1;
+}
+
+unsigned Chip::HPWL() {
+    unsigned ret = 0;
+    for (unsigned i = 0; i < getNumNets(); ++i) {
+        ret += HPWL_NET(i);
+    }
+    return ret;
+}
+
+inline unsigned Chip::HPWL_NET(unsigned idx) {
+    const GridNet& net = getNet(idx);
+    unsigned maxRow = 0, minRow = getNumRows(), maxColumn = 0,
+             minColumn = getNumColumns();
+    for (unsigned i = 0; i < net.getNumPin(); ++i) {
+        Cell& cell = getCell(getPin(net.getPinIdx(i)).get_cell_idx());
+        unsigned row = cell.getRow(), column = cell.getColumn();
+        assert(row < getNumRows());
+        assert(column < getNumColumns());
+        if (row > maxRow) {
+            maxRow = row;
+        }
+        if (row < minRow) {
+            minRow = row;
+        }
+        if (column > maxColumn) {
+            maxColumn = column;
+        }
+        if (column < minColumn) {
+            minColumn = column;
+        }
+    }
+    assert(maxRow >= minRow && maxColumn >= minColumn);
+    return maxRow - minRow + maxColumn - minColumn;
 }
