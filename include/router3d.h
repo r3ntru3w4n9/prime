@@ -1,10 +1,10 @@
 /***********************************************************************
 
-  FileName    [router.h]
+  FileName    [router3d.h]
 
   Author      [Yang Chien Yi]
 
-  This file difines the router set. A_star.
+  This file difines the router set. A_star and L_shape.
 
 ***********************************************************************/
 
@@ -166,15 +166,24 @@ class Router3D {
                         const unsigned col,
                         const GridNet& net,
                         int& minSupply);
-    void H_down();
 
-    void H_up();
+    void Rout_H(const unsigned lay,
+                const unsigned row,
+                const unsigned scol,
+                const unsigned ecol,
+                const GridNet& net,
+                safe::vector<int>& minSupplyTable,
+                safe::vector<unsigned>& cost);
 
-    void V_down();
-
-    void V_up();
+    void Rout_V(const unsigned lay,
+                const unsigned col,
+                const unsigned srow,
+                const unsigned erow,
+                const GridNet& net,
+                safe::vector<int>& minSupplyTable,
+                safe::vector<unsigned>& cost);
 };
 
-bool isOdd(int a); // V
+bool isOdd(int a);  // V
 
-bool isEven(int a); // H
+bool isEven(int a);  // H
