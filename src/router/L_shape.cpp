@@ -3,6 +3,14 @@
 
 #include "router3d.h"
 
+bool isOdd(int a) {
+    return a & 01;
+}
+
+bool isEven(int a) {
+    return !isOdd(a);
+}
+
 bool Router3D::L_shape(const unsigned srow,
                        const unsigned scol,
                        const unsigned slay,
@@ -16,8 +24,8 @@ bool Router3D::L_shape(const unsigned srow,
     safe::vector<unsigned> cost(_pm.getNumLayers(), UINT_MAX);
     // H down
     for (int i = slay, j = slay; i >= net.getMinlayer();
-         (i ^ 01) ? i -= 1 : i -= 2) {
-        if (i ^ 01) {
+         (isEven(i)) ? i -= 1 : i -= 2) {
+        if (isEven(i)) {
             continue;
         }
         int minSupply = INT_MAX;
@@ -31,8 +39,8 @@ bool Router3D::L_shape(const unsigned srow,
     // H up
     for (int i = slay, j = slay;
          i < _pm.getNumLayers() && i >= net.getMinlayer();
-         (i ^ 01) ? i += 1 : i += 2) {
-        if (i ^ 01) {
+         (isEven(i)) ? i += 1 : i += 2) {
+        if (isEven(i)) {
             continue;
         }
         int minSupply = INT_MAX;
@@ -45,8 +53,8 @@ bool Router3D::L_shape(const unsigned srow,
     }
     // V down
     for (int i = elay, j = elay; i >= net.getMinlayer();
-         (i ^ 01) ? i -= 2 : i -= 1) {
-        if (!(i ^ 01)) {
+         (isOdd(i)) ? i -= 2 : i -= 1) {
+        if (isOdd(i)) {
             continue;
         }
         int minSupply = INT_MAX;
@@ -60,8 +68,8 @@ bool Router3D::L_shape(const unsigned srow,
     // V up
     for (int i = slay, j = slay;
          i < _pm.getNumLayers() && i >= net.getMinlayer();
-         (i ^ 01) ? i += 2 : i += 1) {
-        if (!(i ^ 01)) {
+         (isOdd(i)) ? i += 2 : i += 1) {
+        if (!(isOdd(i))) {
             continue;
         }
         int minSupply = INT_MAX;

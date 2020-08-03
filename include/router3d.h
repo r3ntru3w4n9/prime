@@ -106,27 +106,6 @@ class Router3D {
                  const GridNet& net,
                  IdxList& ans);
 
-    bool Layer_Assignment_H(const unsigned scol,
-                            const unsigned ecol,
-                            const unsigned row,
-                            const unsigned lay,
-                            const GridNet& net,
-                            int& minSupply);
-
-    bool Layer_Assignment_V(const unsigned srow,
-                            const unsigned erow,
-                            const unsigned col,
-                            const unsigned lay,
-                            const GridNet& net,
-                            int& minSupply);
-
-    bool Via_Assignment(const unsigned slay,
-                        const unsigned elay,
-                        const unsigned row,
-                        const unsigned col,
-                        const GridNet& net,
-                        int& minSupply);
-
     // friend class of cost functions
     friend class CostGen;
     friend class ManDist;
@@ -165,4 +144,37 @@ class Router3D {
                        const GridNet&);
     void backtrace(const unsigned, const unsigned, IdxList&);
     // operator overloading
+
+    // L_shape functions
+    bool Layer_Assignment_H(const unsigned scol,
+                            const unsigned ecol,
+                            const unsigned row,
+                            const unsigned lay,
+                            const GridNet& net,
+                            int& minSupply);
+
+    bool Layer_Assignment_V(const unsigned srow,
+                            const unsigned erow,
+                            const unsigned col,
+                            const unsigned lay,
+                            const GridNet& net,
+                            int& minSupply);
+
+    bool Via_Assignment(const unsigned slay,
+                        const unsigned elay,
+                        const unsigned row,
+                        const unsigned col,
+                        const GridNet& net,
+                        int& minSupply);
+    void H_down();
+
+    void H_up();
+
+    void V_down();
+
+    void V_up();
 };
+
+bool isOdd(int a); // V
+
+bool isEven(int a); // H
