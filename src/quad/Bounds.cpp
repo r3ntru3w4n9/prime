@@ -268,7 +268,7 @@ inline void BoundsTree::bounds_check(void) const {
 }
 
 safe::list<EndPoints> BoundsNode::top_down(void) const {
-    auto left = l, right = r;
+    // auto left = l, right = r;
 
     auto llist = (l == nullptr) ? safe::list<EndPoints>() : l->top_down(),
          rlist = (r == nullptr) ? safe::list<EndPoints>() : r->top_down();
@@ -370,6 +370,119 @@ safe::list<EndPoints> BoundsNode::top_down(void) const {
     return llist;
 }
 
+safe::list<EndPoints> BoundsNode::mark_edge(const std::pair<float, float>& p, bool is_root) const {
+    // auto left = l, right = r;
+    if(l == nullptr) return safe::list<EndPoints>();
+    assert(l != nullptr && r != nullptr);
+
+    auto lbox = l->data(), rbox = r->data();
+    auto contains = lbox.overlap_with(rbox);
+    Corner lcontr = contains.first, rcontl = contains.second;
+    EndPoints ep;
+
+    if (lcontr == Corner::None && rcontl == Corner::None) {
+        // no overlap
+        bool tb = lbox.top() < rbox.bottom();
+        bool bt = lbox.bottom() > rbox.top();
+        bool lr = lbox.left() > rbox.right();
+        bool rl = lbox.right() < rbox.left();
+
+        if (tb || bt || lr || rl) {
+            // not side by side
+            if (tb) {
+                if (lr) {
+                    ep = EndPoints(lbox.corner(Corner::TL),
+                                   rbox.corner(Corner::BR));
+                } else {
+                    assert(rl);
+                    ep = EndPoints(lbox.corner(Corner::TR),
+                                   rbox.corner(Corner::BL));
+                }
+            } else {
+                assert(bt);
+                if (lr) {
+                    ep = EndPoints(lbox.corner(Corner::BL),
+                                   rbox.corner(Corner::TR));
+                } else {
+                    assert(rl);
+                    ep = EndPoints(lbox.corner(Corner::BR),
+                                   rbox.corner(Corner::TL));
+                }
+            }
+        } else {
+            // side by side
+            if (tb) {
+                ep = EndPoints(std::make_pair(lbox.centx(), lbox.top()),
+                               std::make_pair(rbox.centx(), rbox.bottom()));
+            } else if (bt) {
+                ep = EndPoints(std::make_pair(lbox.centx(), lbox.bottom()),
+                               std::make_pair(rbox.centx(), rbox.top()));
+            } else if (lr) {
+                ep = EndPoints(std::make_pair(lbox.left(), lbox.centy()),
+                               std::make_pair(rbox.right(), rbox.centy()));
+            } else {
+                assert(rl);
+                ep = EndPoints(std::make_pair(lbox.right(), lbox.centy()),
+                               std::make_pair(rbox.left(), rbox.centy()));
+            }
+        }
+    } else if (lcontr == Corner::None) {
+        auto middle = lbox.corner(rcontl);
+        ep = std::make_pair(middle, middle);
+    } else if (rcontl == Corner::None) {
+        auto middle = rbox.corner(lcontr);
+        ep = std::make_pair(middle, middle);
+    } else {
+        assert(lcontr != Corner::None && rcontl != Corner::None);
+        switch (lcontr) {
+            case Corner::TL:
+                assert(rcontl == Corner::BR);
+                ep =
+                    EndPoints(lbox.corner(Corner::TL), rbox.corner(Corner::BR));
+                break;
+            case Corner::TR:
+                assert(rcontl == Corner::BL);
+                ep =
+                    EndPoints(lbox.corner(Corner::TR), rbox.corner(Corner::BL));
+                break;
+            case Corner::BL:
+                assert(rcontl == Corner::TR);
+                ep =
+                    EndPoints(lbox.corner(Corner::BL), rbox.corner(Corner::TR));
+                break;
+            case Corner::BR:
+                assert(rcontl == Corner::TL);
+                ep =
+                    EndPoints(lbox.corner(Corner::BR), rbox.corner(Corner::TL));
+                break;
+            case Corner::None:
+                assert(0);
+                break;
+        }
+    }
+
+    auto llist = l->mark_edge(ep.first, false),
+         rlist = r->mark_edge(ep.second, false);
+
+    llist.splice(llist.end(), rlist);
+    assert(rlist.empty());
+
+    if(is_root) {
+        llist.push_back(ep);
+    }
+    else
+    {
+        llist.push_back(EndPoints(p, ep.first));
+        llist.push_back(EndPoints(p, ep.second));
+    }
+    
+    return llist;
+}
+
 safe::list<EndPoints> BoundsTree::top_down(void) const {
     return root->top_down();
+}
+
+safe::list<EndPoints> BoundsTree::mark_edge(void) const {
+    return root->mark_edge(std::make_pair(0, 0), true);
 }
