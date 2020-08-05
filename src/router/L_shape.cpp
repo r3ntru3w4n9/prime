@@ -115,9 +115,13 @@ inline bool Router3D::Layer_Assignment_H(const unsigned scol,
                                          const unsigned row,
                                          const unsigned lay,
                                          const GridNet& net,
-                                         int& minSupply) {
+                                         int& minSupply,
+                                         int& cover) {
     for (unsigned i = scol; i <= ecol; (scol < ecol) ? ++i : --i) {
         Grid& grid = _pm.getGrid(lay, _pm.getIdx(row, i));
+        if (grid.canGetNet(net)) {
+          cover++;  
+        }
         if (!grid.routable(net)) {
             return false;
         }
@@ -134,9 +138,13 @@ inline bool Router3D::Layer_Assignment_V(const unsigned srow,
                                          const unsigned col,
                                          const unsigned lay,
                                          const GridNet& net,
-                                         int& minSupply) {
+                                         int& minSupply,
+                                         int& cover) {
     for (unsigned i = srow; i <= erow; (srow < erow) ? ++i : --i) {
         Grid& grid = _pm.getGrid(lay, _pm.getIdx(i, col));
+        if (grid.canGetNet(net)) {
+          cover++;  
+        }
         if (!grid.routable(net)) {
             return false;
         }
@@ -153,9 +161,13 @@ inline bool Router3D::Via_Assignment(const unsigned slay,
                                      const unsigned row,
                                      const unsigned col,
                                      const GridNet& net,
-                                     int& minSupply) {
+                                     int& minSupply,
+                                     int& cover) {
     for (unsigned i = slay; i <= elay; (slay < elay) ? ++i : --i) {
         Grid& grid = _pm.getGrid(i, _pm.getIdx(row, col));
+        if (grid.canGetNet(net)) {
+          cover++;  
+        }
         if (!grid.routable(net)) {
             return false;
         }
@@ -182,11 +194,14 @@ inline bool Router3D::Rout_H(const unsigned lay,
             continue;
         }
         int minSupply = INT_MAX;
-        if (Via_Assignment(j, i, row, scol, net, minSupply) &&
-            Layer_Assignment_H(scol, ecol, row, i, net, minSupply)) {
+        int cover = 0;
+        if (Via_Assignment(j, i, row, scol, net, minSupply, cover) &&
+            Layer_Assignment_H(scol, ecol, row, i, net, minSupply, cover)) {
             ret = true;
             minSupplyTable[i] = minSupply;
-            cost[i] = abs(i - lay);
+            unsigned c = abs(i - lay);
+            assert(c >= cover);
+            cost[i] = c - cover;
             j = i;
         }
     }
@@ -197,11 +212,14 @@ inline bool Router3D::Rout_H(const unsigned lay,
             continue;
         }
         int minSupply = INT_MAX;
-        if (Via_Assignment(j, i, row, scol, net, minSupply) &&
-            Layer_Assignment_H(scol, ecol, row, i, net, minSupply)) {
+        int cover = 0;
+        if (Via_Assignment(j, i, row, scol, net, minSupply, cover) &&
+            Layer_Assignment_H(scol, ecol, row, i, net, minSupply, cover)) {
             ret = true;
             minSupplyTable[i] = minSupply;
-            cost[i] = abs(i - lay);
+            unsigned c = abs(i - lay);
+            assert(c >= cover);
+            cost[i] = c - cover;
             j = i;
         }
     }
@@ -222,11 +240,14 @@ inline bool Router3D::Rout_V(const unsigned lay,
             continue;
         }
         int minSupply = INT_MAX;
-        if (Via_Assignment(j, i, erow, col, net, minSupply) &&
-            Layer_Assignment_V(srow, erow, col, i, net, minSupply)) {
+        int cover = 0;
+        if (Via_Assignment(j, i, erow, col, net, minSupply, cover) &&
+            Layer_Assignment_V(srow, erow, col, i, net, minSupply, cover)) {
             ret = true;
             minSupplyTable[i] = minSupply;
-            cost[i] = abs(i - lay);
+            unsigned c = abs(i-lay);
+            assert(c >= cover);
+            cost[i] = c-cover;
             j = i;
         }
     }
@@ -237,11 +258,14 @@ inline bool Router3D::Rout_V(const unsigned lay,
             continue;
         }
         int minSupply = INT_MAX;
-        if (Via_Assignment(j, i, erow, col, net, minSupply) &&
-            Layer_Assignment_V(srow, erow, col, i, net, minSupply)) {
+        int cover = 0;
+        if (Via_Assignment(j, i, erow, col, net, minSupply, cover) &&
+            Layer_Assignment_V(srow, erow, col, i, net, minSupply, cover)) {
             ret = true;
             minSupplyTable[i] = minSupply;
-            cost[i] = abs(i - lay);
+            unsigned c = abs(i-lay);
+            assert(c >= cover);
+            cost[i] = c-cover;
             j = i;
         }
     }

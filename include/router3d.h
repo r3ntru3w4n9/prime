@@ -151,21 +151,24 @@ class Router3D {
                             const unsigned row,
                             const unsigned lay,
                             const GridNet& net,
-                            int& minSupply);
+                            int& minSupply,
+                            int& cover);
 
     bool Layer_Assignment_V(const unsigned srow,
                             const unsigned erow,
                             const unsigned col,
                             const unsigned lay,
                             const GridNet& net,
-                            int& minSupply);
+                            int& minSupply,
+                            int& cover);
 
     bool Via_Assignment(const unsigned slay,
                         const unsigned elay,
                         const unsigned row,
                         const unsigned col,
                         const GridNet& net,
-                        int& minSupply);
+                        int& minSupply,
+                        int& cover);
 
     bool Rout_H(const unsigned lay,
                 const unsigned row,
