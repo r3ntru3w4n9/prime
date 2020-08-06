@@ -132,10 +132,26 @@ void Router3D::backtrace(const unsigned target,
     ans.push_back(get_row(x));
     ans.push_back(get_column(x));
     ans.push_back(get_layer(x));
+    int exdir, dir = 0; // 1 = H, 2 = V, 3 = via
     while (x != origin) {
         x = _GridList[x]->get_pi();
-        ans.push_back(get_row(x));
-        ans.push_back(get_column(x));
-        ans.push_back(get_layer(x));
+        unsigned row = get_row(x), col = get_column(x), lay = get_layer(x);
+
+        if (row != ans[ans.size()-3]) {
+            dir = 2;
+        } else if (col != ans[ans.size()-2]) {
+            dir = 1;
+        } else if (lay != ans[ans.size()-1]) {
+            dir = 3;
+        }
+        if (exdir != dir) {
+            ans.push_back(row);
+            ans.push_back(col);
+            ans.push_back(lay);
+            ans.push_back(row);
+            ans.push_back(col);
+            ans.push_back(lay);
+        }
+        exdir = dir;
     }
 }
