@@ -27,9 +27,20 @@
 
 class BoundingNet {
    public:
+    // constructor
     BoundingNet(Chip& chp, GridNet& net);
     BoundingNet(BoundingNet&& other);
     BoundingNet(const BoundingNet& other) = delete;
+
+    // access function
+    unsigned getLeftmost() const;
+    unsigned getRightmost() const;
+    unsigned getTopmost() const;
+    unsigned getBottommost() const;
+    unsigned getLeftRange() const;
+    unsigned getRightRange() const;
+    unsigned getUpRange() const;
+    unsigned getDownRange() const;
 
    private:
     unsigned _leftmost, _leftnext;
@@ -47,6 +58,26 @@ class BoundingNet {
                    const unsigned pin);
 };
 
+class moveCell {
+   public:
+    moveCell();
+    moveCell(moveCell&& other);
+    moveCell(const moveCell& other) = delete;
+
+    // set range
+    void setleftRange(const unsigned range);
+    void setrightRange(const unsigned range);
+    void setupRange(const unsigned range);
+    void setdownRange(const unsigned range);
+   private:
+    int _H;
+    int _V;
+    unsigned _rightRange;
+    unsigned _leftRange;
+    unsigned _upRange;
+    unsigned _downRange;
+};
+
 class Place {
    public:
     Place(Chip& chp);
@@ -54,4 +85,8 @@ class Place {
    private:
     Chip& _chp;
     safe::vector<BoundingNet> _nets;
+    safe::vector<moveCell> _cells;
+
+    // private function
+    void updateCell(const unsigned i);
 };

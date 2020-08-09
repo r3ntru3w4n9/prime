@@ -53,6 +53,39 @@ BoundingNet::BoundingNet(BoundingNet&& other)
       _topmostpin(other._topmostpin),
       _bottommostpin(other._bottommostpin) {}
 
+unsigned BoundingNet::getLeftmost() const {
+    return _leftmostpin;
+}
+
+unsigned BoundingNet::getRightmost() const {
+    return _rightmostpin;
+}
+
+unsigned BoundingNet::getTopmost() const {
+    return _topmostpin;
+}
+
+unsigned BoundingNet::getBottommost() const {
+    return _bottommostpin;
+}
+
+unsigned BoundingNet::getLeftRange() const {
+    assert(_leftnext >= _leftmost);
+    return _leftnext - _leftmost;
+}
+unsigned BoundingNet::getRightRange() const {
+    assert(_rightnext <= _rightmost);
+    return _rightmost - _rightnext;
+}
+unsigned BoundingNet::getUpRange() const {
+    assert(_topnext <= _topmost);
+    return _topmost - _topnext;
+}
+unsigned BoundingNet::getDownRange() const {
+    assert(_bottomnext >= _bottommost);
+    return _bottomnext - _bottommost;
+}
+
 void BoundingNet::updatePos(const unsigned row,
                             const unsigned column,
                             const unsigned pin) {
@@ -89,9 +122,66 @@ void BoundingNet::updatePos(const unsigned row,
     }
 }
 
+moveCell::moveCell() {}
+moveCell::moveCell(moveCell&& other)
+    : _H(other._H),
+      _V(other._V),
+      _rightRange(other._rightRange),
+      _leftRange(other._leftRange),
+      _upRange(other._upRange),
+      _downRange(other._downRange) {}
+
+void moveCell::setleftRange(const unsigned range) {
+    _H--;
+    if (range < _leftRange) {
+        _leftRange = range;
+    }
+}
+
+void moveCell::setrightRange(const unsigned range) {
+    _H++;
+    if (range < _rightRange) {
+        _rightRange = range;
+    }
+}
+
+void moveCell::setupRange(const unsigned range) {
+    _V++;
+    if (range < _upRange) {
+        _upRange = range;
+    }
+}
+
+void moveCell::setdownRange(const unsigned range) {
+    _V--;
+    if (range < _downRange) {
+        _downRange = range;
+    }
+}
+
 Place::Place(Chip& chp) : _chp(chp) {
     _nets.reserve(_chp.getNumNets());
+    for (unsigned i = 0; i < _chp.getNumCells(); ++i) {
+        _cells.push_back(std::move(moveCell()));
+    }
     for (unsigned i = 0; i < _chp.getNumNets(); ++i) {
         _nets.push_back(std::move(BoundingNet(_chp, _chp.getNet(i))));
+        updateCell(i);
     }
+    for (unsigned i = 0; i < _chp.getNumCells(); ++i) {
+        // TODO move
+    }
+}
+
+inline void Place::updateCell(const unsigned i) {
+    BoundingNet& net = _nets[i];
+    unsigned cell;
+    cell = _chp.getPin(net.getLeftmost()).get_cell_idx();
+    _cells[cell].setleftRange(net.getLeftRange());
+    cell = _chp.getPin(net.getRightmost()).get_cell_idx();
+    _cells[cell].setrightRange(net.getRightRange());
+    cell = _chp.getPin(net.getTopmost()).get_cell_idx();
+    _cells[cell].setupRange(net.getUpRange());
+    cell = _chp.getPin(net.getBottommost()).get_cell_idx();
+    _cells[cell].setdownRange(net.getDownRange());
 }
