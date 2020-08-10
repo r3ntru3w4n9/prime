@@ -7,6 +7,7 @@ TARGETS = src/main.cpp \
 		  src/router/A_star.cpp src/router/cost_function.cpp src/router/L_shape.cpp\
 		  src/quad/QuadUtil.cpp src/quad/QuadNode.cpp src/quad/QuadTree.cpp src/quad/QuadForest.cpp src/quad/Bounds.cpp \
 		  src/core/mmapstream.cpp  src/placement/Legalizer.cpp src/router/SimpleRouter.cpp \
+		  src/placement/place.cpp
 
 BINARY = prime
 FLAGS =

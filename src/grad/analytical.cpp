@@ -178,6 +178,7 @@ double Cost::Wirelength(const safe::vector<double>& x) {
 }
 
 double Cost::Density(const safe::vector<double>& x) {
+    assert(x.size());
     double ret = 0;
     return ret;
 }

@@ -25,6 +25,8 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
+typedef safe::vector<std::pair<unsigned, unsigned>> argList;  // arg, val
+
 class BoundingNet {
    public:
     // constructor
@@ -69,6 +71,17 @@ class moveCell {
     void setrightRange(const unsigned range);
     void setupRange(const unsigned range);
     void setdownRange(const unsigned range);
+
+    // access function
+    int getHgain() const;
+    int getVgain() const;
+    int getH() const;
+    int getV() const;
+    unsigned getRightRange() const;
+    unsigned getLeftRange() const;
+    unsigned getDownRange() const;
+    unsigned getUpRange() const;
+
    private:
     int _H;
     int _V;
@@ -90,3 +103,5 @@ class Place {
     // private function
     void updateCell(const unsigned i);
 };
+
+bool myfunc(std::pair<unsigned, unsigned> a, std::pair<unsigned, unsigned> b);

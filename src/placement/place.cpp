@@ -159,6 +159,38 @@ void moveCell::setdownRange(const unsigned range) {
     }
 }
 
+int moveCell::getHgain() const {
+    return _H > 0 ? abs(_H) * _rightRange : abs(_H) * _leftRange;
+}
+
+int moveCell::getVgain() const {
+    return _V > 0 ? abs(_V) * _rightRange : abs(_V) * _leftRange;
+}
+
+int moveCell::getH() const {
+    return _H;
+}
+
+int moveCell::getV() const {
+    return _V;
+}
+
+unsigned moveCell::getRightRange() const {
+    return _rightRange;
+}
+
+unsigned moveCell::getLeftRange() const {
+    return _leftRange;
+}
+
+unsigned moveCell::getDownRange() const {
+    return _downRange;
+}
+
+unsigned moveCell::getUpRange() const {
+    return _upRange;
+}
+
 Place::Place(Chip& chp) : _chp(chp) {
     _nets.reserve(_chp.getNumNets());
     for (unsigned i = 0; i < _chp.getNumCells(); ++i) {
@@ -168,8 +200,30 @@ Place::Place(Chip& chp) : _chp(chp) {
         _nets.push_back(std::move(BoundingNet(_chp, _chp.getNet(i))));
         updateCell(i);
     }
+    // move
+    argList list;
     for (unsigned i = 0; i < _chp.getNumCells(); ++i) {
-        // TODO move
+        if (_chp.getCell(i).movable(_chp.limited())) {
+            moveCell& cell = _cells[i];
+            list.push_back(
+                std::make_pair(i, cell.getHgain() + cell.getVgain()));
+        }
+    }
+    std::sort(list.begin(), list.end(), myfunc);
+    for (auto i = list.begin(); i != list.end(); ++i) {
+        if (i->second == 0) {
+            break;
+        }
+        unsigned idx = i->first;
+        Cell& cell = _chp.getCell(idx);
+        moveCell& m_cell = _cells[idx];
+        unsigned erow = m_cell.getH() > 0
+                            ? cell.getRow() + m_cell.getRightRange()
+                            : cell.getRow() - m_cell.getLeftRange();
+        unsigned ecol = m_cell.getV() > 0
+                            ? cell.getColumn() + m_cell.getUpRange()
+                            : cell.getColumn() - m_cell.getDownRange();
+        _chp.moveCell(cell, cell.getRow(), cell.getColumn(), erow, ecol);
     }
 }
 
@@ -184,4 +238,8 @@ inline void Place::updateCell(const unsigned i) {
     _cells[cell].setupRange(net.getUpRange());
     cell = _chp.getPin(net.getBottommost()).get_cell_idx();
     _cells[cell].setdownRange(net.getDownRange());
+}
+
+bool myfunc(std::pair<unsigned, unsigned> a, std::pair<unsigned, unsigned> b) {
+    return a.second > b.second;
 }

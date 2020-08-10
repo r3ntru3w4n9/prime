@@ -186,7 +186,7 @@ inline bool Router3D::Rout_H(const unsigned lay,
                              safe::vector<unsigned>& cost) {
     // H down
     bool ret = false;
-    for (int i = lay, j = lay; i >= net.getMinlayer();
+    for (int i = lay, j = lay; i >= int(net.getMinlayer());
          (isEven(i)) ? i -= 1 : i -= 2) {
         if (isEven(i)) {
             continue;
@@ -198,13 +198,13 @@ inline bool Router3D::Rout_H(const unsigned lay,
             ret = true;
             minSupplyTable[i] = minSupply;
             unsigned c = abs(i - lay);
-            assert(c >= cover);
+            assert(int(c) >= cover);
             cost[i] = c - cover;
             j = i;
         }
     }
     // H up
-    for (int i = lay, j = lay; i < _pm.getNumLayers() && i >= net.getMinlayer();
+    for (int i = lay, j = lay; i < int(_pm.getNumLayers()) && i >= int(net.getMinlayer());
          (isEven(i)) ? i += 1 : i += 2) {
         if (isEven(i)) {
             continue;
@@ -216,7 +216,7 @@ inline bool Router3D::Rout_H(const unsigned lay,
             ret = true;
             minSupplyTable[i] = minSupply;
             unsigned c = abs(i - lay);
-            assert(c >= cover);
+            assert(int(c) >= cover);
             cost[i] = c - cover;
             j = i;
         }
@@ -233,7 +233,7 @@ inline bool Router3D::Rout_V(const unsigned lay,
                              safe::vector<unsigned>& cost) {
     bool ret = false;
     // V down
-    for (int i = lay, j = lay; i >= net.getMinlayer();
+    for (int i = lay, j = lay; i >= int(net.getMinlayer());
          (isOdd(i)) ? i -= 2 : i -= 1) {
         if (isOdd(i)) {
             continue;
@@ -245,13 +245,13 @@ inline bool Router3D::Rout_V(const unsigned lay,
             ret = true;
             minSupplyTable[i] = minSupply;
             unsigned c = abs(i-lay);
-            assert(c >= cover);
+            assert(int(c) >= cover);
             cost[i] = c-cover;
             j = i;
         }
     }
     // V up
-    for (int i = lay, j = lay; i < _pm.getNumLayers() && i >= net.getMinlayer();
+    for (int i = lay, j = lay; i < int(_pm.getNumLayers()) && i >= int(net.getMinlayer());
          (isOdd(i)) ? i += 2 : i += 1) {
         if (!(isOdd(i))) {
             continue;
@@ -263,7 +263,7 @@ inline bool Router3D::Rout_V(const unsigned lay,
             ret = true;
             minSupplyTable[i] = minSupply;
             int c = abs(i-lay);
-            assert(c >= cover);
+            assert(int(c) >= cover);
             cost[i] = c-cover;
             j = i;
         }
@@ -281,7 +281,7 @@ inline unsigned Router3D::Select(const safe::vector<int>& minSupplyTable,
     minSupply = INT_MAX;
     for (unsigned i = 0; i < _pm.getNumLayers(); i += 2) {
         for (unsigned j = 1; j < _pm.getNumLayers(); j += 2) {
-            int c = cost[i] + cost[j];
+            unsigned c = cost[i] + cost[j];
             if (c < ret) {
                 layH = i;
                 layV = j;

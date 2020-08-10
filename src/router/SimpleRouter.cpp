@@ -17,7 +17,7 @@ SimpleRouter::SimpleRouter(Chip& chip) {
         GridNet& net = chip.getNet(i);
         safe::list<BoundsTree> forest;
         
-        for(int j = 0; j < net.getNumPin(); j++) {
+        for(unsigned j = 0; j < net.getNumPin(); j++) {
             Cell& cell = chip.getCell(chip.getPin(net.getPinIdx(j)).get_cell_idx());
             unsigned x = cell.getRow(), y = cell.getColumn();
 

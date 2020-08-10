@@ -375,13 +375,13 @@ bool Chip::moveCelltry(Cell& cell,
     return true;
 }
 
-void Chip::revert(Cell& cell,
+/*void Chip::revert(Cell& cell,
                   unsigned sRow,
                   unsigned sCol,
                   unsigned eRow,
                   unsigned eCol) {
     // TODO
-}
+}*/
 
 void Chip::decNumMoved() {
     assert(_movedCells.size() > 0);
