@@ -168,14 +168,12 @@ class QuadTree {
     unsigned check_direction(const CoordPair c_1, const CoordPair c_2) const;
 
     void tree_to_segment();
-    inline void dfs_extract_segments(
-        const unsigned now, 
-        const int parent, 
-        safe::vector<unsigned>* vias);
-    inline void add_via_segment(
-        safe::vector<unsigned>& via_now,
-        size_t bound_1,
-        size_t bound_2);
+    inline void dfs_extract_segments(const unsigned now,
+                                     const int parent,
+                                     safe::vector<unsigned>* vias);
+    inline void add_via_segment(safe::vector<unsigned>& via_now,
+                                size_t bound_1,
+                                size_t bound_2);
     // Debug functions
     void print_segments();
 

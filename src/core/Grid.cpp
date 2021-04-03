@@ -152,8 +152,8 @@ bool Coordinate::CanAddCell(Cell& cell,
 }
 
 void Coordinate::initCell(Cell& cell,
-                         safe::vector<Coordinate>& coordinates,
-                         safe::vector<Layer>& layers) {
+                          safe::vector<Coordinate>& coordinates,
+                          safe::vector<Layer>& layers) {
     unsigned id = cell.getMasterCellId();
     unsigned n;
     if (_MCT2Num.contains(id)) {
@@ -256,7 +256,7 @@ void Coordinate::addCell(Cell& cell,
         }
         Grid& grid = layer.getGrid(_idx);
         grid.decSupply(d);
-        grid.addPin(cell.getPinLayer(i),pins);
+        grid.addPin(cell.getPinLayer(i), pins);
     }
 }
 
@@ -309,7 +309,7 @@ void Coordinate::rmCell(Cell& cell,
         }
         Grid& grid = layer.getGrid(_idx);
         grid.incSupply(d);
-        grid.rmPin(cell.getPinLayer(i),pins);
+        grid.rmPin(cell.getPinLayer(i), pins);
     }
 }
 

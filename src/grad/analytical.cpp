@@ -117,7 +117,8 @@ void Cost::evaluateFG(const safe::vector<double>& x,
         }
     }
     std::sort(list.begin(), list.end(), myfunc);
-    for (auto i = list.begin() ,n = list.begin() + _chip.getMaxMove(); i != n ; ++i) {
+    for (auto i = list.begin(), n = list.begin() + _chip.getMaxMove(); i != n;
+         ++i) {
         if (i->second == 0) {
             break;
         }

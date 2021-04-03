@@ -70,4 +70,5 @@ class MasterCellType {
     safe::vector<safe::vector<int>> _adjHGridDemand;
 };
 
-std::ostream& operator<<(std::ostream& os, const MasterCellType& MCT); //to be updated
+std::ostream& operator<<(std::ostream& os,
+                         const MasterCellType& MCT);  // to be updated

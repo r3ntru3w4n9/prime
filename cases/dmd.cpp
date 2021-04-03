@@ -14,8 +14,7 @@
 int main(int argc, char* argv[]) {
     // start
     if (argc != 2) {
-        std::cout << "Usage: ./dmd <dmd.txt>"
-                  << std::endl;
+        std::cout << "Usage: ./dmd <dmd.txt>" << std::endl;
         return 0;
     }
 
@@ -33,10 +32,10 @@ int main(int argc, char* argv[]) {
     }
 
     std::string str;
-    for (unsigned i = 0; i < 5; ++i) inputfile >> str;
+    for (unsigned i = 0; i < 5; ++i)
+        inputfile >> str;
     int supply, demand;
-    while(inputfile >> str)
-    {
+    while (inputfile >> str) {
         inputfile >> str;
         inputfile >> str;
         inputfile >> supply >> demand;
@@ -44,9 +43,9 @@ int main(int argc, char* argv[]) {
     }
 
     // Test QuadForest functionality
-    //QuadForest qf(Mgr);
-    //std::cout << qf.size() << std::endl;
-    //std::cout << qf << std::endl;
+    // QuadForest qf(Mgr);
+    // std::cout << qf.size() << std::endl;
+    // std::cout << qf << std::endl;
     // Mgr.output(outputfile);
     return 0;
 }

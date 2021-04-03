@@ -14,8 +14,8 @@
 ///                           INCLUDES                               ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "MasterCell.h"
 #include "../include/safe.h"
+#include "MasterCell.h"
 
 ////////////////////////////////////////////////////////////////////////
 ///                          DESCRIPTION                             ///
@@ -80,9 +80,7 @@ class Pin {
 class GridNet {
    public:
     // Constructors(no copy constructor)
-    GridNet(unsigned idx,
-            unsigned PinNum,
-            unsigned minLayer);
+    GridNet(unsigned idx, unsigned PinNum, unsigned minLayer);
     GridNet(const GridNet& g) = delete;
     GridNet(GridNet&& g);
 
@@ -93,8 +91,7 @@ class GridNet {
     // modifier
     void addPin(unsigned pin);  // you don't need this
     void addPin(Pin& pin);
-    void addSegment(int srow, int scol, int slay, int erow, int ecol, int
-    elay);
+    void addSegment(int srow, int scol, int slay, int erow, int ecol, int elay);
     void clearSegments();
 
     // accesser
@@ -144,8 +141,8 @@ class Cell {
 
     bool moved() const;
     // constraint means the limit of movable number
-    bool movable(bool constraint) const; // movable(Chip::limited());
-    bool movable() const; // only for init value check
+    bool movable(bool constraint) const;  // movable(Chip::limited());
+    bool movable() const;                 // only for init value check
 
     unsigned getRow() const;
     unsigned getColumn() const;
@@ -176,4 +173,4 @@ class Cell {
     safe::vector<safe::vector<unsigned>> _Layer2pin;
 };
 
-std::ostream& operator<<(std::ostream& os, const Cell& cell);// to be updated
+std::ostream& operator<<(std::ostream& os, const Cell& cell);  // to be updated

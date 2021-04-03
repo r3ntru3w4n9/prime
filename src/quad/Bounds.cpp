@@ -370,9 +370,11 @@ safe::list<EndPoints> BoundsNode::top_down(void) const {
     return llist;
 }
 
-safe::list<EndPoints> BoundsNode::mark_edge(const std::pair<float, float>& p, bool is_root) const {
+safe::list<EndPoints> BoundsNode::mark_edge(const std::pair<float, float>& p,
+                                            bool is_root) const {
     // auto left = l, right = r;
-    if(l == nullptr) return safe::list<EndPoints>();
+    if (l == nullptr)
+        return safe::list<EndPoints>();
     assert(l != nullptr && r != nullptr);
 
     auto lbox = l->data(), rbox = r->data();
@@ -467,15 +469,13 @@ safe::list<EndPoints> BoundsNode::mark_edge(const std::pair<float, float>& p, bo
     llist.splice(llist.end(), rlist);
     assert(rlist.empty());
 
-    if(is_root) {
+    if (is_root) {
         llist.push_back(ep);
-    }
-    else
-    {
+    } else {
         llist.push_back(EndPoints(p, ep.first));
         llist.push_back(EndPoints(p, ep.second));
     }
-    
+
     return llist;
 }
 

@@ -1,6 +1,6 @@
 
 CXXC = g++
-CXXCFLAGS = -std=c++11 -Wall -Wextra -flto -Iinclude -g -lstdc++
+CXXCFLAGS = -std=c++11 -Wall -Wextra -flto -Iinclude -lstdc++ -O2
 TARGETS = src/main.cpp \
 		  src/core/Cell.cpp src/core/Grid.cpp src/core/MasterCell.cpp src/core/Chip.cpp \
 		  src/grad/ConjugateGradient.cpp src/grad/analytical.cpp \

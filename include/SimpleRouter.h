@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include "Chip.h"
 #include "Bounds.h"
+#include "Chip.h"
 
 class SimpleRouter {
-public:
+   public:
     SimpleRouter(Chip& chip);
 };

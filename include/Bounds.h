@@ -92,7 +92,8 @@ class BoundsNode {
     void data(Bounds b);
 
     safe::list<EndPoints> top_down(void) const;
-    safe::list<EndPoints> mark_edge(const std::pair<float, float>& p, bool is_root) const;
+    safe::list<EndPoints> mark_edge(const std::pair<float, float>& p,
+                                    bool is_root) const;
 
    private:
     Bounds d;

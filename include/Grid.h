@@ -88,8 +88,8 @@ class Coordinate {
         safe::vector<Coordinate>& coordinates,
         safe::vector<Layer>& layers) const;  // to see if you can add this cell
     void initCell(Cell& cell,
-                 safe::vector<Coordinate>& coordinates,
-                 safe::vector<Layer>& layers);
+                  safe::vector<Coordinate>& coordinates,
+                  safe::vector<Layer>& layers);
     void addCell(Cell& cell,
                  safe::vector<Coordinate>& coordinates,
                  safe::vector<Layer>& layers,

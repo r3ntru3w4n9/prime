@@ -12,18 +12,17 @@
 
 #include <string>
 
-class mstream
-{
-public:
+class mstream {
+   public:
     mstream(const char* filepath);
 
-    mstream& operator>>(std::string &dest);
-    mstream& operator>>(unsigned &dest);
-    mstream& operator>>(int &dest);
+    mstream& operator>>(std::string& dest);
+    mstream& operator>>(unsigned& dest);
+    mstream& operator>>(int& dest);
 
     bool is_open() const;
 
-private:
+   private:
     char* _content;
     unsigned int _current;
     unsigned int _max_size;

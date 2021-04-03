@@ -37,7 +37,7 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-typedef safe::vector<std::pair<unsigned, double>> argList; // arg, val
+typedef safe::vector<std::pair<unsigned, double>> argList;  // arg, val
 
 class Cost {
    public:

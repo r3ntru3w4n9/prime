@@ -34,8 +34,7 @@ int main(int argc, char* argv[]) {
 
     // start
     if (argc != 3) {
-        std::cout << "Usage: ./prime <input.txt> <output.txt>"
-                  << std::endl;
+        std::cout << "Usage: ./prime <input.txt> <output.txt>" << std::endl;
         return 0;
     }
 

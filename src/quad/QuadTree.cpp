@@ -59,9 +59,12 @@ static inline void modify_self_capacity(Chip& chip, QuadNode& qn) {
     // TODO: update the nets
     // FIXME: ripup pins only or the entire cell??
     // int positions[4] = {};
-    Grid& grid = chip.getGrid(qn.get_layer_self(), qn.get_coord_x(), qn.get_coord_y());
-    if (ripup) grid.incSupply(1);
-    else grid.decSupply(1);
+    Grid& grid =
+        chip.getGrid(qn.get_layer_self(), qn.get_coord_x(), qn.get_coord_y());
+    if (ripup)
+        grid.incSupply(1);
+    else
+        grid.decSupply(1);
 }
 
 // TODO: update cap in between cells
@@ -75,39 +78,55 @@ static inline void modify_edge_capacity(Chip& chip,
     // TODO: in the for loop update the cost
     switch (dir) {
         case Direction::Up:
-            other = qt.get_node(qn.get_up()); // upper node has smaller x coordinate
+            other = qt.get_node(
+                qn.get_up());  // upper node has smaller x coordinate
             dist = qn.get_coord_x() - other.get_coord_x();
             for (int i = 0; i < dist; ++i) {
-                Grid& grid = chip.getGrid(qn.get_layer_up(), qn.get_coord_x() + i, qn.get_coord_y());
-                if (ripup) grid.incSupply(1);
-                else grid.decSupply(1);
+                Grid& grid = chip.getGrid(
+                    qn.get_layer_up(), qn.get_coord_x() + i, qn.get_coord_y());
+                if (ripup)
+                    grid.incSupply(1);
+                else
+                    grid.decSupply(1);
             }
             break;
         case Direction::Down:
             other = qt.get_node(qn.get_down());
             dist = other.get_coord_x() - qn.get_coord_x();
             for (int i = 0; i <= dist; ++i) {
-                Grid& grid = chip.getGrid(qn.get_layer_down(), qn.get_coord_x() + i, qn.get_coord_y());
-                if (ripup) grid.incSupply(1);
-                else grid.decSupply(1);
+                Grid& grid =
+                    chip.getGrid(qn.get_layer_down(), qn.get_coord_x() + i,
+                                 qn.get_coord_y());
+                if (ripup)
+                    grid.incSupply(1);
+                else
+                    grid.decSupply(1);
             }
             break;
         case Direction::Left:
             other = qt.get_node(qn.get_left());
             dist = qn.get_coord_y() - other.get_coord_y();
             for (int i = 0; i <= dist; ++i) {
-                Grid& grid = chip.getGrid(qn.get_layer_left(), qn.get_coord_x() + i, qn.get_coord_y());
-                if (ripup) grid.incSupply(1);
-                else grid.decSupply(1);
+                Grid& grid =
+                    chip.getGrid(qn.get_layer_left(), qn.get_coord_x() + i,
+                                 qn.get_coord_y());
+                if (ripup)
+                    grid.incSupply(1);
+                else
+                    grid.decSupply(1);
             }
             break;
         case Direction::Right:
             other = qt.get_node(qn.get_right());
             dist = other.get_coord_y() - qn.get_coord_y();
             for (int i = 0; i <= dist; ++i) {
-                Grid& grid = chip.getGrid(qn.get_layer_right(), qn.get_coord_x() + i, qn.get_coord_y());
-                if (ripup) grid.incSupply(1);
-                else grid.decSupply(1);
+                Grid& grid =
+                    chip.getGrid(qn.get_layer_right(), qn.get_coord_x() + i,
+                                 qn.get_coord_y());
+                if (ripup)
+                    grid.incSupply(1);
+                else
+                    grid.decSupply(1);
             }
             break;
     }
@@ -127,17 +146,20 @@ void dfs_rip_or_put(Chip& chip, QuadTree& qt, QuadNode& qn, Direction indir) {
 
     if (indir != Direction::Up && qn.has_down()) {
         modify_edge_capacity<ripup, Direction::Down>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, qt.get_nodes()[qn.get_down()], Direction::Down);
+        dfs_rip_or_put<ripup>(chip, qt.get_nodes()[qn.get_down()],
+                              Direction::Down);
     }
 
     if (indir != Direction::Right && qn.has_left()) {
         modify_edge_capacity<ripup, Direction::Left>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, qt.get_nodes()[qn.get_left()], Direction::Left);
+        dfs_rip_or_put<ripup>(chip, qt.get_nodes()[qn.get_left()],
+                              Direction::Left);
     }
 
     if (indir != Direction::Left && qn.has_right()) {
         modify_edge_capacity<ripup, Direction::Right>(chip, qt, qn);
-        dfs_rip_or_put<ripup>(chip, qt.get_nodes()[qn.get_right()], Direction::Right);
+        dfs_rip_or_put<ripup>(chip, qt.get_nodes()[qn.get_right()],
+                              Direction::Right);
     }
 }
 
@@ -845,7 +867,8 @@ void QuadTree::tree_to_segment() {
         vias[i] = safe::vector<unsigned>(_maxLayers + 1, 0);
     }
     // for (size_t i = 0; i < nodes.size(); ++i) {
-    //     vias.push_back(LayerInterval(nodes[i].get_layer_self(), nodes[i].get_layer_self()));
+    //     vias.push_back(LayerInterval(nodes[i].get_layer_self(),
+    //     nodes[i].get_layer_self()));
     // }
     dfs_extract_segments(0, -1, vias);
     // Fix problems of different pins with same coordinates but different
@@ -856,15 +879,21 @@ void QuadTree::tree_to_segment() {
         size_t idx = pins[i].get_idx();
         if (nodes[pinIdx2Node[idx]].get_layer_self() !=
             (int)pins[i].get_layer()) {
-            add_via_segment(vias[pinIdx2Node[idx]], nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer());
-            // vias[pinIdx2Node[idx]].first = MIN(vias[pinIdx2Node[idx]].first, MIN(nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
-            // vias[pinIdx2Node[idx]].second = MAX(vias[pinIdx2Node[idx]].second, MAX(nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
-            // segments.push_back(NetSegment(
+            add_via_segment(vias[pinIdx2Node[idx]],
+                            nodes[pinIdx2Node[idx]].get_layer_self(),
+                            pins[i].get_layer());
+            // vias[pinIdx2Node[idx]].first = MIN(vias[pinIdx2Node[idx]].first,
+            // MIN(nodes[pinIdx2Node[idx]].get_layer_self(),
+            // pins[i].get_layer())); vias[pinIdx2Node[idx]].second =
+            // MAX(vias[pinIdx2Node[idx]].second,
+            // MAX(nodes[pinIdx2Node[idx]].get_layer_self(),
+            // pins[i].get_layer())); segments.push_back(NetSegment(
             //     nodes[pinIdx2Node[idx]].get_coord_x(),
             //     nodes[pinIdx2Node[idx]].get_coord_y(),
             //     nodes[pinIdx2Node[idx]].get_coord_x(),
             //     nodes[pinIdx2Node[idx]].get_coord_y(),
-            //     nodes[pinIdx2Node[idx]].get_layer_self(), pins[i].get_layer()));
+            //     nodes[pinIdx2Node[idx]].get_layer_self(),
+            //     pins[i].get_layer()));
         }
     }
     if (segments.size() == 0) {
@@ -883,7 +912,8 @@ void QuadTree::tree_to_segment() {
             }
         }
         if (min_dist > 0 && min_dist < DINF) {
-            add_via_segment(vias[pinIdx2Node[closest]], pins[closest_idx].get_layer(), _minLayer);
+            add_via_segment(vias[pinIdx2Node[closest]],
+                            pins[closest_idx].get_layer(), _minLayer);
             // segments.push_back(
             //     NetSegment(nodes[pinIdx2Node[closest]].get_coord_x(),
             //                nodes[pinIdx2Node[closest]].get_coord_y(),
@@ -894,17 +924,15 @@ void QuadTree::tree_to_segment() {
     }
     for (size_t i = 0; i < nodes.size(); ++i) {
         for (size_t j = 0; j < vias[i].size(); ++j) {
-            if (vias[i][j] == 0) continue;
+            if (vias[i][j] == 0)
+                continue;
             size_t begin = j;
             while (j < vias[i].size() && vias[i][j] == 1) {
                 ++j;
             }
             segments.push_back(NetSegment(
-                nodes[i].get_coord_x(),
-                nodes[i].get_coord_y(),
-                nodes[i].get_coord_x(),
-                nodes[i].get_coord_y(),
-                begin, j - 1));
+                nodes[i].get_coord_x(), nodes[i].get_coord_y(),
+                nodes[i].get_coord_x(), nodes[i].get_coord_y(), begin, j - 1));
         }
     }
 }
@@ -919,10 +947,12 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[up].get_coord_x(), nodes[up].get_coord_y(),
                        nodes[now].get_layer_up()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_up()) {
-            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_up());
+            add_via_segment(vias[now], nodes[now].get_layer_self(),
+                            nodes[now].get_layer_up());
         }
         if (nodes[now].get_layer_up() != nodes[up].get_layer_self()) {
-            add_via_segment(vias[up], nodes[now].get_layer_up(), nodes[up].get_layer_self());
+            add_via_segment(vias[up], nodes[now].get_layer_up(),
+                            nodes[up].get_layer_self());
         }
         dfs_extract_segments(up, now, vias);
     }
@@ -933,10 +963,12 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[down].get_coord_x(), nodes[down].get_coord_y(),
                        nodes[now].get_layer_down()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_down()) {
-            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_down());
+            add_via_segment(vias[now], nodes[now].get_layer_self(),
+                            nodes[now].get_layer_down());
         }
         if (nodes[now].get_layer_down() != nodes[down].get_layer_self()) {
-            add_via_segment(vias[down], nodes[now].get_layer_down(), nodes[down].get_layer_self());
+            add_via_segment(vias[down], nodes[now].get_layer_down(),
+                            nodes[down].get_layer_self());
         }
         dfs_extract_segments(down, now, vias);
     }
@@ -947,10 +979,12 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[left].get_coord_x(), nodes[left].get_coord_y(),
                        nodes[now].get_layer_left()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_left()) {
-            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_left());
+            add_via_segment(vias[now], nodes[now].get_layer_self(),
+                            nodes[now].get_layer_left());
         }
         if (nodes[now].get_layer_left() != nodes[left].get_layer_self()) {
-            add_via_segment(vias[left], nodes[now].get_layer_left(), nodes[left].get_layer_self());
+            add_via_segment(vias[left], nodes[now].get_layer_left(),
+                            nodes[left].get_layer_self());
         }
         dfs_extract_segments(left, now, vias);
     }
@@ -961,19 +995,20 @@ inline void QuadTree::dfs_extract_segments(const unsigned now,
                        nodes[right].get_coord_x(), nodes[right].get_coord_y(),
                        nodes[now].get_layer_right()));
         if (nodes[now].get_layer_self() != nodes[now].get_layer_right()) {
-            add_via_segment(vias[now], nodes[now].get_layer_self(), nodes[now].get_layer_right());
+            add_via_segment(vias[now], nodes[now].get_layer_self(),
+                            nodes[now].get_layer_right());
         }
         if (nodes[now].get_layer_right() != nodes[right].get_layer_self()) {
-            add_via_segment(vias[right], nodes[now].get_layer_right(), nodes[right].get_layer_self());
+            add_via_segment(vias[right], nodes[now].get_layer_right(),
+                            nodes[right].get_layer_self());
         }
         dfs_extract_segments(right, now, vias);
     }
 }
 
-inline void QuadTree::add_via_segment(
-        safe::vector<unsigned>& via_now,
-        size_t bound_1,
-        size_t bound_2) {
+inline void QuadTree::add_via_segment(safe::vector<unsigned>& via_now,
+                                      size_t bound_1,
+                                      size_t bound_2) {
     assert(bound_1 != bound_2);
     size_t lowerbound = MIN(bound_1, bound_2);
     size_t upperbound = MAX(bound_1, bound_2);

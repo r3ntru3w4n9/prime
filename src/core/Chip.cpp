@@ -318,7 +318,7 @@ bool Chip::moveCellLegal(Cell& cell,
                          unsigned eRow,
                          unsigned eCol) {
     assert(cell.movable());
-    if(sRow == eRow && sCol == eCol) {
+    if (sRow == eRow && sCol == eCol) {
         return true;
     }
     if (!cell.movable(limited())) {
@@ -347,7 +347,7 @@ void Chip::moveCell(Cell& cell,
                     unsigned eRow,
                     unsigned eCol) {
     assert(cell.movable());
-    if(sRow == eRow && sCol == eCol) {
+    if (sRow == eRow && sCol == eCol) {
         return;
     }
     Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];
@@ -371,7 +371,7 @@ bool Chip::moveCelltry(Cell& cell,
                        unsigned eCol) {
     assert(cell.movable());
     assert(cell.movable(limited()));
-    if(sRow == eRow && sCol == eCol) {
+    if (sRow == eRow && sCol == eCol) {
         return true;
     }
     Coordinate& c_target = _coordinates[getIdx(eRow, eCol)];

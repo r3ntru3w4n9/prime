@@ -4,14 +4,14 @@
 
 #pragma once
 
+#include <assert.h>
 #include <iostream>
 #include <memory>
-#include <assert.h>
 
 #include "QuadTree.h"
 
 // Manage all nets
-class QuadForest{
+class QuadForest {
    public:
     QuadForest() = delete;
     QuadForest(Chip& chip) noexcept;
@@ -33,13 +33,13 @@ class QuadForest{
     void return_segments(Chip& chip);
 
    private:
-    Chip&                         chip; // TODO:
-    int                     baseRowIdx;
-    int                     baseColIdx;
-    int                        maxRows;
-    int                        maxCols;
-    int                      maxLayers;
-    safe::vector<QuadTree>      qtrees;
+    Chip& chip;  // TODO:
+    int baseRowIdx;
+    int baseColIdx;
+    int maxRows;
+    int maxCols;
+    int maxLayers;
+    safe::vector<QuadTree> qtrees;
     // safe::unordered_map<std::string, unsigned> name2NetIdx;
 
     // safe::vector<CellPinPair>     pins;

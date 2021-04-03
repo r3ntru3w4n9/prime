@@ -5,8 +5,8 @@
 #pragma once
 
 #include "Chip.h"
-#include "analytical.h"
 #include "QuadForest.h"
+#include "analytical.h"
 #include "safe.h"
 
 constexpr double ILLEGAL = -1.;

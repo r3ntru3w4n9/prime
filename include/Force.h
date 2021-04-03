@@ -28,7 +28,7 @@
 ///                           CLASSES                                ///
 ////////////////////////////////////////////////////////////////////////
 
-typedef safe::vector<std::pair<unsigned, unsigned>> argList; // arg, val
+typedef safe::vector<std::pair<unsigned, unsigned>> argList;  // arg, val
 
 class Force {
    public:
@@ -42,7 +42,7 @@ class Force {
     Force& operator=(Force&& f) = delete;
 
     // calculation
-    void balance(unsigned ite); //number of iterations
+    void balance(unsigned ite);  // number of iterations
 
     // estimation
     unsigned HPWL() const;
@@ -52,11 +52,11 @@ class Force {
     Chip& _chip;
     safe::vector<unsigned> _row;
     safe::vector<unsigned> _column;
-    safe::vector<unsigned> _rowSum; // by net
-    safe::vector<unsigned> _columnSum; // by net
+    safe::vector<unsigned> _rowSum;     // by net
+    safe::vector<unsigned> _columnSum;  // by net
     safe::vector<unsigned> _rowNew;
     safe::vector<unsigned> _columnNew;
-    safe::vector<unsigned> _movable; // movable cells
+    safe::vector<unsigned> _movable;  // movable cells
 
     // private function
     void balance_init();
